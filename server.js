@@ -1,5 +1,6 @@
 let crypto = require('crypto')
 let fs = require('fs')
+let path = require('path')
 
 let connect = require('connect')
 let cookie = require('cookie')
@@ -98,16 +99,18 @@ app.use('/api/user/edit/password', async (req, res, next) => {
     res.end(JSON.stringify(token(req.body.uid)))
 })
 
-app.use(serve_static(__dirname + "/client"))
+app.use(serve_static('_out/client'))
 
 app.listen(3000)
 
 
 function db_users_open() {
+    let file = '_out/db/users.sqlite3'
     let db; try {
-	db = new Database('users.sqlite3', {fileMustExist: true})
+	db = new Database(file, {fileMustExist: true})
     } catch (e) {		// 1st run
-	db = new Database('users.sqlite3')
+	fs.mkdirSync(path.dirname(file), {recursive: true})
+	db = new Database(file)
 	db.exec(fs.readFileSync('users.sql').toString())
 	db.prepare(`UPDATE users SET blob = ? WHERE uid = 0`)
 	    .run(crypto.randomBytes(1024))
@@ -141,7 +144,7 @@ function pw_hash_mk(password) { return bcrypt.hash(password, 12) }
 function token(uid) {
     let user = users.prepare(`SELECT pw_hash,blob FROM users WHERE uid = ?`)
 	.get(uid)
-    let exp_date = Date.now() + 60*60*24*30*3 // 90 days
+    let exp_date = Date.now() + 60*60*24*30*3 * 1000 // 90 days
     return {
 	uid,
 	token: token_mk(user.pw_hash, exp_date, user.blob),
