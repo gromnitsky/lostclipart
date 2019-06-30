@@ -3,14 +3,10 @@ CREATE TABLE users(uid INTEGER PRIMARY KEY,
                    pw_hash NOT NULL,
                    blob NOT NULL,
                    gecos,
-		   registered INT NOT NULL);
-CREATE TABLE groups(gid INTEGER PRIMARY KEY, name UNIQUE NOT NULL);
-CREATE TABLE users_groups(uid INT NOT NULL, gid INT NOT NULL);
+		   registered INT NOT NULL,
+		   grp NOT NULL);
 
-INSERT INTO users(uid, name, pw_hash, blob, registered)
+INSERT INTO users(uid, name, pw_hash, blob, registered, grp)
        VALUES (0, 'admin',
 	       '$2b$12$Wi9EaIjnWkR4/qj2wvR/EOYLNWSPlXe9LA.Xu5RtL6DFa9ZiFXb7K',
-               'xxx', strftime('%s','now'));
-INSERT INTO groups VALUES (10, 'wheel');
-INSERT INTO groups VALUES (100, 'users');
-INSERT INTO users_groups VALUES (0,10);
+               'xxx', strftime('%s','now'), 'adm');

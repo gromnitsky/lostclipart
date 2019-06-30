@@ -6,6 +6,7 @@ let cookie = require('cookie')
 let bcrypt = require('bcrypt')
 let Database = require('better-sqlite3')
 let co_body = require('co-body')
+let serve_static = require('serve-static')
 
 let users = db_users_open()
 let app = connect()
@@ -51,19 +52,53 @@ app.use('/api/user/login', async (req, res, next) => {
     error()
 })
 
-app.use('/api/user/edit', async (req, res, next) => {
-    let uid = session_uid(req)
-    if (uid < 0) return next(new AERR(412, 'bad session token'))
+app.use('/api/user/edit', (req, res, next) => {
+    let session = session_uid(req)
+    if (session.uid < 0) return next(new AERR(412, 'bad session token'))
 
-    if (!(validate_name(req.body.name) && validate_password(req.body.password)))
-	return next(new AERR(412, 'bad name/password'))
+    let uid = Number(req.body.uid)
+    let target = users.prepare(`SELECT grp FROM users WHERE uid = ?`).get(uid)
+
+    if ( !(session.uid === uid || session.grp === 'adm')
+	 || (uid === 0 && session.uid !== 0)
+	 || (target.grp === 'adm' && session.uid !== 0))
+	return next(new AERR(403, 'session token is invalid for the op'))
+
+    next()
+})
+
+app.use('/api/user/edit/misc', (req, res, next) => {
+    let target = users.prepare(`SELECT name FROM users WHERE uid = ?`)
+	.get(req.body.uid)
+    if (!target) return next(new AERR(403, 'invalid uid'))
+
+    if (!validate_name(req.body.name)) return next(new AERR(412, 'bad name'))
     let gecos = (req.body.gecos || '').slice(0, 512)
-    let pw_hash = await pw_hash_mk(req.body.password)
 
-    users.prepare(`UPDATE users SET name = ?, pw_hash = ?, gecos = ?
-                   WHERE uid = ?`).run(req.body.name, pw_hash, gecos, uid)
+    if (target.name !== req.body.name && // FIXME: rm & just check UPDATE below
+	users.prepare(`SELECT name FROM users WHERE name = ?`)
+	.get(req.body.name)) {
+	return next(new AERR(412, `user ${req.body.name} already exists`))
+    }
+
+    users.prepare(`UPDATE users SET name = ?, gecos = ? WHERE uid = ?`)
+	.run(req.body.name, gecos, req.body.uid)
     res.end()
 })
+
+app.use('/api/user/edit/password', async (req, res, next) => {
+    if (!validate_password(req.body.password))
+	return next(new AERR(412, 'bad password'))
+
+    if (users
+	.prepare(`UPDATE users SET pw_hash = ? WHERE uid = ?`)
+	.run(await pw_hash_mk(req.body.password), req.body.uid).changes === 0)
+	return next(new AERR(412, 'invalid uid'))
+
+    res.end(JSON.stringify(token(req.body.uid)))
+})
+
+app.use(serve_static(__dirname + "/client"))
 
 app.listen(3000)
 
@@ -93,14 +128,12 @@ function cookie_get(req, name) {
 // return a fresh uid
 async function user_add(name, password, gecos, registered) {
     let pw_hash = await pw_hash_mk(password)
-    let info = users
-	.prepare(`INSERT INTO users(name,pw_hash,blob,gecos,registered)
-                  VALUES (?,?,?,?,?)`)
-	.run(name, pw_hash, crypto.randomBytes(1024), gecos, registered)
-
-    users.prepare(`INSERT INTO users_groups VALUES (?,?)`)
-	.run(info.lastInsertRowid, 100)
-    return info.lastInsertRowid
+    return users
+	.prepare(`INSERT INTO users(name,pw_hash,blob,gecos,registered,grp)
+                  VALUES (?,?,?,?,?,?)`)
+	.run(name, pw_hash, crypto.randomBytes(1024),
+	     gecos, registered, 'users')
+	.lastInsertRowid
 }
 
 function pw_hash_mk(password) { return bcrypt.hash(password, 12) }
@@ -126,12 +159,11 @@ function session_uid(req) {
     let exp_date = cookie_get(req, 'exp_date')
     let token = cookie_get(req, 'token')
 
-    let user = users.prepare(`SELECT pw_hash,blob FROM users WHERE uid = ?`)
-	.get(uid)
-    if (!user) return -1
+    let user = users.prepare(`SELECT * FROM users WHERE uid = ?`).get(uid)
+    if (!user) return { uid: -1 }
 
-    if (token !== token_mk(user.pw_hash, exp_date, user.blob)) return -2
-    return uid
+    if (token !== token_mk(user.pw_hash, exp_date, user.blob)) return {uid: -2}
+    return user
 }
 
 class AERR extends Error {
