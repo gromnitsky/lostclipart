@@ -101,6 +101,10 @@ app.use('/api/user/edit/password', async (req, res, next) => {
 
 app.use(serve_static('_out/client'))
 
+app.use((req, res) => {		// in 404 stead
+    fs.createReadStream('_out/client/index.html').pipe(res)
+})
+
 app.listen(3000)
 
 

@@ -3,7 +3,8 @@ all:
 
 vendor.src := react/umd/react.production.min.js \
 	react-dom/umd/react-dom.production.min.js \
-	js-cookie/src/js.cookie.js
+	js-cookie/src/js.cookie.js \
+	@reach/router/umd/reach-router.min.js
 vendor.dest := $(addprefix $(out)/vendor/, $(vendor.src))
 
 $(out)/vendor/%: node_modules/%; $(copy)

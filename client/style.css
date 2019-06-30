@@ -1,0 +1,21 @@
+:root {
+  --max-width: 800px;
+}
+
+body {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+header {
+  display: flex;
+  margin: 10px 0;
+}
+
+header > * {
+  margin: 0 10px 0 0;
+}
+
+header > *:last-child {
+  margin: 0;
+}
