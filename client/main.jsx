@@ -2,6 +2,7 @@
 
 let {Router, Link, navigate} = ReachRouter
 import UserAdd from './useradd.js'
+import Profile from './profile.js'
 
 class Main extends React.Component {
     constructor(props) {
