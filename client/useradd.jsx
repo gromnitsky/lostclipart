@@ -39,9 +39,11 @@ export default class UserAdd extends React.Component {
 		SameSite: 'Strict'
 	    }
 	    Cookies.set('uid', token.uid, opt)
+	    Cookies.set('name', form.get('name'), opt)
 	    Cookies.set('token', token.token, opt)
 	    Cookies.set('exp_date', token.exp_date, opt)
 
+	    this.props.user_set(form.get('name'))
 	    // FIXME: redirect to a profile page
 	}).catch( e => this.error(e)).finally( () => fieldset.disabled = false)
     }

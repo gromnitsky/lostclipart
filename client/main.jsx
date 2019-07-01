@@ -1,12 +1,18 @@
-/* global React, ReactDOM, ReachRouter */
+/* global React, ReactDOM, ReachRouter, Cookies */
 
-let {Router, Link} = ReachRouter
+let {Router, Link, navigate} = ReachRouter
 import UserAdd from './useradd.js'
 
-export default class Main extends React.Component {
+class Main extends React.Component {
     constructor(props) {
 	super(props)
+	this.state = {
+	    user_name: Cookies.get('name')
+	}
     }
+
+    user_set(name) { this.setState({user_name: name}) }
+
     render() {
 	return (
 	    <>
@@ -15,15 +21,15 @@ export default class Main extends React.Component {
 		<Link to="upload">Upload</Link>
 		<input id="header__search" style={{flexGrow: 1}}
 		       placeholder="Search..."/>
-		<Link to="useradd">Register</Link> {/* or user name */}
-		<Link to="login">Login</Link>      {/* or Logout */}
+		<HeaderProfile name={this.state.user_name} />
 	      </header>
 
 	      <Router>
 		<Home path="/" />
 		<Upload path="upload" />
-		<UserAdd path="useradd" />
+		<UserAdd path="useradd" user_set={this.user_set.bind(this)}/>
 		<Login path="login" />
+		<Logout path="logout" />
 	      </Router>
 
 	      <footer>
@@ -33,6 +39,30 @@ export default class Main extends React.Component {
 	    </>
 	)
     }
+}
+
+let HeaderProfile = function(props) {
+    if (props.name) {
+	let profile = `user/${Cookies.get('uid')}`
+	return (
+	    <>
+	      <Link to={profile}>{props.name}</Link>
+	      <Link to="logout">Logout</Link>
+	    </>
+	)
+    }
+    return (
+	<>
+	  <Link to="useradd">Register</Link>
+	  <Link to="login">Login</Link>
+	</>
+    )
+}
+
+let Logout = function() {
+    ['uid', 'name', 'token', 'exp_date'].forEach(Cookies.remove)
+    window.location.href = '/'	// hard reload
+    return null
 }
 
 let Home = () => <h1>Home</h1>

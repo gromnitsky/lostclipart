@@ -99,9 +99,15 @@ app.use('/api/user/edit/password', async (req, res, next) => {
     res.end(JSON.stringify(token(req.body.uid)))
 })
 
+
 app.use(serve_static('_out/client'))
 
-app.use((req, res) => {		// in 404 stead
+app.use((req, res, next) => {	// in 404 stead
+    let error = () => next(new AERR(404, 'Not Found'))
+    if (req.method !== 'GET') return error()
+    let pathname = new URL(`http://example.com/${req.url}`).pathname
+    if (pathname.indexOf('.') !== -1) return error()
+
     fs.createReadStream('_out/client/index.html').pipe(res)
 })
 
