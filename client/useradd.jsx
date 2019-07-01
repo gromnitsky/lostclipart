@@ -1,4 +1,6 @@
-/* global React, Cookies */
+/* global React, Cookies, ReachRouter */
+
+let {navigate} = ReachRouter
 
 export default class UserAdd extends React.Component {
     constructor(props) {
@@ -20,7 +22,7 @@ export default class UserAdd extends React.Component {
 	this.error()
 	let fieldset = this.form.current.querySelector('fieldset')
 
-	let form = new FormData(document.querySelector('form'))
+	let form = new FormData(this.form.current)
 	if (form.get('password1') !== form.get('password2')) {
 	    this.error("passwords don't match"); return
 	}
@@ -44,7 +46,7 @@ export default class UserAdd extends React.Component {
 	    Cookies.set('exp_date', token.exp_date, opt)
 
 	    this.props.user_set(form.get('name'))
-	    // FIXME: redirect to a profile page
+	    navigate(`user/${token.uid}`, { replace: true })
 	}).catch( e => this.error(e)).finally( () => fieldset.disabled = false)
     }
 
@@ -52,23 +54,33 @@ export default class UserAdd extends React.Component {
 	return (
 	    <form id="form--useradd"
 		  onSubmit={this.handle_submit} ref={this.form}>
-	      <div id="error">{this.state.error}</div>
+	      <h1>Register</h1>
+	      <div className="form-error">{this.state.error}</div>
 
 	      <fieldset>
-		<label>New user name: <input name="name" /></label>
-		<label>Password:
-		  <input name="password1" type="password" />
-		</label>
-		<label>Repeat password:
-		  <input name="password2" type="password" />
-		</label>
+		<div> {/* for css grid doesn't work in fieldset! */}
+		  <label htmlFor="form--useradd__name">New user name:</label>
+		  <input name="name" id="form--useradd__name" />
 
-		<div>
-		  TODO: captcha
-		</div>
+		  <label htmlFor="form--useradd__pw1">Password:</label>
+		  <input name="password1" type="password" id="form--useradd__pw1" />
 
-		<input type="submit" />
-	      </fieldset>
+		  <label htmlFor="form--useradd__pw2">Repeat password:</label>
+		  <input name="password2" type="password" id="form--useradd__pw2" />
+
+		  <div id="form--useradd__captcha">
+		    TODO: captcha
+		  </div>
+
+		  <div id="form--useradd__btn">
+		    <input type="submit" />
+		  </div>
+	      </div></fieldset>
+
+	      <p>
+		By clicking 'Submit', you agree to our Terms of Service
+		and Privacy Statement.
+	      </p>
 	    </form>
 	)
     }

@@ -24,17 +24,23 @@ class Main extends React.Component {
 		<HeaderProfile name={this.state.user_name} />
 	      </header>
 
-	      <Router>
-		<Home path="/" />
-		<Upload path="upload" />
-		<UserAdd path="useradd" user_set={this.user_set.bind(this)}/>
-		<Login path="login" />
-		<Logout path="logout" />
-	      </Router>
+	      <main>
+		<Router>
+		  <Home path="/" />
+		  <Upload path="upload" />
+		  <UserAdd path="useradd" user_set={this.user_set.bind(this)}/>
+		  <Login path="login" />
+		  <Logout path="logout" />
+		  <Profile path="user/:uid" />
+		</Router>
+	      </main>
 
 	      <footer>
-		<hr />
-		Footer
+		<ul>
+		  <li>&copy; 2019 AG</li>
+		  <li><a href="/terms.txt">Terms</a></li>
+		  <li><a href="/privacy.txt">Privacy</a></li>
+		</ul>
 	      </footer>
 	    </>
 	)
