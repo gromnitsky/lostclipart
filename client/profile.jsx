@@ -86,6 +86,9 @@ export default class Profile extends React.Component {
 	fieldset.disabled = true
 	u.fetch_text('/api/user/edit/misc', {
 	    method: 'POST', body: new URLSearchParams(form).toString()
+	}).then( () => {	// upd user name in GUI
+	    Cookies.set('name', form.get('name'))
+	    this.props.user_set(form.get('name'))
 	}).catch( e => this.error_general(e))
 	    .finally( () => fieldset.disabled = false)
     }

@@ -34,7 +34,8 @@ class Main extends React.Component {
 		  <UserAdd path="useradd" user_set={this.user_set.bind(this)} />
 		  <Login path="login" user_set={this.user_set.bind(this)} />
 		  <Logout path="logout" />
-		  <Profile path="user/:uid" />
+		  <Profile path="user/:uid"
+			   user_set={this.user_set.bind(this)}/>
 		</Router>
 	      </main>
 
