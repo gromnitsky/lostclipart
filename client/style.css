@@ -56,33 +56,36 @@ footer ul li {
   background: #cd0000;
   color: #fffafa;
   margin: 1em 0;
+  padding: 0 0.3em;
 }
 
 
-#form--useradd {
+.form--useradd {
   max-width: 400px;
   margin: 0 auto;
 }
 
-#form--useradd fieldset {
+.form--useradd fieldset {
   margin: 0;
   border: 0;
   padding: 0;
 }
 
-#form--useradd fieldset > div {
+.form--useradd fieldset > div {
   display: grid;
   grid-template-columns: [labels] auto [controls] 1fr;
   grid-auto-flow: row dense;
   grid-gap: 5px;
 }
 
-#form--useradd fieldset div label {
+.form--useradd fieldset div > label {
   grid-column: labels;
   grid-row: auto;
 }
 
-#form--useradd fieldset div input {
+.form--useradd fieldset div > input,
+.form--useradd fieldset div > textarea,
+.form--pw__roval, {
   grid-column: controls;
   grid-row: auto;
 }
@@ -92,7 +95,7 @@ footer ul li {
   grid-column: 1 / -1;
 }
 
-#form--useradd__btn {
+.form--useradd__btn {
   grid-row: auto;
   grid-column: 1 / -1;
   text-align: end;

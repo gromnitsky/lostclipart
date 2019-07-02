@@ -24,6 +24,12 @@ app.use('/api/user', (req, res, next) => {
     }).catch(next)
 })
 
+app.use('/api/user/profile', (req, res, next) => { // FIXME: should be GET
+    let user = users.prepare(`SELECT uid,name,grp,gecos FROM users WHERE uid = ?`).get(req.body.uid)
+    if (!user) return next(new AERR(400, 'invalid uid'))
+    res.end(JSON.stringify(user))
+})
+
 app.use('/api/user/new', async (req, res, next) => {
     if (!validate_name(req.body.name)) return next(new AERR(412, 'bad name'))
     if (users.prepare(`SELECT name FROM users WHERE name = ?`)

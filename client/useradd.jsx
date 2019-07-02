@@ -52,7 +52,7 @@ export default class UserAdd extends React.Component {
 
     render() {
 	return (
-	    <form id="form--useradd"
+	    <form className="form--useradd"
 		  onSubmit={this.handle_submit} ref={this.form}>
 	      <h1>Register</h1>
 	      <div className="form-error">{this.state.error}</div>
@@ -72,7 +72,7 @@ export default class UserAdd extends React.Component {
 		    TODO: captcha
 		  </div>
 
-		  <div id="form--useradd__btn">
+		  <div className="form--useradd__btn">
 		    <input type="submit" />
 		  </div>
 	      </div></fieldset>
