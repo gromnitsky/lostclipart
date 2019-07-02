@@ -1,5 +1,6 @@
-/* global React, Cookies */
+/* global React, Cookies, ReachRouter */
 
+let {navigate} = ReachRouter
 import * as u from './u.js'
 
 export default class Profile extends React.Component {
@@ -51,17 +52,17 @@ export default class Profile extends React.Component {
 		</fieldset>
 	      </form>
 
-	      <form className="form--useradd" ref={this.form_pw}>
+	      <form className="form--useradd"
+		    onSubmit={this.handle_submit_pw.bind(this)}
+		    ref={this.form_pw}>
 		<h1>Change Password</h1>
-		<div className="error">{this.state.error_pw}</div>
+		<div className="form-error">{this.state.error_pw}</div>
 		<fieldset>
 		  <div>
-		    <label htmlFor="form--pw__old">Old password:</label>
-		    <input name="password_old" type="password" id="form--pw__old" />
-		    <label htmlFor="form--pw__new1">New password:</label>
-		    <input name="password_new1" type="password" id="form--pw__new1" />
-		    <label htmlFor="form--pw__new2">Repeat new password:</label>
-		    <input name="password_new2" type="password" id="form--pw__new2" />
+		    <label htmlFor="form--pw__1">New password:</label>
+		    <input name="password1" type="password" id="form--pw__1" />
+		    <label htmlFor="form--pw__2">Repeat new password:</label>
+		    <input name="password2" type="password" id="form--pw__2" />
 
 		    <div className="form--useradd__btn">
 		      <input type="submit" />
@@ -69,12 +70,6 @@ export default class Profile extends React.Component {
 
 		  </div>
 		</fieldset>
-
-		<p>
-		  If you do not remeber your old password,
-		  contact us for a password reset.
-		</p>
-
 	      </form>
 	    </>
 	)
@@ -99,6 +94,26 @@ export default class Profile extends React.Component {
     handle_name_change(evt) { this.setState({name: evt.target.value}) }
 
     handle_submit_pw(event) {
+	event.preventDefault()
+	this.error_pw('')
+	let fieldset = this.form_pw.current.querySelector('fieldset')
+
+	let form = new FormData(this.form_pw.current)
+	if (form.get('password1') !== form.get('password2')) {
+	    this.error_pw("passwords don't match"); return
+	}
+	form.set('uid', this.uid())
+	form.set('password', form.get('password1'))
+	form.delete('password1')
+	form.delete('password2')
+
+	fieldset.disabled = true
+	u.fetch_text('/api/user/edit/password', {
+	    method: 'POST', body: new URLSearchParams(form).toString()
+	}).then( () => {
+	    navigate('/login')
+	}).catch( e => this.error_pw(e))
+	    .finally( () => fieldset.disabled = false)
     }
 
     get_user_info() {

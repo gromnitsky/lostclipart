@@ -1,15 +1,13 @@
 /* global React, Cookies, ReachRouter */
 
 let {navigate} = ReachRouter
+import * as u from './u.js'
 
 export default class UserAdd extends React.Component {
     constructor(props) {
 	super(props)
-	this.handle_submit = this.handle_submit.bind(this)
 	this.form = React.createRef()
-	this.state = {
-	    error: ''
-	}
+	this.state = { error: '' }
     }
 
     error(err) {
@@ -31,29 +29,21 @@ export default class UserAdd extends React.Component {
 	form.delete('password2')
 
 	fieldset.disabled = true
-	fetch_json('/api/user/new', {
+	u.fetch_json('/api/user/new', {
 	    method: 'POST',
 	    body: new URLSearchParams(form).toString()
 	}).then( token => {	// auto login
 	    console.log(token)
-	    let opt = {
-		expires: new Date(token.exp_date),
-		SameSite: 'Strict'
-	    }
-	    Cookies.set('uid', token.uid, opt)
-	    Cookies.set('name', form.get('name'), opt)
-	    Cookies.set('token', token.token, opt)
-	    Cookies.set('exp_date', token.exp_date, opt)
-
-	    this.props.user_set(form.get('name'))
-	    navigate(`user/${token.uid}`, { replace: true })
+	    u.session_start(token, form, this.props)
+	    navigate('upload', { replace: true })
 	}).catch( e => this.error(e)).finally( () => fieldset.disabled = false)
     }
 
     render() {
 	return (
 	    <form className="form--useradd"
-		  onSubmit={this.handle_submit} ref={this.form}>
+		  onSubmit={this.handle_submit.bind(this)}
+		  ref={this.form}>
 	      <h1>Register</h1>
 	      <div className="form-error">{this.state.error}</div>
 
@@ -84,12 +74,4 @@ export default class UserAdd extends React.Component {
 	    </form>
 	)
     }
-}
-
-function fetch_json(url, opt) {
-    let fetcherr = r => {
-	if (r.ok) return r
-	throw new Error(r.status + ' ' + r.statusText) // FIXME: read res body
-    }
-    return fetch(url, opt).then(fetcherr).then( r => r.json())
 }

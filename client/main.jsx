@@ -3,6 +3,8 @@
 let {Router, Link, navigate} = ReachRouter
 import UserAdd from './useradd.js'
 import Profile from './profile.js'
+import Login from './login.js'
+import * as u from './u.js'
 
 class Main extends React.Component {
     constructor(props) {
@@ -29,8 +31,8 @@ class Main extends React.Component {
 		<Router>
 		  <Home path="/" />
 		  <Upload path="upload" />
-		  <UserAdd path="useradd" user_set={this.user_set.bind(this)}/>
-		  <Login path="login" />
+		  <UserAdd path="useradd" user_set={this.user_set.bind(this)} />
+		  <Login path="login" user_set={this.user_set.bind(this)} />
 		  <Logout path="logout" />
 		  <Profile path="user/:uid" />
 		</Router>
@@ -50,10 +52,10 @@ class Main extends React.Component {
 
 let HeaderProfile = function(props) {
     if (props.name) {
-	let profile = `user/${Cookies.get('uid')}`
+	let profile = `/user/${Cookies.get('uid')}`
 	return (
 	    <>
-	      <Link to={profile}>{props.name}</Link>
+	      <a href={profile}>{props.name}</a>
 	      <Link to="logout">Logout</Link>
 	    </>
 	)
@@ -67,14 +69,13 @@ let HeaderProfile = function(props) {
 }
 
 let Logout = function() {
-    ['uid', 'name', 'token', 'exp_date'].forEach(Cookies.remove)
+    u.session_clean()
     window.location.href = '/'	// hard reload
     return null
 }
 
 let Home = () => <h1>Home</h1>
 let Upload = () => <h1>Upload</h1>
-let Login = () => <h1>Login</h1>
 
 let app = document.querySelector('body')
 ReactDOM.render(<Main />, app)
