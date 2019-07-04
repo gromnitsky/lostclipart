@@ -1,5 +1,7 @@
+-- -*- sql[sqlite] -*-
+
 CREATE TABLE users(uid INTEGER PRIMARY KEY,
-       	     	   name UNIQUE NOT NULL,
+       	     	   name UNIQUE NOT NULL COLLATE NOCASE,
                    pw_hash NOT NULL,
                    blob NOT NULL,
                    gecos,
