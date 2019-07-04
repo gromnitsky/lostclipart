@@ -37,6 +37,11 @@ export default class Profile extends React.Component {
 		    <label>Group</label>
 		    <span className="form--pw__roval">{this.state.grp}</span>
 
+		    <label>Registered</label>
+		    <span className="form--pw__roval">
+		      {this.date_fmt(this.state.registered)}
+		    </span>
+
 		    <label>Uploaded</label>
 		    <a className="form--pw__roval" href="#">TODO</a>
 
@@ -126,6 +131,7 @@ export default class Profile extends React.Component {
 	    method: 'POST',
 	    body: new URLSearchParams(form).toString()
 	}).then( json => {
+	    console.log(json)
 	    this.setState(json)
 	}).catch(e => console.log(`${this.get_user_info.name}:`, e))
     }
@@ -134,6 +140,8 @@ export default class Profile extends React.Component {
 	let p = window.location.href.split('/')
 	return p[p.length - 1] || -1
     }
+
+    date_fmt(i) { return new Date(i*1000).toLocaleString('en-ZA') }
 
     flash_error(form, err) {
 	if (err instanceof Error) err = err.message
