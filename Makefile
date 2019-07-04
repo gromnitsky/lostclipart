@@ -26,6 +26,9 @@ $(out)/%: $(src)/%; $(copy)
 compile := $(vendor.dest) $(jsx.dest) $(static.dest)
 all: $(compile)
 
+include server.mk
+devel: all server
+
 
 
 mkdir = @mkdir -p $(dir $@)
