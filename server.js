@@ -16,6 +16,8 @@ let serve_static = require('serve-static')
 let multiparty = require('multiparty')
 let mmm = require('mmmagic')
 
+let jsonschema = require('./jsonschema')
+
 let conf = {
     img: '_out/img',
     uploadDir: '_out/tmp',
@@ -23,6 +25,8 @@ let conf = {
 }
 let db = db_open()
 fs.mkdirSync(conf.uploadDir, {recursive: true})
+
+
 let app = connect()
 
 app.use('/api/user', (req, res, next) => {
@@ -118,8 +122,6 @@ app.use('/api/user/edit/password', async (req, res, next) => {
     res.end(JSON.stringify(token(req.body.uid)))
 })
 
-let jsonschema = require('./jsonschema')
-
 app.use('/api/image/upload', (req, res, next) => {
     if (req.method !== 'POST') return next(new AERR(405, 'expected POST'))
     let session = session_uid(req)
@@ -138,42 +140,40 @@ app.use('/api/image/upload', (req, res, next) => {
 	if (err) return error(500, err.message)
 	console.log('fields:', fields)
 	console.log('files:', util.inspect(files, {depth:null}))
-	try {
+
+	let attachments = async () => {
 	    jsonschema.validate(jsonschema.schema.upload.fields, fields)
 	    jsonschema.validate(jsonschema.schema.upload.files, files)
-	} catch (e) {
-	    return error(412, e.message)
+	    let att = {
+		svg: files.svg[0],
+		thumbnail: files.thumbnail[0]
+	    }
+	    if ( !(await file(att.svg.path) === 'image/svg' &&
+		   await file(att.thumbnail.path) === 'image/png') )
+		throw new Error('images are in wrong formats')
+	    return att
 	}
 
-	let svg = files.svg[0]
-	let thumbnail = files.thumbnail[0]
-	let iid
-
-	file(svg.path).then( mime => {
-	    if (mime !== 'image/svg') throw new Error('not an svg')
-	    return file(thumbnail.path)
-
-	}).then( async mime => {
-	    if (mime !== 'image/png') throw new Error('not a png')
-
-	    iid = db.images
+	let transaction = db.images.transaction( async att => {
+	    let iid = db.images
 		.prepare(`INSERT INTO images(uid,md5,filename,mtime,size,uploaded,desc,lid) VALUES (?,?,?,?,?,?,?,?)`)
-		.run(session.uid, await md5_file(svg.path),
-		     svg.originalFilename, fields.mtime || today(), svg.size,
-		     today(), (fields.desc || '').slice(0, 512), fields.lid)
+		.run(session.uid, await md5_file(att.svg.path),
+		     att.svg.originalFilename, fields.mtime || today(),
+		     att.svg.size, today(), (fields.desc || '').slice(0, 512),
+		     fields.lid)
 		.lastInsertRowid
 
-	    let ipath = [conf.img, 'images',session.uid,`${iid}.svg`].join('/')
-	    let tpath = [conf.img, 'thumbnails', session.uid, `${iid}.png`]
-		.join('/')
+	    let img = iid2image(session.uid, iid)
+	    await mv(att.svg.path, img.svg)
+	    await mv(att.thumbnail.path,  img.thumbnail)
 
-	    await mv(svg.path, ipath)
-	    await mv(thumbnail.path, tpath)
+	    return iid
+	})
 
+	attachments().then(transaction).then( iid => {
 	    res.end(JSON.stringify({iid}))
-
-	}).catch(e => {
-	    // TODO: delete iid
+	}).catch( e => {
+	    // TODO: rm moved files
 	    error(412, e.message)
 	})
     })
@@ -222,9 +222,6 @@ function db_open() {
 function validate_name(s) { return s && /^\w{2,20}$/.test(s) }
 function validate_password(s) { return s && s.length >= 10 }
 
-function cookie_set(res, name, val, opt) {
-    res.setHeader('set-cookie', cookie.serialize(name, val, opt))
-}
 function cookie_get(req, name) {
     return cookie.parse(req.headers.cookie || '')[name]
 }
@@ -298,4 +295,11 @@ async function mv(src, dest) {
 
 async function md5_file(name) {
     return crypto.createHash('md5').update(await readFile(name)).digest('hex')
+}
+
+function iid2image(uid, iid) {
+    return {
+	svg: [conf.img, 'images', uid, `${iid}.svg`].join('/'),
+	thumbnail: [conf.img, 'thumbnails', uid, `${iid}.png`].join('/')
+    }
 }
