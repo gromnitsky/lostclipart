@@ -8,10 +8,11 @@ INSERT INTO licenses(name) VALUES ('CC BY-SA');
 
 CREATE TABLE images(iid INTEGER PRIMARY KEY,
                     uid INT NOT NULL,
+		    md5 UNIQUE NOT NULL,
                     filename NOT NULL,
-                    fdate INT NOT NULL,
+                    mtime INT NOT NULL,
+		    size INT NOT NULL,
                     uploaded INT NOT NULL,
-                    path NOT NULL,
                     desc,
                     lid INT NOT NULL,
 		    FOREIGN KEY(lid) REFERENCES licenses(lid));

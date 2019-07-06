@@ -4,6 +4,7 @@ let {Router, Link, navigate} = ReachRouter
 import UserAdd from './useradd.js'
 import Profile from './profile.js'
 import Login from './login.js'
+import Upload from './upload.js'
 import * as u from './u.js'
 
 class Main extends React.Component {
@@ -76,7 +77,6 @@ let Logout = function() {
 }
 
 let Home = () => <h1>Home</h1>
-let Upload = () => <h1>Upload</h1>
 
 let app = document.querySelector('body')
 ReactDOM.render(<Main />, app)

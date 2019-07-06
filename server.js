@@ -1,6 +1,11 @@
 let crypto = require('crypto')
 let fs = require('fs')
 let path = require('path')
+let util = require('util')
+
+let readFile = util.promisify(fs.readFile)
+let mkdir = util.promisify(fs.mkdir)
+let rename = util.promisify(fs.rename)
 
 let connect = require('connect')
 let cookie = require('cookie')
@@ -8,8 +13,16 @@ let bcrypt = require('bcrypt')
 let Database = require('better-sqlite3')
 let co_body = require('co-body')
 let serve_static = require('serve-static')
+let multiparty = require('multiparty')
+let mmm = require('mmmagic')
 
+let conf = {
+    img: '_out/img',
+    uploadDir: '_out/tmp',
+    maxFilesSize: 5*1024*1024,
+}
 let db = db_open()
+fs.mkdirSync(conf.uploadDir, {recursive: true})
 let app = connect()
 
 app.use('/api/user', (req, res, next) => {
@@ -42,7 +55,7 @@ app.use('/api/user/new', async (req, res, next) => {
 
     let gecos = (req.body.gecos || '').slice(0, 512)
     let uid = await user_add(req.body.name, req.body.password,
-			     gecos, Math.floor(new Date()/1000))
+			     gecos, today())
     res.end(JSON.stringify(token(uid)))
 })
 
@@ -105,6 +118,71 @@ app.use('/api/user/edit/password', async (req, res, next) => {
     res.end(JSON.stringify(token(req.body.uid)))
 })
 
+let jsonschema = require('./jsonschema')
+
+app.use('/api/image/upload', (req, res, next) => {
+    if (req.method !== 'POST') return next(new AERR(405, 'expected POST'))
+    let session = session_uid(req)
+    if (session.uid < 0) return next(new AERR(412, 'bad session token'))
+
+    let form = new multiparty.Form({
+	maxFilesSize: conf.maxFilesSize,
+	uploadDir: conf.uploadDir,
+    })
+    let cleanup = files => Object.keys(files).forEach( k => { // rm tmp uploads
+	files[k].forEach(v => fs.unlink(v.path, ()=>{}))
+    })
+
+    form.parse(req, (err, fields, files) => {
+	let error = (code, msg) => { cleanup(files); next(new AERR(code, msg)) }
+	if (err) return error(500, err.message)
+	console.log('fields:', fields)
+	console.log('files:', util.inspect(files, {depth:null}))
+	try {
+	    jsonschema.validate(jsonschema.schema.upload.fields, fields)
+	    jsonschema.validate(jsonschema.schema.upload.files, files)
+	} catch (e) {
+	    return error(412, e.message)
+	}
+
+	let svg = files.svg[0]
+	let thumbnail = files.thumbnail[0]
+	let iid
+
+	file(svg.path).then( mime => {
+	    if (mime !== 'image/svg') throw new Error('not an svg')
+	    return file(thumbnail.path)
+
+	}).then( async mime => {
+	    if (mime !== 'image/png') throw new Error('not a png')
+
+	    iid = db.images
+		.prepare(`INSERT INTO images(uid,md5,filename,mtime,size,uploaded,desc,lid) VALUES (?,?,?,?,?,?,?,?)`)
+		.run(session.uid, await md5_file(svg.path),
+		     svg.originalFilename, fields.mtime || today(), svg.size,
+		     today(), (fields.desc || '').slice(0, 512), fields.lid)
+		.lastInsertRowid
+
+	    let ipath = [conf.img, 'images',session.uid,`${iid}.svg`].join('/')
+	    let tpath = [conf.img, 'thumbnails', session.uid, `${iid}.png`]
+		.join('/')
+
+	    await mv(svg.path, ipath)
+	    await mv(thumbnail.path, tpath)
+
+	    res.end(JSON.stringify({iid}))
+
+	}).catch(e => {
+	    // TODO: delete iid
+	    error(412, e.message)
+	})
+    })
+})
+
+app.use('/api/licenses', (req, res) => {
+    return res.end(JSON.stringify(db.images
+				  .prepare(`SELECT * FROM licenses`).all()))
+})
 
 app.use(serve_static('_out/client'))
 
@@ -199,4 +277,25 @@ class AERR extends Error {
 	this.name = 'ApiError'
 	this.status = status
   }
+}
+
+function file(name) {
+    return new Promise( (res, rej) => {
+	let magic = new mmm.Magic(mmm.MAGIC_MIME_TYPE)
+	magic.detectFile(name, function(err, result) {
+	    if (err) rej(err)
+	    res(result)
+	})
+    })
+}
+
+function today() { return Math.floor(new Date()/1000) }
+
+async function mv(src, dest) {
+    await mkdir(path.dirname(dest), {recursive: true})
+    return rename(src, dest)
+}
+
+async function md5_file(name) {
+    return crypto.createHash('md5').update(await readFile(name)).digest('hex')
 }
