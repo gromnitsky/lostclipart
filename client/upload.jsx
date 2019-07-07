@@ -1,4 +1,4 @@
-/* global React, Cookies, ReachRouter */
+/* global React, Cookies, ReachRouter, Awesomplete */
 
 let {navigate} = ReachRouter
 import * as u from './u.js'
@@ -41,7 +41,7 @@ export default class Login extends React.Component {
 		  </select>
 
 		  <label htmlFor="form--upload__tags">Tags:</label>
-		  <input id="form--upload__tags" name="tags" />
+		  <input id="form--upload__tags" name="tags" data-multiple />
 
 		  <label htmlFor="form--upload__desc">Description:</label>
 		  <textarea id="form--upload__desc"
@@ -55,6 +55,33 @@ export default class Login extends React.Component {
 	      <div className="form-error">{this.state.error}</div>
 	    </form>
 	)
+    }
+
+    componentDidMount() {
+	let input = document.querySelector("#form--upload__tags")
+	let last_tag = s => s.match(/[^,]*$/)[0]
+	let awsmplt = new Awesomplete(input, {
+	    minChars: 2,
+	    filter: function(text, input) {
+		return Awesomplete.FILTER_CONTAINS(text, last_tag(input))
+	    },
+	    item: function(text, input) {
+		return Awesomplete.ITEM(text, last_tag(input))
+	    },
+	    replace: function(text) {
+		let before = this.input.value.match(/^.+,\s*|/)[0]
+		this.input.value = before + text + ", "
+	    }
+	})
+
+	input.addEventListener('input', evt => { // TODO: debounce
+	    let q = last_tag(evt.target.value).trim(); if (q.length < 2) return
+	    u.fetch_json(`/api/tags/search?q=${encodeURIComponent(q)}`)
+		.then( tags => {
+		    awsmplt.list = tags.map( v => v.name)
+		    awsmplt.evaluate()
+		})
+	})
     }
 
     async licenses() {

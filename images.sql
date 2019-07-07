@@ -18,7 +18,7 @@ CREATE TABLE images(iid INTEGER PRIMARY KEY,
 		    FOREIGN KEY(lid) REFERENCES licenses(lid));
 
 CREATE TABLE tags(tid INTEGER PRIMARY KEY,
-                  name NOT NULL,
+                  name UNIQUE NOT NULL,
 		  desc);
 INSERT INTO tags(name) VALUES ('man');
 INSERT INTO tags(name) VALUES ('woman');
