@@ -20,6 +20,11 @@ CREATE TABLE images(iid INTEGER PRIMARY KEY,
 CREATE TABLE tags(tid INTEGER PRIMARY KEY,
                   name NOT NULL,
 		  desc);
+INSERT INTO tags(name) VALUES ('man');
+INSERT INTO tags(name) VALUES ('woman');
+INSERT INTO tags(name) VALUES ('cat');
+INSERT INTO tags(name) VALUES ('dog');
+INSERT INTO tags(name) VALUES ('100%');
 
 CREATE TABLE images_tags(iid INT NOT NULL,
                          tid INT NOT NULL,

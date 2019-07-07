@@ -29,6 +29,11 @@ fs.mkdirSync(conf.uploadDir, {recursive: true})
 
 let app = connect()
 
+app.use('/', (req, res, next) => {
+    if (req.method === 'GET') req.searchparams = new URLSearchParams(req.url.slice(req.url.search(/[?&]/)+1))
+    next()
+})
+
 app.use('/api/user', (req, res, next) => {
     if (req.method !== 'POST') return next(new AERR(405, 'Method Not Allowed'))
     next()
@@ -182,6 +187,15 @@ app.use('/api/image/upload', (req, res, next) => {
 app.use('/api/licenses', (req, res) => {
     return res.end(JSON.stringify(db.images
 				  .prepare(`SELECT * FROM licenses`).all()))
+})
+
+app.use('/api/tags/search', (req, res) => {
+    let q = (req.searchparams.get('q') || '').trim()
+    if (q.length < 2) { res.end('[]'); return }
+
+    q = q.replace(/:/g, '::').replace(/[%_]/g, ':$&')
+    let tags = db.images.prepare(`SELECT * FROM tags WHERE name LIKE ? ESCAPE ':'`).all(`%${q}%`)
+    return res.end(JSON.stringify(tags))
 })
 
 app.use(serve_static('_out/client'))
