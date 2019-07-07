@@ -24,13 +24,14 @@ export default class Login extends React.Component {
 
 	      <fieldset>
 		<div>
-		  <input type="file" name="svg"
-			 id="form--upload__file"
-			 onChange={this.handle_image.bind(this)}
-			 accept=".svg, .SVG" />
+		  <div id="form--upload__ctrl">
+		    <input type="file" name="svg"
+			   id="form--upload__file"
+			   onChange={this.handle_image.bind(this)}
+			   accept=".svg, .SVG" />
 
-		  <div>
-		    <canvas width="320" height="320"
+		    <canvas style={{marginTop: '5px'}}
+			    width="320" height="320"
 			    id="form--upload__preview"></canvas>
 		  </div>
 

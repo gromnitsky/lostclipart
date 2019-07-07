@@ -100,3 +100,35 @@ footer ul li {
   grid-column: 1 / -1;
   text-align: end;
 }
+
+
+#form--upload fieldset {
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+#form--upload fieldset > div {
+  display: grid;
+  grid-gap: 5px;
+  grid-template-columns: 1fr auto 2fr;
+  grid-template-rows: auto auto 1fr auto;
+  grid-template-areas: "img label ctrl"
+                       ".   label ctrl"
+                       ".   label ctrl"
+                       ".   .     ctrl"
+}
+
+#form--upload__ctrl {
+  grid-column: img;
+  grid-row: span 4;
+}
+
+#form--upload fieldset > div > label {
+  grid-column: label;
+}
+
+#form--upload__btn {
+  grid-column: ctrl;
+  text-align: end;
+}
