@@ -16,9 +16,9 @@ export default class Profile extends React.Component {
 	    error_general: '',
 	    error_pw: '',
 	}
-
-	this.get_user_info()
     }
+
+    componentDidMount() { this.get_user_info() }
 
     render() {
 	return (
@@ -39,7 +39,7 @@ export default class Profile extends React.Component {
 
 		    <label>Registered</label>
 		    <span className="form--pw__roval">
-		      {this.date_fmt(this.state.registered)}
+		      {u.date_fmt(this.state.registered)}
 		    </span>
 
 		    <label>Uploaded</label>
@@ -125,23 +125,13 @@ export default class Profile extends React.Component {
     }
 
     get_user_info() {
-	let form = new FormData()
-	form.append('uid', this.uid())
-	u.fetch_json('/api/user/profile', {
-	    method: 'POST',
-	    body: new URLSearchParams(form).toString()
-	}).then( json => {
-	    console.log(json)
-	    this.setState(json)
-	}).catch(e => console.log(`${this.get_user_info.name}:`, e))
+	u.get_user_info(this.uid()).then(this.setState.bind(this))
     }
 
     uid() {
 	let p = window.location.href.split('/')
 	return p[p.length - 1] || -1
     }
-
-    date_fmt(i) { return new Date(i*1000).toLocaleString('en-ZA') }
 
     flash_error(form, err) {
 	if (err instanceof Error) err = err.message

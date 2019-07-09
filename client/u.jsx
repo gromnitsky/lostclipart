@@ -1,4 +1,4 @@
-/* global Cookies, ReachRouter */
+/* global Cookies */
 
 export function my_fetch(url, opt) {
     let fetcherr = r => {
@@ -31,4 +31,15 @@ export function session_start(token, form, props) {
     Cookies.set('exp_date', token.exp_date, opt)
 
     props.user_set(form.get('name'))
+}
+
+export function date_fmt(s) { return new Date(s*1000).toLocaleString('en-ZA') }
+
+export function get_user_info(uid) {
+    let form = new FormData()
+    form.append('uid', uid)
+    return fetch_json('/api/user/profile', {
+	method: 'POST',
+	body: new URLSearchParams(form).toString()
+    })
 }
