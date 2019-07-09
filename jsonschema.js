@@ -32,9 +32,14 @@ exports.schema = {
 		    type: 'array',
 		    minItems: 1,
 		    items: { type: "string", maxLength: 512 }
+		},
+		tags: {		// "foo, bar" is ok, ", " is not
+		    type: 'array',
+		    minItems: 1,
+		    items: { type: "string", "pattern": '^.*[^\\s,].*$' }
 		}
 	    },
-	    required: ["lid"]
+	    required: ['lid', 'tags']
 	}
     }
 }

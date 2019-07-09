@@ -20,8 +20,9 @@ let jsonschema = require('./jsonschema')
 
 let conf = {
     img: '_out/img',
-    uploadDir: '_out/tmp',
-    maxFilesSize: 5*1024*1024,
+    uploadDir: '_out/tmp',	// FIXME: name
+    maxFilesSize: 5*1024*1024,	// FIXME: name
+    tags: { perimage: 10 }
 }
 let db = db_open()
 fs.mkdirSync(conf.uploadDir, {recursive: true})
@@ -140,43 +141,51 @@ app.use('/api/image/upload', (req, res, next) => {
 	files[k].forEach(v => fs.unlink(v.path, ()=>{}))
     })
 
+    let attachments = async (fields, files) => {
+	jsonschema.validate(jsonschema.schema.upload.fields, fields)
+	jsonschema.validate(jsonschema.schema.upload.files, files)
+	let att = {
+	    svg: {
+		file: files.svg[0],
+		md5: await md5_file(files.svg[0].path)
+	    },
+	    thumbnail: files.thumbnail[0],
+	}
+	if ( !(await file(att.svg.file.path) === 'image/svg' &&
+	       await file(att.thumbnail.path) === 'image/png') )
+	    throw new Error('images are in wrong formats')
+	return att
+    }
+
     form.parse(req, (err, fields, files) => {
 	let error = (code, msg) => { cleanup(files); next(new AERR(code, msg)) }
 	if (err) return error(500, err.message)
 	console.log('fields:', fields)
 	console.log('files:', util.inspect(files, {depth:null}))
 
-	let attachments = async () => {
-	    jsonschema.validate(jsonschema.schema.upload.fields, fields)
-	    jsonschema.validate(jsonschema.schema.upload.files, files)
-	    let att = {
-		svg: files.svg[0],
-		thumbnail: files.thumbnail[0]
-	    }
-	    if ( !(await file(att.svg.path) === 'image/svg' &&
-		   await file(att.thumbnail.path) === 'image/png') )
-		throw new Error('images are in wrong formats')
-	    return att
-	}
+	let transaction = db.images.transaction( att => {
+	    let iid = db.images.prepare('INSERT INTO images VALUES (NULL, @uid, @md5, @filename, @mtime, @size, @uploaded, @desc, @lid)').run({
+		    uid: session.uid,
+		    md5: att.svg.md5,
+		    filename: att.svg.file.originalFilename,
+		    mtime: fields.mtime[0] || today(),
+		    size: att.svg.file.size,
+		    uploaded: today(),
+		    desc: (fields.desc[0] || '').slice(0, 512),
+		    lid: fields.lid[0]
+		}).lastInsertRowid
 
-	let transaction = db.images.transaction( async att => {
-	    let iid = db.images
-		.prepare(`INSERT INTO images(uid,md5,filename,mtime,size,uploaded,desc,lid) VALUES (?,?,?,?,?,?,?,?)`)
-		.run(session.uid, await md5_file(att.svg.path),
-		     att.svg.originalFilename, fields.mtime || today(),
-		     att.svg.size, today(), (fields.desc || '').slice(0, 512),
-		     fields.lid)
-		.lastInsertRowid
+	    tag_image(iid, fields.tags[0])
 
-	    let img = iid2image(session.uid, iid)
-	    await mv(att.svg.path, img.svg)
-	    await mv(att.thumbnail.path,  img.thumbnail)
-
-	    return iid
+	    return {att, iid}
 	})
 
-	attachments().then(transaction).then( iid => {
-	    res.end(JSON.stringify({iid}))
+	attachments(fields, files).then(transaction).then( async v => {
+	    let img = iid2image(session.uid, v.iid)
+	    await mv(v.att.svg.file.path, img.svg)
+	    await mv(v.att.thumbnail.path,  img.thumbnail)
+
+	    res.end(JSON.stringify({iid: v.iid}))
 	}).catch( e => {
 	    // TODO: rm moved files
 	    error(412, e.message)
@@ -201,7 +210,7 @@ app.use('/api/tags/search', (req, res) => {
 app.use(serve_static('_out/client'))
 
 app.use((req, res, next) => {	// in 404 stead
-    let error = () => next(new AERR(404, 'Not Found'))
+    let error = () => next(new AERR(404, `${req.url} Not Found`))
     if (req.method !== 'GET') return error()
     let pathname = new URL(`http://example.com/${req.url}`).pathname
     if (pathname.indexOf('.') !== -1) return error()
@@ -316,4 +325,27 @@ function iid2image(uid, iid) {
 	svg: [conf.img, 'images', uid, `${iid}.svg`].join('/'),
 	thumbnail: [conf.img, 'thumbnails', uid, `${iid}.png`].join('/')
     }
+}
+
+function tags_add(str) {
+    let tags = (str || '').split(',').filter(Boolean).
+	map( v => v.replace(/\s+/, ' ').trim()).filter(Boolean).
+	slice(0, conf.tags.perimage)
+
+    let insert = db.images.prepare('INSERT INTO tags (name) VALUES (?)')
+    return tags.map( v => {
+	try {
+	    return insert.run(v).lastInsertRowid
+	} catch (e) {
+	    if (!/\bUNIQUE\b/.test(e.message)) throw e
+	    return db.images.prepare('SELECT tid FROM tags WHERE name = ?')
+		.get(v).tid
+	}
+    })
+}
+
+function tag_image(iid, str) {
+    db.images.prepare(`INSERT INTO images_tags
+                        SELECT ?,tid FROM tags WHERE tid in (${tags_add(str)})`)
+	.run(iid)
 }
