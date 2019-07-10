@@ -48,14 +48,14 @@ app.use('/api/user', (req, res, next) => {
 })
 
 app.use('/api/user/profile', (req, res, next) => { // FIXME: should be GET
-    let user = db.users.prepare(`SELECT uid,name,grp,gecos,registered FROM users WHERE uid = ?`).get(req.body.uid)
+    let user = db.prepare(`SELECT uid,name,grp,gecos,registered FROM users WHERE uid = ?`).get(req.body.uid)
     if (!user) return next(new AERR(400, 'invalid uid'))
     res.end(JSON.stringify(user))
 })
 
 app.use('/api/user/new', async (req, res, next) => {
     if (!validate_name(req.body.name)) return next(new AERR(412, 'bad name'))
-    if (db.users.prepare(`SELECT name FROM users WHERE name = ?`)
+    if (db.prepare(`SELECT name FROM users WHERE name = ?`)
 	.get(req.body.name)) {
 	return next(new AERR(412, `user ${req.body.name} already exists`))
     }
@@ -72,7 +72,7 @@ app.use('/api/user/new', async (req, res, next) => {
 app.use('/api/user/login', async (req, res, next) => {
     let error = () => next(new AERR(412, 'bad cridentials'))
 
-    let user = db.users.prepare(`SELECT uid,pw_hash FROM users WHERE name = ?`)
+    let user = db.prepare(`SELECT uid,pw_hash FROM users WHERE name = ?`)
 	.get(req.body.name)
     if (!user) { return error() }
 
@@ -87,7 +87,7 @@ app.use('/api/user/edit', (req, res, next) => {
     if (session.uid < 0) return next(new AERR(412, 'bad session token'))
 
     let uid = Number(req.body.uid)
-    let target = db.users.prepare(`SELECT grp FROM users WHERE uid = ?`).get(uid)
+    let target = db.prepare(`SELECT grp FROM users WHERE uid = ?`).get(uid)
 
     if ( !(session.uid === uid || session.grp === 'adm')
 	 || (uid === 0 && session.uid !== 0)
@@ -98,7 +98,7 @@ app.use('/api/user/edit', (req, res, next) => {
 })
 
 app.use('/api/user/edit/misc', (req, res, next) => {
-    let target = db.users.prepare(`SELECT name FROM users WHERE uid = ?`)
+    let target = db.prepare(`SELECT name FROM users WHERE uid = ?`)
 	.get(req.body.uid)
     if (!target) return next(new AERR(403, 'invalid uid'))
 
@@ -106,12 +106,12 @@ app.use('/api/user/edit/misc', (req, res, next) => {
     let gecos = (req.body.gecos || '').slice(0, 512)
 
     if (target.name !== req.body.name && // FIXME: rm & just check UPDATE below
-	db.users.prepare(`SELECT name FROM users WHERE name = ?`)
+	db.prepare(`SELECT name FROM users WHERE name = ?`)
 	.get(req.body.name)) {
 	return next(new AERR(412, `user ${req.body.name} already exists`))
     }
 
-    db.users.prepare(`UPDATE users SET name = ?, gecos = ? WHERE uid = ?`)
+    db.prepare(`UPDATE users SET name = ?, gecos = ? WHERE uid = ?`)
 	.run(req.body.name, gecos, req.body.uid)
     res.end()
 })
@@ -120,8 +120,7 @@ app.use('/api/user/edit/password', async (req, res, next) => {
     if (!validate_password(req.body.password))
 	return next(new AERR(412, 'bad password'))
 
-    if (db.users
-	.prepare(`UPDATE users SET pw_hash = ? WHERE uid = ?`)
+    if (db.prepare(`UPDATE users SET pw_hash = ? WHERE uid = ?`)
 	.run(await pw_hash_mk(req.body.password), req.body.uid).changes === 0)
 	return next(new AERR(412, 'invalid uid'))
 
@@ -163,17 +162,18 @@ app.use('/api/image/upload', (req, res, next) => {
 	console.log('fields:', fields)
 	console.log('files:', util.inspect(files, {depth:null}))
 
-	let transaction = db.images.transaction( att => {
-	    let iid = db.images.prepare('INSERT INTO images VALUES (NULL, @uid, @md5, @filename, @mtime, @size, @uploaded, @desc, @lid)').run({
-		    uid: session.uid,
-		    md5: att.svg.md5,
-		    filename: att.svg.file.originalFilename,
-		    mtime: fields.mtime[0] || today(),
-		    size: att.svg.file.size,
-		    uploaded: today(),
-		    desc: (fields.desc[0] || '').slice(0, 512),
-		    lid: fields.lid[0]
-		}).lastInsertRowid
+	let transaction = db.transaction( att => {
+	    let iid = db.prepare('INSERT INTO images VALUES (NULL, @uid, @md5, @filename, @mtime, @size, @uploaded, @title, @desc, @lid)').run({
+		uid: session.uid,
+		md5: att.svg.md5,
+		filename: att.svg.file.originalFilename,
+		mtime: fields.mtime[0] || today(),
+		size: att.svg.file.size,
+		uploaded: today(),
+		title: fields.title[0].slice(0, 128),
+		desc: (fields.desc[0] || '').slice(0, 512),
+		lid: fields.lid[0]
+	    }).lastInsertRowid
 
 	    tag_image(iid, fields.tags[0])
 
@@ -194,7 +194,7 @@ app.use('/api/image/upload', (req, res, next) => {
 })
 
 app.use('/api/licenses', (req, res) => {
-    return res.end(JSON.stringify(db.images
+    return res.end(JSON.stringify(db
 				  .prepare(`SELECT * FROM licenses`).all()))
 })
 
@@ -203,8 +203,16 @@ app.use('/api/tags/search', (req, res) => {
     if (q.length < 2) { res.end('[]'); return }
 
     q = q.replace(/:/g, '::').replace(/[%_]/g, ':$&')
-    let tags = db.images.prepare(`SELECT * FROM tags WHERE name LIKE ? ESCAPE ':'`).all(`%${q}%`)
+    let tags = db.prepare(`SELECT * FROM tags WHERE name LIKE ? ESCAPE ':'`).all(`%${q}%`)
     return res.end(JSON.stringify(tags))
+})
+
+app.use('/api/image/view', (req, res, next) => {
+    let q = db.prepare(`SELECT * FROM easyimages WHERE iid = ?`)
+	.all(req.searchparams.get('iid'))
+    if (!q.length) return next(new AERR(412, `invalid iid`))
+
+    return res.end(JSON.stringify(q))
 })
 
 app.use(serve_static('_out/client'))
@@ -233,13 +241,10 @@ function db_open() {
 	}
 	return db
     }
-    let users = open('_out/db/users.sqlite3', 'users.sql')
-    users.prepare(`UPDATE users SET blob = ? WHERE uid = 0`)
+    let db = open('_out/db.sqlite3', 'schema.sql')
+    db.prepare(`UPDATE users SET blob = ? WHERE uid = 0`)
 	.run(crypto.randomBytes(1024))
-    return {
-	users,
-	images: open('_out/db/images.sqlite3', 'images.sql')
-    }
+    return db
 }
 
 function validate_name(s) { return s && /^\w{2,20}$/.test(s) }
@@ -252,7 +257,7 @@ function cookie_get(req, name) {
 // return a fresh uid
 async function user_add(name, password, gecos, registered) {
     let pw_hash = await pw_hash_mk(password)
-    return db.users
+    return db
 	.prepare(`INSERT INTO users(name,pw_hash,blob,gecos,registered,grp)
                   VALUES (?,?,?,?,?,?)`)
 	.run(name, pw_hash, crypto.randomBytes(1024),
@@ -263,7 +268,7 @@ async function user_add(name, password, gecos, registered) {
 function pw_hash_mk(password) { return bcrypt.hash(password, 12) }
 
 function token(uid) {
-    let user = db.users.prepare(`SELECT pw_hash,blob FROM users WHERE uid = ?`)
+    let user = db.prepare(`SELECT pw_hash,blob FROM users WHERE uid = ?`)
 	.get(uid)
     let exp_date = Date.now() + 60*60*24*30*3 * 1000 // 90 days
     return {
@@ -283,7 +288,7 @@ function session_uid(req) {
     let exp_date = cookie_get(req, 'exp_date')
     let token = cookie_get(req, 'token')
 
-    let user = db.users.prepare(`SELECT * FROM users WHERE uid = ?`).get(uid)
+    let user = db.prepare(`SELECT * FROM users WHERE uid = ?`).get(uid)
     if (!user) return { uid: -1 }
 
     if (token !== token_mk(user.pw_hash, exp_date, user.blob)) return {uid: -2}
@@ -332,20 +337,20 @@ function tags_add(str) {
 	map( v => v.replace(/\s+/, ' ').trim()).filter(Boolean).
 	slice(0, conf.tags.perimage)
 
-    let insert = db.images.prepare('INSERT INTO tags (name) VALUES (?)')
+    let insert = db.prepare('INSERT INTO tags (name) VALUES (?)')
     return tags.map( v => {
 	try {
 	    return insert.run(v).lastInsertRowid
 	} catch (e) {
 	    if (!/\bUNIQUE\b/.test(e.message)) throw e
-	    return db.images.prepare('SELECT tid FROM tags WHERE name = ?')
+	    return db.prepare('SELECT tid FROM tags WHERE name = ?')
 		.get(v).tid
 	}
     })
 }
 
 function tag_image(iid, str) {
-    db.images.prepare(`INSERT INTO images_tags
+    db.prepare(`INSERT INTO images_tags
                         SELECT ?,tid FROM tags WHERE tid in (${tags_add(str)})`)
 	.run(iid)
 }

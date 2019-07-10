@@ -37,9 +37,14 @@ exports.schema = {
 		    type: 'array',
 		    minItems: 1,
 		    items: { type: "string", "pattern": '^.*[^\\s,].*$' }
-		}
+		},
+		title: {
+		    type: 'array',
+		    minItems: 1,
+		    items: { type: "string", "pattern": '^.*[^\\s].*$' }
+		},
 	    },
-	    required: ['lid', 'tags']
+	    required: ['lid', 'tags', 'title']
 	}
     }
 }

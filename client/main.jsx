@@ -5,6 +5,7 @@ import UserAdd from './useradd.js'
 import Profile from './profile.js'
 import Login from './login.js'
 import Upload from './upload.js'
+import ImageView from './image_view.js'
 import * as u from './u.js'
 
 class Main extends React.Component {
@@ -37,6 +38,7 @@ class Main extends React.Component {
 		  <Logout path="logout" />
 		  <Profile path="user/:uid"
 			   user_set={this.user_set.bind(this)}/>
+		  <ImageView path="image/:iid" />
 		</Router>
 	      </main>
 

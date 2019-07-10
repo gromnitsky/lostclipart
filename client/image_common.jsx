@@ -14,8 +14,8 @@ export class LicenseSelector extends React.Component {
 	this.setState({
 	    licenses: (await u.fetch_json('/api/licenses'))
 		.map( v => <option key={v.lid}
-		      selected={v.name === this.props.cur
-				|| (!this.props.cur && v.name === "CC BY")}
+		      selected={v.lid === this.props.lid
+				|| (!this.props.lid && v.name === "CC BY")}
 		      value={v.lid}>{v.name}</option>)
 	})
     }

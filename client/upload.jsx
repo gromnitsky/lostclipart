@@ -4,7 +4,7 @@ let {navigate} = ReachRouter
 import * as u from './u.js'
 import * as ic from './image_common.js'
 
-export default class Login extends React.Component {
+export default class Upload extends React.Component {
     constructor(props) {
 	super(props)
 	this.form = React.createRef()
@@ -33,6 +33,9 @@ export default class Login extends React.Component {
 			    width="320" height="320"
 			    id="form--image__preview"></canvas>
 		  </div>
+
+		  <label htmlFor="form--image__title">Title:</label>
+		  <input name="title" id="form--image__title" />
 
 		  <label htmlFor="image__license-sel">License:</label>
 		  <ic.LicenseSelector />
@@ -104,9 +107,8 @@ export default class Login extends React.Component {
 	    u.fetch_json('/api/image/upload', {
 		method: 'POST',
 		body: form
-	    }).then( iid => {
-		console.log(iid)
-		// FIXME: navigate to /image/:iid
+	    }).then( json => {
+		navigate(`image/${json.iid}`)
 	    }).catch( e => this.error(e))
 		.finally( () => fieldset.disabled = false)
 	})
