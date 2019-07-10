@@ -26,7 +26,11 @@ static.dest := $(patsubst $(src)/%, $(out)/%, $(static.src))
 $(out)/%: $(src)/%; $(copy)
 
 compile := $(vendor.dest) $(jsx.dest) $(static.dest)
-all: $(compile)
+all: $(compile) $(out)/clipart
+
+$(out)/clipart:
+	mkdir -p $(out)/../img
+	cd $(out) && ln -s ../img $(notdir $@)
 
 include server.mk
 devel: all server
