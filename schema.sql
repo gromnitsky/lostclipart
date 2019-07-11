@@ -58,6 +58,7 @@ CREATE VIEW easyimages AS
               images.*,
               licenses.name AS license,
               users.name AS user_name,
+              users.grp AS user_grp,
               users.status AS user_status
        FROM tags
        INNER JOIN images_tags ON images_tags.tid == tags.tid

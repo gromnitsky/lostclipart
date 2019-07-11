@@ -22,8 +22,7 @@ export default class Login extends React.Component {
 	    method: 'POST',
 	    body: new URLSearchParams(form).toString()
 	}).then( token => {
-	    console.log(token)
-	    u.session_start(token, form, this.props)
+	    u.session_start(token, this.props)
 	    navigate('upload', { replace: true })
 	}).catch( e => this.error(e)).finally( () => fieldset.disabled = false)
     }

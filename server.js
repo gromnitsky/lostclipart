@@ -48,8 +48,8 @@ app.use('/api/user', (req, res, next) => {
 })
 
 app.use('/api/user/profile', (req, res, next) => { // FIXME: should be GET
-    let user = db.prepare(`SELECT uid,name,grp,gecos,registered FROM users WHERE uid = ?`).get(req.body.uid)
-    if (!user) return next(new AERR(400, 'invalid uid'))
+    let user = db.prepare(`SELECT uid,name,grp,gecos,registered,status FROM users WHERE uid = ?`).get(req.body.uid)
+    if (!user) return next(new AERR(404, 'invalid uid'))
     res.end(JSON.stringify(user))
 })
 
@@ -167,11 +167,11 @@ app.use('/api/image/upload', (req, res, next) => {
 		uid: session.uid,
 		md5: att.svg.md5,
 		filename: att.svg.file.originalFilename,
-		mtime: fields.mtime[0] || today(),
+		mtime: fields.mtime && fields.mtime[0] || today(),
 		size: att.svg.file.size,
 		uploaded: today(),
 		title: fields.title[0].slice(0, 128),
-		desc: (fields.desc[0] || '').slice(0, 512),
+		desc: (fields.desc && fields.desc[0] || '').slice(0, 512),
 		lid: fields.lid[0]
 	    }).lastInsertRowid
 
@@ -187,8 +187,8 @@ app.use('/api/image/upload', (req, res, next) => {
 
 	    res.end(JSON.stringify({iid: v.iid}))
 	}).catch( e => {
-	    // TODO: rm moved files
-	    error(412, e.message)
+	    // FIXME: rm moved files
+	    error(412, e)
 	})
     })
 })
@@ -210,7 +210,7 @@ app.use('/api/tags/search', (req, res) => {
 app.use('/api/image/view', (req, res, next) => {
     let q = db.prepare(`SELECT * FROM easyimages WHERE iid = ?`)
 	.all(req.searchparams.get('iid'))
-    if (!q.length) return next(new AERR(412, `invalid iid`))
+    if (!q.length) return next(new AERR(404, 'invalid iid'))
 
     return res.end(JSON.stringify(q))
 })
@@ -268,11 +268,14 @@ async function user_add(name, password, gecos, registered) {
 function pw_hash_mk(password) { return bcrypt.hash(password, 12) }
 
 function token(uid) {
-    let user = db.prepare(`SELECT pw_hash,blob FROM users WHERE uid = ?`)
+    let user = db.prepare(`SELECT name,pw_hash,blob,grp,status FROM users WHERE uid = ?`)
 	.get(uid)
     let exp_date = Date.now() + 60*60*24*30*3 * 1000 // 90 days
     return {
 	uid,
+	name: user.name,
+	grp: user.grp,
+	status: user.status,
 	token: token_mk(user.pw_hash, exp_date, user.blob),
 	exp_date
     }
@@ -298,10 +301,10 @@ function session_uid(req) {
 class AERR extends Error {
     constructor(status, msg) {
 	super(msg)
-	Error.captureStackTrace(this, AERR)
+	msg instanceof Error ? this.stack = msg.stack : Error.captureStackTrace(this, AERR)
 	this.name = 'ApiError'
 	this.status = status
-  }
+    }
 }
 
 function file(name) {

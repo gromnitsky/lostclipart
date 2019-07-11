@@ -1,4 +1,4 @@
-/* global React, ReachRouter */
+/* global React, ReachRouter, Cookies */
 
 let {Link} = ReachRouter
 import * as u from './u.js'
@@ -51,6 +51,9 @@ export default class Upload extends React.Component {
 		  <span>Tags:</span>
 		  <div>{this.state.tags}</div>
 
+		  <span>Write access:</span>
+		  <div>{this.write_access() ? 'yes' : 'no'}</div>
+
 		  <span>Description:</span>
 		  <div>{this.state.desc}</div>
 
@@ -58,6 +61,13 @@ export default class Upload extends React.Component {
 	      </div>
 	    </>
 	)
+    }
+
+    write_access() {
+	let uid = Number(Cookies.get('uid'))
+	return uid === 0
+	    || (!this.state.user_status
+		&& (Cookies.get('grp') === 'admin' || this.state.uid === uid))
     }
 
     iid() {

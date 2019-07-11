@@ -34,7 +34,7 @@ export default class UserAdd extends React.Component {
 	    body: new URLSearchParams(form).toString()
 	}).then( token => {	// auto login
 	    console.log(token)
-	    u.session_start(token, form, this.props)
+	    u.session_start(token, this.props)
 	    navigate('upload', { replace: true })
 	}).catch( e => this.error(e)).finally( () => fieldset.disabled = false)
     }

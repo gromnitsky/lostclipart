@@ -16,9 +16,8 @@ export default class Profile extends React.Component {
 	    error_general: '',
 	    error_pw: '',
 	}
+	this.get_user_info()
     }
-
-    componentDidMount() { this.get_user_info() }
 
     render() {
 	return (
@@ -125,7 +124,7 @@ export default class Profile extends React.Component {
     }
 
     get_user_info() {
-	u.get_user_info(this.uid()).then(this.setState.bind(this))
+	u.user_info(this.uid()).then(this.setState.bind(this))
     }
 
     uid() {
