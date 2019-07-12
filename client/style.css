@@ -160,3 +160,7 @@ div.awesomplete > input {
   grid-column: img;
   grid-row: span 10;
 }
+
+.editable--input div.awesomplete {
+  width: 100%;
+}

@@ -36,7 +36,9 @@ export function session_start(token, props) {
     props.user_set(token.name)
 }
 
-export function date_fmt(s) { return new Date(s*1000).toLocaleString('en-ZA') }
+export function date_fmt(s) {
+    return new Date(s*1000).toLocaleString('en-ZA', {timeZone: 'UTC'})
+}
 
 export function user_info(uid) {
     let form = new FormData()
@@ -45,4 +47,24 @@ export function user_info(uid) {
 	method: 'POST',
 	body: new URLSearchParams(form).toString()
     })
+}
+
+export function children_find_id(children, id) { // TODO: rm
+    let result
+    React.Children.forEach(children, elm => {
+        if (elm.props.id === id) {
+            result = elm
+        } else {
+            if (typeof elm.props.children === "object")
+                result = children_find_id(elm.props.children, id)
+        }
+    })
+    return result
+}
+
+export function write_access(target_uid, target_status) {
+    let uid = Number(Cookies.get('uid'))
+    return uid === 0
+        || (!target_status
+            && (Cookies.get('grp') === 'admin' || target_uid === uid))
 }

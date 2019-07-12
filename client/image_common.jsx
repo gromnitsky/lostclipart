@@ -36,11 +36,7 @@ export class Tagger extends React.Component {
     }
 
     render() {
-	return (
-	    <input id={this.props.id} name={this.props.name}
-		   placeholder={this.props.placeholder} spellCheck="false"
-		   ref={this.ctrl} />
-	)
+	return <input {...this.props} ref={this.ctrl} />
     }
 
     componentDidMount() {

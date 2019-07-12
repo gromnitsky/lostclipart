@@ -40,9 +40,9 @@ export default class Upload extends React.Component {
 		  <label htmlFor="image__license-sel">License:</label>
 		  <ic.LicenseSelector />
 
-		  <label htmlFor="form--image__tags">Tags:</label>
-		  <ic.Tagger id="form--image__tags" name="tags"
-			     placeholder="foo bar, baz" />
+                  <label htmlFor="form--image__tags">Tags:</label>
+                  <ic.Tagger id="form--image__tags" name="tags"
+                             placeholder="foo bar, baz" />
 
 		  <label htmlFor="form--upload__desc">Description:</label>
 		  <textarea id="form--image__desc"
