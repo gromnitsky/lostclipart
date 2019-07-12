@@ -49,14 +49,14 @@ export function user_info(uid) {
     })
 }
 
-export function children_find_id(children, id) { // TODO: rm
+export function children_find(children, fn) {
     let result
     React.Children.forEach(children, elm => {
-        if (elm.props.id === id) {
+        if (fn(elm)) {
             result = elm
         } else {
             if (typeof elm.props.children === "object")
-                result = children_find_id(elm.props.children, id)
+                result = children_find(elm.props.children, fn)
         }
     })
     return result

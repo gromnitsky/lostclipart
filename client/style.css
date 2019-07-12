@@ -140,7 +140,7 @@ footer ul li {
 
 
 #image__license-sel {
-  max-width: 10rem;
+  max-width: fit-content;
 }
 
 div.awesomplete > input {

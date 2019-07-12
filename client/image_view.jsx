@@ -1,4 +1,4 @@
-/* global React, ReachRouter, Cookies */
+/* global React, ReachRouter */
 
 let {Link} = ReachRouter
 import * as u from './u.js'
@@ -8,7 +8,9 @@ export default class Upload extends React.Component {
     constructor(props) {
 	super(props)
 	this.state = {}
+    }
 
+    componentDidMount() {
 	u.fetch_json(`/api/image/view?iid=${this.iid()}`).then( json => {
 	    let r = Object.assign({}, json[0])
 	    r.tags = json.map( v => v.tag).join`, `
@@ -39,7 +41,16 @@ export default class Upload extends React.Component {
 		  </span>
 
 		  <span>License:</span>
-		  <span>{this.state.license}</span>
+                  <ELicenseSelector value={this.state.license}
+                          name="lid"
+                          uid={this.state.uid}
+                          status={this.state.user_status}
+                          hook_to="#image__license-sel"
+                          error={this.error_saving.bind(this)}>
+                    <div>
+                      <ic.LicenseSelector />
+                    </div>
+                  </ELicenseSelector>
 
 		  <span>Original filename</span>
                   <EInput value={this.state.filename}
@@ -101,8 +112,8 @@ export default class Upload extends React.Component {
     error_saving(msg) { this.setState({error_saving: msg}) }
 
     iid() {
-	let p = window.location.href.split('/')
-	return p[p.length - 1] || -1
+        let p = window.location.pathname.split('/')
+        return p[p.length - 1] || -1
     }
 
     img() {
@@ -122,13 +133,11 @@ class EInput extends React.Component  {
         this.state = { writable: false }
     }
 
-    // static getDerivedStateFromProps(props, state) {
-    //     console.log(1)
-    //     return { value: props.value }
-    // }
-
-    UNSAFE_componentWillReceiveProps(props) {
-        this.setState({value: props.value})
+    // sets this.state.value when it gets a props update
+    static getDerivedStateFromProps(props, state) {
+        if (state.value === undefined && props.value !== undefined)
+            return {value: props.value}
+        return null
     }
 
     render() {
@@ -141,22 +150,29 @@ class EInput extends React.Component  {
         input.value = this.state.value
     }
 
-    rnd_writable() {
+    writable_children_get() {
         let children = React.cloneElement(this.props.children)
         children.props.style = children.props.style || {}
         Object.assign(children.props.style, { flexGrow: 1 })
+        return children
+    }
 
+    rnd_writable() {
         return (
             <div className="editable--input" style={{display: 'flex'}}>
-              {children}
+              {this.writable_children_get()}
               <button style={{ marginLeft: "5px" }}
                       onClick={this.handle_click_save.bind(this)}>S</button>
             </div>
         )
     }
 
+    writable_value_get() {      // overridable
+        return document.querySelector(this.props.hook_to).value
+    }
+
     handle_click_save() {
-        let value = document.querySelector(this.props.hook_to).value
+        let value = this.writable_value_get()
         // FIXME
         this.setState({value, writable: false})
     }
@@ -178,4 +194,20 @@ class EInput extends React.Component  {
     }
 
     handle_click_edit() { this.setState({writable: true}) }
+}
+
+class ELicenseSelector extends EInput {
+    writable_children_get() {
+        let children = super.writable_children_get()
+        let ls = u.children_find(children, elm => {
+            return elm.type === ic.LicenseSelector
+        })
+        ls.props.value = this.state.value
+        return children
+    }
+
+    writable_value_get() {
+        let node = document.querySelector(this.props.hook_to)
+        return node.options[node.selectedIndex].text
+    }
 }
