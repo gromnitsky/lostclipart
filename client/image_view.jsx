@@ -64,8 +64,8 @@ export default class Upload extends React.Component {
                     <input id="image--viwer__filename" />
                   </EInput>
 
-		  <span>mtime</span>
-                  <EInput value={new Date((this.state.mtime || 0)*1000).toISOString().replace(/Z$/, '')}
+                  <span>mtime</span>
+                  <EDateTime value={this.mtime()}
                           iid={this.iid()}
                           name="mtime"
                           uid={this.state.uid}
@@ -73,7 +73,7 @@ export default class Upload extends React.Component {
                           hook_to="#image--viwer__mtime"
                           error={this.error_saving.bind(this)}>
                     <input type="datetime-local" id="image--viwer__mtime" />
-                  </EInput>
+                  </EDateTime>
 
 		  <span>Size</span>
 		  <span>{this.state.size} bytes</span>
@@ -131,6 +131,12 @@ export default class Upload extends React.Component {
 	    thumbnail: [dir, 'thumbnails', this.state.uid,
 			`${this.state.iid}.png`].join('/')
 	}
+    }
+
+    mtime() {
+        if (!this.state.mtime) return
+        let d = new Date(0); d.setUTCMilliseconds(this.state.mtime*1000)
+        return d.toISOString().replace(/Z$/, '')
     }
 }
 
@@ -238,5 +244,11 @@ class ELicenseSelector extends EInput {
         let idx = Array.from(node.options).
             findIndex( v => v.text === this.writable_value_get())
         return node.options[idx].value
+    }
+}
+
+class EDateTime extends EInput {
+    value_for_saving() {
+        return Math.floor(new Date(this.writable_value_get() + 'Z').getTime() / 1000)
     }
 }
