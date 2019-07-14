@@ -1,4 +1,4 @@
-/* global Cookies, React, Awesomplete */
+/* global React, Awesomplete */
 
 import * as u from './u.js'
 
@@ -6,22 +6,27 @@ export class LicenseSelector extends React.Component {
     constructor(props) {
 	super(props)
 	this.state = {}
+        this.node = React.createRef()
     }
 
     componentDidMount() { this.fetch_licenses() }
+    componentDidUpdate() {
+        let node = this.node.current
+        let idx = Array.from(node.options).
+            findIndex( v => v.text === (this.props.text || 'CC BY'))
+        if (idx) node.selectedIndex = idx
+    }
 
     async fetch_licenses() {
 	this.setState({
 	    licenses: (await u.fetch_json('/api/licenses'))
-		.map( v => <option key={v.lid}
-		      selected={v.name === (this.props.value || "CC BY")}
-		      value={v.lid}>{v.name}</option>)
+		.map( v => <option key={v.lid} value={v.lid}>{v.name}</option>)
 	})
     }
 
     render() {
 	return (
-	    <select name="lid" id="image__license-sel">
+	    <select name="lid" id="image__license-sel" ref={this.node}>
 	      {this.state.licenses}
 	    </select>
 	)

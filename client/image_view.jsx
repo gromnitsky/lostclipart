@@ -24,7 +24,7 @@ export default class Upload extends React.Component {
 	return (
 	    <>
 	      <div className="form-error">{this.state.error_loading}</div>
-	      <div className="form-error">{this.state.error_saving}</div>
+              <div className="form-error">{this.state.error_saving}</div>
 
 	      <div className={this.state.error_loading ? 'hidden' : ''}>
 		<h1>{this.state.title}</h1>
@@ -42,11 +42,12 @@ export default class Upload extends React.Component {
 
 		  <span>License:</span>
                   <ELicenseSelector value={this.state.license}
-                          name="lid"
-                          uid={this.state.uid}
-                          status={this.state.user_status}
-                          hook_to="#image__license-sel"
-                          error={this.error_saving.bind(this)}>
+                                    iid={this.iid()}
+                                    name="lid"
+                                    uid={this.state.uid}
+                                    status={this.state.user_status}
+                                    hook_to="#image__license-sel"
+                                    error={this.error_saving.bind(this)}>
                     <div>
                       <ic.LicenseSelector />
                     </div>
@@ -54,6 +55,7 @@ export default class Upload extends React.Component {
 
 		  <span>Original filename</span>
                   <EInput value={this.state.filename}
+                          iid={this.iid()}
                           name="filename"
                           uid={this.state.uid}
                           status={this.state.user_status}
@@ -64,6 +66,7 @@ export default class Upload extends React.Component {
 
 		  <span>mtime</span>
                   <EInput value={new Date((this.state.mtime || 0)*1000).toISOString().replace(/Z$/, '')}
+                          iid={this.iid()}
                           name="mtime"
                           uid={this.state.uid}
                           status={this.state.user_status}
@@ -77,6 +80,7 @@ export default class Upload extends React.Component {
 
 		  <span>Tags</span>
                   <EInput value={this.state.tags}
+                          iid={this.iid()}
                           name="tags"
                           uid={this.state.uid}
                           status={this.state.user_status}
@@ -95,6 +99,7 @@ export default class Upload extends React.Component {
 
 		  <span>Description</span>
                   <EInput value={this.state.desc}
+                          iid={this.iid()}
                           name="desc"
                           uid={this.state.uid}
                           status={this.state.user_status}
@@ -109,7 +114,9 @@ export default class Upload extends React.Component {
 	)
     }
 
-    error_saving(msg) { this.setState({error_saving: msg}) }
+    error_saving(err) {
+        this.setState({error_saving: err instanceof Error ? err.message : err})
+    }
 
     iid() {
         let p = window.location.pathname.split('/')
@@ -171,10 +178,25 @@ class EInput extends React.Component  {
         return document.querySelector(this.props.hook_to).value
     }
 
+    value_for_saving() {
+        return this.writable_value_get() // overridable
+    }
+
     handle_click_save() {
         let value = this.writable_value_get()
-        // FIXME
-        this.setState({value, writable: false})
+        this.props.error('')
+
+        let form = new FormData()
+        form.set('iid', this.props.iid)
+        form.set(this.props.name, this.value_for_saving())
+        u.my_fetch('/api/image/edit', {
+            method: 'POST',
+            body: new URLSearchParams(form).toString()
+        }).then( () => {
+            this.setState({value, writable: false})
+        }).catch( e => {
+            this.props.error(e)
+        })
     }
 
     rnd_readable() {
@@ -202,12 +224,19 @@ class ELicenseSelector extends EInput {
         let ls = u.children_find(children, elm => {
             return elm.type === ic.LicenseSelector
         })
-        ls.props.value = this.state.value
+        ls.props.text = this.state.value
         return children
     }
 
     writable_value_get() {
         let node = document.querySelector(this.props.hook_to)
         return node.options[node.selectedIndex].text
+    }
+
+    value_for_saving() {
+        let node = document.querySelector(this.props.hook_to)
+        let idx = Array.from(node.options).
+            findIndex( v => v.text === this.writable_value_get())
+        return node.options[idx].value
     }
 }

@@ -215,6 +215,23 @@ app.use('/api/image/view', (req, res, next) => {
     return res.end(JSON.stringify(q))
 })
 
+app.use('/api/image/edit', (req, res, next) => {
+    if (req.method !== 'POST') return next(new AERR(405, 'expected POST'))
+
+    co_body.form(req, {limit: '1kb'}).then( body => {
+        write_access_check(req, body.iid)
+
+        // our GUI allows only a single column update
+        ;['lid', 'filename', 'desc', 'mtime'].
+            filter( col => col in body).forEach( col => {
+                if (db.prepare(`UPDATE images SET ${col} = ? WHERE iid = ?`).
+                    run(body[col], body.iid).changes !== 1)
+                    throw new AERR(412, `${body.iid}: ${col}: upd failed`)
+            })
+	res.end()
+    }).catch(next)
+})
+
 app.use(serve_static('_out/client'))
 
 app.use((req, res, next) => {	// in 404 stead
@@ -356,4 +373,16 @@ function tag_image(iid, str) {
     db.prepare(`INSERT INTO images_tags
                         SELECT ?,tid FROM tags WHERE tid in (${tags_add(str)})`)
 	.run(iid)
+}
+
+function write_access_check(req, iid) {
+    let wa = (target_uid, target_status) => {
+        let session = session_uid(req); if (session.uid < 0) return false
+        return session.uid === 0
+            || (!target_status
+                && (session.grp === 'admin' || target_uid === session.uid))
+    }
+    let target = db.prepare(`SELECT uid,user_status FROM easyimages WHERE iid = ? LIMIT 1`).get(iid)
+    if ( !(target && wa(target.uid, target.user_status)))
+        throw new AERR(403, 'Forbidden')
 }
