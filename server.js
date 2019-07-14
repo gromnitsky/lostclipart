@@ -221,6 +221,8 @@ app.use('/api/image/edit', (req, res, next) => {
     co_body.form(req, {limit: '1kb'}).then( body => {
         write_access_check(req, body.iid)
 
+        if (body.tags) db.transaction( () => tag_image(body.iid, body.tags))()
+
         // our GUI allows only a single column update
         ;['lid', 'filename', 'desc', 'mtime'].
             filter( col => col in body).forEach( col => {
@@ -352,7 +354,7 @@ function iid2image(uid, iid) {
     }
 }
 
-function tags_add(str) {
+function tags_add(str) {        // return an array of tids
     let tags = (str || '').split(',').filter(Boolean).
 	map( v => v.replace(/\s+/, ' ').trim()).filter(Boolean).
 	slice(0, conf.tags.perimage)
@@ -370,9 +372,24 @@ function tags_add(str) {
 }
 
 function tag_image(iid, str) {
+    // delete old tags
+    db.prepare(`DELETE FROM images_tags WHERE iid = ?`).run(iid)
+    // add new
     db.prepare(`INSERT INTO images_tags
-                        SELECT ?,tid FROM tags WHERE tid in (${tags_add(str)})`)
-	.run(iid)
+                       SELECT ?,tid FROM tags WHERE tid in (${tags_add(str)})`).
+        run(iid)
+
+    tags_orphans_delete()
+}
+
+function tags_orphans() {       // return an array of tids
+    return db.prepare(`SELECT tags.tid FROM tags LEFT OUTER JOIN images_tags
+                           ON tags.tid = images_tags.tid
+                        WHERE images_tags.iid IS null`).all().map( v => v.tid)
+}
+
+function tags_orphans_delete() {
+    db.prepare(`DELETE FROM tags WHERE tid in (${tags_orphans()})`).run()
 }
 
 function write_access_check(req, iid) {

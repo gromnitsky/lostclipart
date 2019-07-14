@@ -74,7 +74,7 @@ let HeaderProfile = function(props) {
 
 let Logout = function() {
     u.session_clean()
-    window.location.href = '/'	// hard reload
+    window.location.replace('/') // hard reload
     return null
 }
 
