@@ -48,8 +48,10 @@ export default class Profile extends React.Component {
 		      {u.date_fmt(this.state.registered)}
 		    </span>
 
-		    <label>Uploaded</label>
-		    <a className="form--pw__roval" href="#">TODO</a>
+		    <label>Uploads</label>
+		    <a className="form--pw__roval" href="#">
+                      {this.state.uploads}
+                    </a>
 
 		    <label>Gecos</label>
 		    <textarea value={this.state.gecos}

@@ -48,7 +48,7 @@ app.use('/api/user', (req, res, next) => {
 })
 
 app.use('/api/user/profile', (req, res, next) => { // FIXME: should be GET
-    let user = db.prepare(`SELECT uid,name,grp,gecos,registered,status FROM users WHERE uid = ?`).get(req.body.uid)
+    let user = db.prepare(`SELECT uid,name,grp,gecos,registered,status,(select count(iid) from images where uid=@uid) AS uploads FROM users WHERE uid = @uid`).get({uid: req.body.uid})
     if (!user) return next(new AERR(404, 'invalid uid'))
     res.end(JSON.stringify(user))
 })
