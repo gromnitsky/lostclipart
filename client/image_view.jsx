@@ -8,6 +8,7 @@ export default class Upload extends React.Component {
     constructor(props) {
 	super(props)
 	this.state = {}
+        u.title('loading image...')
     }
 
     componentDidMount() {
@@ -15,6 +16,7 @@ export default class Upload extends React.Component {
 	    let r = Object.assign({}, json[0])
 	    r.tags = json.map( v => v.tag).join`, `
 	    this.setState(r)
+            u.title(r.iid)
 	}).catch( e => {
 	    this.setState({error_loading: e.message})
 	})

@@ -9,6 +9,7 @@ export default class Login extends React.Component {
 	u.session_clean()
 	this.form = React.createRef()
 	this.state = { error: '' }
+        u.title('Login')
     }
 
     handle_submit(event) {

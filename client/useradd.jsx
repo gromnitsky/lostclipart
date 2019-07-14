@@ -8,6 +8,7 @@ export default class UserAdd extends React.Component {
 	super(props)
 	this.form = React.createRef()
 	this.state = { error: '' }
+        u.title('Register')
     }
 
     error(err) {

@@ -78,7 +78,10 @@ let Logout = function() {
     return null
 }
 
-let Home = () => <h1>Home</h1>
+let Home = function() {
+    u.title('Home')
+    return <h1>Home</h1>
+}
 
 let app = document.querySelector('body')
 ReactDOM.render(<Main />, app)

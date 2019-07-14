@@ -68,3 +68,9 @@ export function write_access(target_uid, target_status) {
         || (!target_status
             && (Cookies.get('grp') === 'admin' || target_uid === uid))
 }
+
+export function title(str, level = 1) {
+    let sep = ' :: '
+    let chunks = document.title.split(sep)
+    document.title = [...chunks.slice(0, level) || 'Untitled', str].join(sep)
+}

@@ -16,7 +16,14 @@ export default class Profile extends React.Component {
 	    error_general: '',
 	    error_pw: '',
 	}
-	this.get_user_info()
+        u.title('Profile')
+    }
+
+    componentDidMount() {
+	u.user_info(this.uid()).then( json => {
+            this.setState(json)
+            u.title(json.name, 2)
+        })
     }
 
     render() {
@@ -124,7 +131,6 @@ export default class Profile extends React.Component {
     }
 
     get_user_info() {
-	u.user_info(this.uid()).then(this.setState.bind(this))
     }
 
     uid() {

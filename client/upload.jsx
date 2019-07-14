@@ -9,6 +9,7 @@ export default class Upload extends React.Component {
 	super(props)
 	this.form = React.createRef()
 	this.state = {}
+        u.title('Upload')
     }
 
     render() {
