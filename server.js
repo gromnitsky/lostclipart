@@ -16,16 +16,16 @@ let serve_static = require('serve-static')
 let multiparty = require('multiparty')
 let mmm = require('mmmagic')
 
-let jsonschema = require('./jsonschema')
-
 let conf = {
     img: '_out/img',
-    uploadDir: '_out/tmp',	// FIXME: name
-    maxFilesSize: 5*1024*1024,	// FIXME: name
-    tags: { perimage: 10 }
+    upload: {
+        dir: '_out/tmp',
+        max_files_size: 5*1024*1024,
+    },
+    tags: { perimage: 5 }
 }
 let db = db_open()
-fs.mkdirSync(conf.uploadDir, {recursive: true})
+fs.mkdirSync(conf.upload.dir, {recursive: true})
 
 
 let app = connect()
@@ -119,16 +119,18 @@ app.use('/api/image/upload', (req, res, next) => {
     if (session.uid < 0) return next(new AERR(412, 'bad session token'))
 
     let form = new multiparty.Form({
-	maxFilesSize: conf.maxFilesSize,
-	uploadDir: conf.uploadDir,
+        maxFilesSize: conf.upload.max_files_size,
+        uploadDir: conf.upload.dir,
     })
     let cleanup = files => Object.keys(files).forEach( k => { // rm tmp uploads
 	files[k].forEach(v => fs.unlink(v.path, ()=>{}))
     })
 
     let attachments = async (fields, files) => {
-	jsonschema.validate(jsonschema.schema.upload.fields, fields)
-	jsonschema.validate(jsonschema.schema.upload.files, files)
+        if ( !(fields.tags && validate_tags(fields.tags[0])))
+            throw new Error('no tags')
+        if ( !('svg' in files && 'thumbnail' in files))
+            throw new Error('2 attachments are required')
 	let att = {
 	    svg: {
 		file: files.svg[0],
@@ -156,9 +158,9 @@ app.use('/api/image/upload', (req, res, next) => {
 		mtime: fields.mtime && fields.mtime[0] || today(),
 		size: att.svg.file.size,
 		uploaded: today(),
-		title: fields.title[0].slice(0, 128),
+		title: fields.title && fields.title[0].slice(0, 128),
 		desc: (fields.desc && fields.desc[0] || '').slice(0, 512),
-		lid: fields.lid[0]
+		lid: fields.lid && fields.lid[0]
 	    }).lastInsertRowid
 
 	    tag_image(iid, fields.tags[0])
@@ -241,6 +243,7 @@ app.listen(3000)
 
 function db_open() {
     let custom_sqlite_functions = db => {
+	db.pragma('foreign_keys = ON')
         db.function('rmatch', (re, str) => Number(new RegExp(re).test(str)))
     }
 
@@ -251,7 +254,6 @@ function db_open() {
 	} catch (e) {		// 1st run
 	    fs.mkdirSync(path.dirname(file), {recursive: true})
 	    db = new Database(file)
-	    db.pragma('foreign_keys = ON')
             custom_sqlite_functions(db)
 	    db.exec(fs.readFileSync(sql).toString())
 	}
