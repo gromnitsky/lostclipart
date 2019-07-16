@@ -16,6 +16,7 @@ let serve_static = require('serve-static')
 let multiparty = require('multiparty')
 let mmm = require('mmmagic')
 
+let devel = process.env.NODE_ENV !== 'production'
 let conf = {
     img: '_out/img',
     upload: {
@@ -243,26 +244,28 @@ app.listen(3000)
 
 function db_open() {
     let custom_sqlite_functions = db => {
-	db.pragma('foreign_keys = ON')
+        db.pragma('foreign_keys = ON')
         db.function('rmatch', (re, str) => Number(new RegExp(re).test(str)))
     }
 
     let open = (file, sql) => {
-	let db; try {
-	    db = new Database(file, {fileMustExist: true})
+        let opt = { verbose: devel ? console.log : null }
+        let db; try {
+            db = new Database(file,
+                              Object.assign({}, {fileMustExist: true}, opt))
             custom_sqlite_functions(db)
-	} catch (e) {		// 1st run
-	    fs.mkdirSync(path.dirname(file), {recursive: true})
-	    db = new Database(file)
+        } catch (e) {           // 1st run
+            fs.mkdirSync(path.dirname(file), {recursive: true})
+            db = new Database(file, opt)
             custom_sqlite_functions(db)
-	    db.exec(fs.readFileSync(sql).toString())
-	}
-	return db
+            db.exec(fs.readFileSync(sql).toString())
+            db.prepare(`UPDATE users SET blob = ? WHERE uid = 0`)
+                .run(crypto.randomBytes(1024))
+        }
+        return db
     }
-    let db = open('_out/db.sqlite3', 'schema.sql')
-    db.prepare(`UPDATE users SET blob = ? WHERE uid = 0`)
-	.run(crypto.randomBytes(1024))
-    return db
+
+    return open('_out/db.sqlite3', 'schema.sql')
 }
 
 // "foo, bar" is ok, ", " is not
