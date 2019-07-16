@@ -244,7 +244,7 @@ app.use('/api/image/edit/rm', (req, res, next) => {
             db.prepare('DELETE FROM images WHERE iid = ?').run(req.body.iid)
         })()
     } catch(e) {
-        next(new AERR(412, e))
+        next(new AERR(400, e))
     }
     res.end()
 })
@@ -347,7 +347,7 @@ class AERR extends Error {
 	super(msg)
 	msg instanceof Error ? this.stack = msg.stack : Error.captureStackTrace(this, AERR)
 	this.name = 'ApiError'
-	this.status = status
+	this.status = msg instanceof AERR ? msg.status : status
     }
 }
 
