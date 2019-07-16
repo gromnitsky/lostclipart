@@ -41,7 +41,7 @@ export default class Upload extends React.Component {
                           iid={this.iid()}
                           name="title"
                           uid={this.state.uid}
-                          status={this.state.user_status}
+                          user_status={this.state.user_status}
                           hook_to="#image--viwer__title"
                           error={this.error_saving.bind(this)}>
                     <input id="image--viwer__title" />
@@ -55,7 +55,7 @@ export default class Upload extends React.Component {
                                     iid={this.iid()}
                                     name="lid"
                                     uid={this.state.uid}
-                                    status={this.state.user_status}
+                                    user_status={this.state.user_status}
                                     hook_to="#image__license-sel"
                                     error={this.error_saving.bind(this)}>
                     <div>
@@ -68,7 +68,7 @@ export default class Upload extends React.Component {
                           iid={this.iid()}
                           name="filename"
                           uid={this.state.uid}
-                          status={this.state.user_status}
+                          user_status={this.state.user_status}
                           hook_to="#image--viwer__filename"
                           error={this.error_saving.bind(this)}>
                     <input id="image--viwer__filename" />
@@ -79,7 +79,7 @@ export default class Upload extends React.Component {
                           iid={this.iid()}
                           name="mtime"
                           uid={this.state.uid}
-                          status={this.state.user_status}
+                          user_status={this.state.user_status}
                           hook_to="#image--viwer__mtime"
                           error={this.error_saving.bind(this)}>
                     <input type="datetime-local" id="image--viwer__mtime" />
@@ -93,7 +93,7 @@ export default class Upload extends React.Component {
                           iid={this.iid()}
                           name="tags"
                           uid={this.state.uid}
-                          status={this.state.user_status}
+                          user_status={this.state.user_status}
                           hook_to="#image--viewer__tagger"
                           error={this.error_saving.bind(this)}>
                     <div>
@@ -112,7 +112,7 @@ export default class Upload extends React.Component {
                           iid={this.iid()}
                           name="desc"
                           uid={this.state.uid}
-                          status={this.state.user_status}
+                          user_status={this.state.user_status}
                           hook_to="#image--viwer__desc"
                           error={this.error_saving.bind(this)}>
                     <textarea style={{height: '4rem'}} id="image--viwer__desc"/>

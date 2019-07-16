@@ -16,7 +16,7 @@ let serve_static = require('serve-static')
 let multiparty = require('multiparty')
 let mmm = require('mmmagic')
 
-let devel = process.env.NODE_ENV !== 'production'
+let devel = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
 let conf = {
     img: '_out/img',
     upload: {
@@ -38,17 +38,13 @@ app.use('/', (req, res, next) => {
 
 app.use('/api/user', (req, res, next) => {
     if (req.method !== 'POST') return next(new AERR(405, 'Method Not Allowed'))
-    next()
-})
-
-app.use('/api/user', (req, res, next) => {
     co_body.form(req, {limit: '1kb'}).then( body => {
-	req.body = body
-	next()
+        req.body = body
+        next()
     }).catch(next)
 })
 
-app.use('/api/user/profile', (req, res, next) => { // FIXME: should be GET
+app.use('/api/user/profile', (req, res, next) => {
     let user = db.prepare(`SELECT uid,name,grp,gecos,registered,status,(select count(iid) from images where uid=@uid) AS uploads FROM users WHERE uid = @uid`).get({uid: req.body.uid})
     if (!user) return next(new AERR(404, 'invalid uid'))
     res.end(JSON.stringify(user))
@@ -56,20 +52,21 @@ app.use('/api/user/profile', (req, res, next) => { // FIXME: should be GET
 
 app.use('/api/user/new', async (req, res, next) => {
     if (!validate_password(req.body.password))
-        return next(new AERR(412, 'bad password'))
+        return next(new AERR(400, 'bad password'))
 
     let gecos = (req.body.gecos || '').slice(0, 512)
     user_add(req.body.name, req.body.password, gecos, today()).then( uid => {
         res.end(JSON.stringify(token(uid)))
-    }).catch(e => next(new AERR(412, e)))
+    }).catch(e => next(new AERR(409, e)))
 })
 
 app.use('/api/user/login', async (req, res, next) => {
-    let error = () => next(new AERR(412, 'bad cridentials'))
+    let error = () => next(new AERR(400, 'bad cridentials'))
 
-    let user = db.prepare(`SELECT uid,pw_hash FROM users WHERE name = ?`)
+    let user = db.prepare(`SELECT uid,pw_hash,status FROM users WHERE name = ?`)
 	.get(req.body.name)
     if (!user) { return error() }
+    if (user.status === 'disabled') return next(new AERR(403, `user ${user.uid} (${req.body.name}) is disabled`))
 
     if (await bcrypt.compare(req.body.password || '', user.pw_hash)) {
 	return res.end(JSON.stringify(token(user.uid)))
@@ -79,7 +76,7 @@ app.use('/api/user/login', async (req, res, next) => {
 
 app.use('/api/user/edit', (req, res, next) => {
     let session = session_uid(req)
-    if (session.uid < 0) return next(new AERR(412, 'bad session token'))
+    if (session.uid < 0) return next(new AERR(400, 'bad session token'))
 
     let uid = Number(req.body.uid)
     let target = db.prepare(`SELECT grp FROM users WHERE uid = ?`).get(uid)
@@ -98,18 +95,18 @@ app.use('/api/user/edit/misc', (req, res, next) => {
         db.prepare(`UPDATE users SET name = ?, gecos = ? WHERE uid = ?`)
             .run(req.body.name, gecos, req.body.uid)
     } catch(e) {
-        return next(new AERR(412, e))
+        return next(new AERR(400, e))
     }
     res.end()
 })
 
 app.use('/api/user/edit/password', async (req, res, next) => {
     if (!validate_password(req.body.password))
-	return next(new AERR(412, 'bad password'))
+	return next(new AERR(400, 'bad password'))
 
     if (db.prepare(`UPDATE users SET pw_hash = ? WHERE uid = ?`)
 	.run(await pw_hash_mk(req.body.password), req.body.uid).changes === 0)
-	return next(new AERR(412, 'invalid uid'))
+	return next(new AERR(400, 'invalid uid'))
 
     res.end(JSON.stringify(token(req.body.uid)))
 })
@@ -117,7 +114,7 @@ app.use('/api/user/edit/password', async (req, res, next) => {
 app.use('/api/image/upload', (req, res, next) => {
     if (req.method !== 'POST') return next(new AERR(405, 'expected POST'))
     let session = session_uid(req)
-    if (session.uid < 0) return next(new AERR(412, 'bad session token'))
+    if (session.uid < 0) return next(new AERR(400, 'bad session token'))
 
     let form = new multiparty.Form({
         maxFilesSize: conf.upload.max_files_size,
@@ -177,7 +174,7 @@ app.use('/api/image/upload', (req, res, next) => {
 	    res.end(JSON.stringify({iid: v.iid}))
 	}).catch( e => {
 	    // FIXME: rm moved files
-	    error(412, e)
+	    error(400, e)
 	})
     })
 })
@@ -200,6 +197,8 @@ app.use('/api/image/view', (req, res, next) => {
     let q = db.prepare(`SELECT * FROM easyimages WHERE iid = ?`)
 	.all(req.searchparams.get('iid'))
     if (!q.length) return next(new AERR(404, 'invalid iid'))
+    if (q[0].user_status === 'disabled')
+        return next(new AERR(403, `user ${q[0].uid} (${q[0].user_name}) is disabled`))
 
     return res.end(JSON.stringify(q))
 })
@@ -211,7 +210,7 @@ app.use('/api/image/edit', (req, res, next) => {
         write_access_check(req, body.iid)
         next()
     }).catch( e => {
-        next(new AERR(412, e))
+        next(new AERR(400, e))
     })
 })
 
@@ -219,7 +218,7 @@ app.use('/api/image/edit/misc', (req, res, next) => {
     try {
         if ('tags' in req.body) {
             if (!validate_tags(req.body.tags))
-                throw new AERR(412, 'invalid tags')
+                throw new AERR(400, 'invalid tags')
             db.transaction( () => tag_image(req.body.iid, req.body.tags))()
         }
 
@@ -228,11 +227,11 @@ app.use('/api/image/edit/misc', (req, res, next) => {
             filter( col => col in req.body).forEach( col => {
                 if (db.prepare(`UPDATE images SET ${col} = ? WHERE iid = ?`).
                     run(req.body[col], req.body.iid).changes !== 1)
-                    throw new AERR(412, `${req.body.iid}: ${col}: upd failed`)
+                    throw new AERR(400, `${req.body.iid}: ${col}: upd failed`)
             })
         res.end()
     } catch(e) {
-        next(new AERR(412, e))
+        next(new AERR(400, e))
     }
 })
 
@@ -258,6 +257,17 @@ app.use((req, res, next) => {	// in 404 stead
     if (pathname.indexOf('.') !== -1) return error()
 
     fs.createReadStream('_out/client/index.html').pipe(res)
+})
+
+app.use( (err, req, res, _next) => {
+    res.statusCode = err.status || 500
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+    res.end(devel ? err.stack : err.toString())
+    if (process.env.NODE_ENV !== 'test') {
+        let r = err.stack || err.toString()
+        if (res.statusCode === 404) r = err.toString()
+        console.error(`${req.method} ${res.statusCode} ${req.url}:`, r)
+    }
 })
 
 app.listen(3000)
@@ -336,7 +346,7 @@ function session_uid(req) {
     let token = cookie_get(req, 'token')
 
     let user = db.prepare(`SELECT * FROM users WHERE uid = ?`).get(uid)
-    if (!user) return { uid: -1 }
+    if (!user || user.status) return { uid: -1 }
 
     if (token !== token_mk(user.pw_hash, exp_date, user.blob)) return {uid: -2}
     return user

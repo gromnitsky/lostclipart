@@ -1,9 +1,9 @@
-/* global Cookies */
+/* global Cookies, React */
 
 export function my_fetch(url, opt) {
     let fetcherr = r => {
-	if (r.ok) return r
-	throw new Error(r.status + ' ' + r.statusText) // FIXME: read res body
+        if (r.ok) return r
+        throw new Error(r.status + ' ' + r.statusText)
     }
     return fetch(url, opt).then(fetcherr)
 }

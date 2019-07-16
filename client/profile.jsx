@@ -53,6 +53,9 @@ export default class Profile extends React.Component {
                       {this.state.uploads}
                     </a>
 
+		    <label>Account status</label>
+		    <span>{this.state.status ? this.state.status : 'nominal'}</span>
+
 		    <label>Gecos</label>
 		    <textarea value={this.state.gecos}
 			      onChange={this.handle_gecos_change.bind(this)}
