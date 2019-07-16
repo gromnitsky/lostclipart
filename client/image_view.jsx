@@ -1,6 +1,6 @@
 /* global React, ReachRouter */
 
-let {Link} = ReachRouter
+let {Link, navigate} = ReachRouter
 import * as u from './u.js'
 import * as ic from './image_common.js'
 
@@ -29,7 +29,6 @@ export default class Upload extends React.Component {
               <div className="form-error">{this.state.error_saving}</div>
 
 	      <div className={this.state.error_loading ? 'hidden' : ''}>
-		<h1>{this.state.title}</h1>
 		<div id="image--viewer">
 		  <a id="image--viewer__img"
 		     href={this.img().svg} target="_blank"
@@ -37,10 +36,19 @@ export default class Upload extends React.Component {
 		    <img src={this.state.iid && this.img().thumbnail} />
 		  </a>
 
-		  <span>Uploader</span>
-		  <span>
-		    <Link to={"/user/" + this.state.uid}>{this.state.user_name}</Link>
-		  </span>
+                  <span>Title</span>
+                  <EInput value={this.state.title}
+                          iid={this.iid()}
+                          name="title"
+                          uid={this.state.uid}
+                          status={this.state.user_status}
+                          hook_to="#image--viwer__title"
+                          error={this.error_saving.bind(this)}>
+                    <input id="image--viwer__title" />
+                  </EInput>
+
+                  <span>Uploader</span>
+                  <Link to={"/user/" + this.state.uid}>{this.state.user_name}</Link>
 
 		  <span>License:</span>
                   <ELicenseSelector value={this.state.license}
@@ -97,7 +105,7 @@ export default class Upload extends React.Component {
 		  <div>{u.date_fmt(this.state.uploaded)}</div>
 
 		  <span>Write access</span>
-		  <div>{u.write_access(this.state.uid, this.state.user_status) ? 'yes' : 'no'}</div>
+		  <div>{this.writable() ? 'yes' : 'no'}</div>
 
 		  <span>Description</span>
                   <EInput value={this.state.desc}
@@ -110,10 +118,18 @@ export default class Upload extends React.Component {
                     <textarea style={{height: '4rem'}} id="image--viwer__desc"/>
                   </EInput>
 
+                  <button className={this.writable() ? '' : 'hidden'}
+                          onClick={this.handle_delete.bind(this)}
+                          id="image--viewer__delete">Delete</button>
+
 		</div>
 	      </div>
 	    </>
 	)
+    }
+
+    writable() {
+        return u.write_access(this.state.uid, this.state.user_status)
     }
 
     error_saving(err) {
@@ -139,6 +155,20 @@ export default class Upload extends React.Component {
         if (!this.state.mtime) return
         let d = new Date(0); d.setUTCMilliseconds(this.state.mtime*1000)
         return d.toISOString().replace(/Z$/, '')
+    }
+
+    handle_delete() {
+        if (!confirm("Are you sure?")) return
+        let form = new FormData()
+        form.set('iid', this.iid())
+        u.my_fetch('/api/image/edit/rm', {
+            method: 'POST',
+            body: new URLSearchParams(form).toString()
+        }).then( () => {
+            navigate('/', { replace: true })
+        }).catch( e => {
+            this.error_saving(e)
+        })
     }
 }
 
@@ -197,7 +227,7 @@ class EInput extends React.Component  {
         let form = new FormData()
         form.set('iid', this.props.iid)
         form.set(this.props.name, this.value_for_saving())
-        u.my_fetch('/api/image/edit', {
+        u.my_fetch('/api/image/edit/misc', {
             method: 'POST',
             body: new URLSearchParams(form).toString()
         }).then( () => {

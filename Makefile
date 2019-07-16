@@ -35,6 +35,9 @@ $(out)/clipart:
 include server.mk
 devel: all server
 
+cloc:
+	cloc *.sql *.js client/* Makefile
+
 
 
 mkdir = @mkdir -p $(dir $@)

@@ -205,27 +205,48 @@ app.use('/api/image/view', (req, res, next) => {
 })
 
 app.use('/api/image/edit', (req, res, next) => {
-    if (req.method !== 'POST') return next(new AERR(405, 'expected POST'))
-
+    if (req.method !== 'POST') return next(new AERR(405, 'Method Not Allowed'))
     co_body.form(req, {limit: '1kb'}).then( body => {
+        req.body = body
         write_access_check(req, body.iid)
-
-        if ('tags' in body) {
-            if (!validate_tags(body.tags)) throw new AERR(412, 'invalid tags')
-            db.transaction( () => tag_image(body.iid, body.tags))()
-        }
-
-        // our GUI allows only a single column update
-        ['lid', 'filename', 'desc', 'mtime'].
-            filter( col => col in body).forEach( col => {
-                if (db.prepare(`UPDATE images SET ${col} = ? WHERE iid = ?`).
-                    run(body[col], body.iid).changes !== 1)
-                    throw new AERR(412, `${body.iid}: ${col}: upd failed`)
-            })
-	res.end()
+        next()
     }).catch( e => {
         next(new AERR(412, e))
     })
+})
+
+app.use('/api/image/edit/misc', (req, res, next) => {
+    try {
+        if ('tags' in req.body) {
+            if (!validate_tags(req.body.tags))
+                throw new AERR(412, 'invalid tags')
+            db.transaction( () => tag_image(req.body.iid, req.body.tags))()
+        }
+
+        // our GUI allows only a single column update
+        ['lid', 'filename', 'desc', 'mtime', 'title'].
+            filter( col => col in req.body).forEach( col => {
+                if (db.prepare(`UPDATE images SET ${col} = ? WHERE iid = ?`).
+                    run(req.body[col], req.body.iid).changes !== 1)
+                    throw new AERR(412, `${req.body.iid}: ${col}: upd failed`)
+            })
+        res.end()
+    } catch(e) {
+        next(new AERR(412, e))
+    }
+})
+
+app.use('/api/image/edit/rm', (req, res, next) => {
+    try {
+        db.transaction( () => {
+            db.prepare('DELETE FROM images_tags WHERE iid = ?').run(req.body.iid)
+            tags_orphans_delete()
+            db.prepare('DELETE FROM images WHERE iid = ?').run(req.body.iid)
+        })()
+    } catch(e) {
+        next(new AERR(412, e))
+    }
+    res.end()
 })
 
 app.use(serve_static('_out/client'))
