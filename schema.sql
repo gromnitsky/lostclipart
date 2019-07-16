@@ -1,7 +1,8 @@
 -- -*- sql[sqlite] -*-
 
 CREATE TABLE users(uid INTEGER PRIMARY KEY,
-                   name UNIQUE NOT NULL COLLATE NOCASE,
+                   name UNIQUE NOT NULL COLLATE NOCASE
+                        CHECK(rmatch('^[a-zA-Z0-9_]{2,20}$', name)),
                    pw_hash NOT NULL,
                    blob NOT NULL,
                    gecos,
@@ -26,11 +27,11 @@ INSERT INTO licenses(name) VALUES ('CC BY-SA');
 CREATE TABLE images(iid INTEGER PRIMARY KEY,
                     uid INT NOT NULL,
                     md5 UNIQUE NOT NULL,
-                    filename NOT NULL,
+                    filename NOT NULL CHECK(length(trim(filename)) > 0),
                     mtime INT NOT NULL,
                     size INT NOT NULL,
                     uploaded INT NOT NULL,
-		    title NOT NULL,
+		    title NOT NULL CHECK(length(trim(title)) > 0),
                     desc,
                     lid INT NOT NULL,
                     FOREIGN KEY(uid) REFERENCES users(uid)

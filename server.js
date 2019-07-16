@@ -54,19 +54,13 @@ app.use('/api/user/profile', (req, res, next) => { // FIXME: should be GET
 })
 
 app.use('/api/user/new', async (req, res, next) => {
-    if (!validate_name(req.body.name)) return next(new AERR(412, 'bad name'))
-    if (db.prepare(`SELECT name FROM users WHERE name = ?`)
-	.get(req.body.name)) {
-	return next(new AERR(412, `user ${req.body.name} already exists`))
-    }
-
     if (!validate_password(req.body.password))
-	return next(new AERR(412, 'bad password'))
+        return next(new AERR(412, 'bad password'))
 
     let gecos = (req.body.gecos || '').slice(0, 512)
-    let uid = await user_add(req.body.name, req.body.password,
-			     gecos, today())
-    res.end(JSON.stringify(token(uid)))
+    user_add(req.body.name, req.body.password, gecos, today()).then( uid => {
+        res.end(JSON.stringify(token(uid)))
+    }).catch(e => next(new AERR(412, e)))
 })
 
 app.use('/api/user/login', async (req, res, next) => {
@@ -98,21 +92,13 @@ app.use('/api/user/edit', (req, res, next) => {
 })
 
 app.use('/api/user/edit/misc', (req, res, next) => {
-    let target = db.prepare(`SELECT name FROM users WHERE uid = ?`)
-	.get(req.body.uid)
-    if (!target) return next(new AERR(403, 'invalid uid'))
-
-    if (!validate_name(req.body.name)) return next(new AERR(412, 'bad name'))
     let gecos = (req.body.gecos || '').slice(0, 512)
-
-    if (target.name !== req.body.name && // FIXME: rm & just check UPDATE below
-	db.prepare(`SELECT name FROM users WHERE name = ?`)
-	.get(req.body.name)) {
-	return next(new AERR(412, `user ${req.body.name} already exists`))
+    try {
+        db.prepare(`UPDATE users SET name = ?, gecos = ? WHERE uid = ?`)
+            .run(req.body.name, gecos, req.body.uid)
+    } catch(e) {
+        return next(new AERR(412, e))
     }
-
-    db.prepare(`UPDATE users SET name = ?, gecos = ? WHERE uid = ?`)
-	.run(req.body.name, gecos, req.body.uid)
     res.end()
 })
 
@@ -221,17 +207,22 @@ app.use('/api/image/edit', (req, res, next) => {
     co_body.form(req, {limit: '1kb'}).then( body => {
         write_access_check(req, body.iid)
 
-        if (body.tags) db.transaction( () => tag_image(body.iid, body.tags))()
+        if ('tags' in body) {
+            if (!validate_tags(body.tags)) throw new AERR(412, 'invalid tags')
+            db.transaction( () => tag_image(body.iid, body.tags))()
+        }
 
         // our GUI allows only a single column update
-        ;['lid', 'filename', 'desc', 'mtime'].
+        ['lid', 'filename', 'desc', 'mtime'].
             filter( col => col in body).forEach( col => {
                 if (db.prepare(`UPDATE images SET ${col} = ? WHERE iid = ?`).
                     run(body[col], body.iid).changes !== 1)
                     throw new AERR(412, `${body.iid}: ${col}: upd failed`)
             })
 	res.end()
-    }).catch(next)
+    }).catch( e => {
+        next(new AERR(412, e))
+    })
 })
 
 app.use(serve_static('_out/client'))
@@ -249,13 +240,19 @@ app.listen(3000)
 
 
 function db_open() {
+    let custom_sqlite_functions = db => {
+        db.function('rmatch', (re, str) => Number(new RegExp(re).test(str)))
+    }
+
     let open = (file, sql) => {
 	let db; try {
 	    db = new Database(file, {fileMustExist: true})
+            custom_sqlite_functions(db)
 	} catch (e) {		// 1st run
 	    fs.mkdirSync(path.dirname(file), {recursive: true})
 	    db = new Database(file)
 	    db.pragma('foreign_keys = ON')
+            custom_sqlite_functions(db)
 	    db.exec(fs.readFileSync(sql).toString())
 	}
 	return db
@@ -266,7 +263,9 @@ function db_open() {
     return db
 }
 
-function validate_name(s) { return s && /^\w{2,20}$/.test(s) }
+// "foo, bar" is ok, ", " is not
+function validate_tags(s) { return /^.*[^\s,].*$/.test(s) }
+
 function validate_password(s) { return s && s.length >= 10 }
 
 function cookie_get(req, name) {
