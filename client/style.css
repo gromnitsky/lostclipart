@@ -177,6 +177,7 @@ div.awesomplete > input {
   width: 100%;
 }
 
-textarea.wrinput__readable {
-  resize: none;
+pre.wrinput__readable {
+  margin: 0;
+  font-family: serif;
 }

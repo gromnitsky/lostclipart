@@ -114,18 +114,17 @@ export default class Upload extends React.Component {
 		  <div>{this.writable() ? 'yes' : 'no'}</div>
 
 		  <span>Description</span>
-                  <WR_desc model={this.state.desc}
+                  <WR_input model={this.state.desc}
                             iid={this.iid()}
                             name="desc"
                             is_writable={this.writable.bind(this)}
                             error={this.error_saving.bind(this)}>
                     <>
-                      <textarea style={{height: '4rem'}} readOnly="true"
-                                className="wrinput__readable"/>
+                      <pre className="wrinput__readable" />
                       <textarea style={{height: '4rem'}}
                                 className="wrinput__writable"/>
                     </>
-                  </WR_desc>
+                  </WR_input>
 
                   <button className={this.writable() ? '' : 'hidden'}
                           onClick={this.handle_delete.bind(this)}
@@ -220,7 +219,7 @@ class WR_input extends React.Component {
     readable_node() { return this.node.current.querySelector(`.wrinput__readable`) }
     readable_children() { return this.children('wrinput__readable') }
     readable_value_get() { return this.state.model }
-    readable_value_set() { this.setState({model: this.readable_node().innerText}) }
+    readable_value_set() { /* do nothing */ }
 
     readable_handle_click() {
         this.readable_value_set()
@@ -252,7 +251,7 @@ class WR_input extends React.Component {
     }
 
     writable_handle_click() {
-        let new_val = this.writable_value_set()
+        let new_val = this.writable_value_set() // for setState isn't immediate
         this.props.error('')
 
         let form = new FormData()
@@ -282,8 +281,6 @@ class WR_mtime extends WR_input {
         return d.toISOString()
     }
 
-    readable_value_set() { /* do nothing */ }
-
     writable_value_get() { // suitable for <input type="datetime-local">
         let d = new Date(0); d.setUTCMilliseconds(this.state.model*1000)
         return d.toISOString().replace(/Z$/, '')
@@ -294,11 +291,6 @@ class WR_mtime extends WR_input {
         this.setState({model: new_val})
         return new_val
     }
-}
-
-class WR_desc extends WR_input { // readable node is a textarea
-    readable_dom_upd() { this.readable_node().value = this.readable_value_get()}
-    readable_value_set() { this.setState({model: this.readable_node().value}) }
 }
 
 class WR_tags extends WR_input {
@@ -326,8 +318,6 @@ class WR_license extends WR_input {
         return this.state.licenses
             .find( v => v.lid === Number(this.state.model)).name
     }
-
-    readable_value_set() { /* do nothing */ }
 
     writable_node() {
         return this.node.current.querySelector('.wrinput__writable select')
