@@ -161,13 +161,22 @@ div.awesomplete > input {
   grid-row: span 11;
 }
 
-.editable--input div.awesomplete {
-  width: 100%;
-}
-
 #image--viewer__delete {
   grid-column: span 3;
   max-width: fit-content;
   justify-self: end;
   margin-top: 3em;
+}
+
+.wrinput__readable,
+.wrinput__writable {
+  flex-grow: 1;
+}
+
+.wrinput__writable > div.awesomplete {
+  width: 100%;
+}
+
+textarea.wrinput__readable {
+  resize: none;
 }

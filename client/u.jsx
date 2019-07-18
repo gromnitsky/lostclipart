@@ -52,6 +52,7 @@ export function user_info(uid) {
 export function children_find(children, fn) {
     let result
     React.Children.forEach(children, elm => {
+        if (result) return
         if (fn(elm)) {
             result = elm
         } else {

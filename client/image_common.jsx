@@ -10,10 +10,10 @@ export class LicenseSelector extends React.Component {
     }
 
     componentDidMount() { this.fetch_licenses() }
-    componentDidUpdate() {
+    componentDidUpdate() {      // dom is ready
         let node = this.node.current
         let idx = Array.from(node.options).
-            findIndex( v => v.text === (this.props.text || 'CC BY'))
+            findIndex( v => v.value === (this.props.lid || "3")) // CC BY
         if (idx) node.selectedIndex = idx
     }
 

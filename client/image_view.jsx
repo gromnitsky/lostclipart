@@ -37,69 +37,75 @@ export default class Upload extends React.Component {
 		  </a>
 
                   <span>Title</span>
-                  <EInput value={this.state.title}
-                          iid={this.iid()}
-                          name="title"
-                          uid={this.state.uid}
-                          user_status={this.state.user_status}
-                          hook_to="#image--viwer__title"
-                          error={this.error_saving.bind(this)}>
-                    <input id="image--viwer__title" />
-                  </EInput>
+                  <WR_input model={this.state.title}
+                           iid={this.iid()}
+                           name="title"
+                           is_writable={this.writable.bind(this)}
+                           error={this.error_saving.bind(this)}>
+                    <>
+                      <span className="wrinput__readable"></span>
+                      <input className="wrinput__writable" />
+                    </>
+                  </WR_input>
 
                   <span>Uploader</span>
                   <Link to={"/user/" + this.state.uid}>{this.state.user_name}</Link>
 
-		  <span>License:</span>
-                  <ELicenseSelector value={this.state.license}
-                                    iid={this.iid()}
-                                    name="lid"
-                                    uid={this.state.uid}
-                                    user_status={this.state.user_status}
-                                    hook_to="#image__license-sel"
-                                    error={this.error_saving.bind(this)}>
-                    <div>
-                      <ic.LicenseSelector />
-                    </div>
-                  </ELicenseSelector>
+                  <span>License:</span>
+                  <WR_license model={this.state.lid}
+                              iid={this.iid()}
+                              name="lid"
+                              is_writable={this.writable.bind(this)}
+                              error={this.error_saving.bind(this)}>
+                    <>
+                      <span className="wrinput__readable"></span>
+                      <div className="wrinput__writable">
+                        <ic.LicenseSelector />
+                      </div>
+                    </>
+                  </WR_license>
 
-		  <span>Original filename</span>
-                  <EInput value={this.state.filename}
-                          iid={this.iid()}
-                          name="filename"
-                          uid={this.state.uid}
-                          user_status={this.state.user_status}
-                          hook_to="#image--viwer__filename"
-                          error={this.error_saving.bind(this)}>
-                    <input id="image--viwer__filename" />
-                  </EInput>
+                  <span>Original filename</span>
+                  <WR_input model={this.state.filename}
+                           iid={this.iid()}
+                           name="filename"
+                           is_writable={this.writable.bind(this)}
+                           error={this.error_saving.bind(this)}>
+                    <>
+                      <span className="wrinput__readable"></span>
+                      <input className="wrinput__writable" />
+                    </>
+                  </WR_input>
 
                   <span>mtime</span>
-                  <EDateTime value={this.mtime()}
-                          iid={this.iid()}
-                          name="mtime"
-                          uid={this.state.uid}
-                          user_status={this.state.user_status}
-                          hook_to="#image--viwer__mtime"
-                          error={this.error_saving.bind(this)}>
-                    <input type="datetime-local" id="image--viwer__mtime" />
-                  </EDateTime>
+                  <WR_mtime model={this.state.mtime}
+                            iid={this.iid()}
+                            name="mtime"
+                            is_writable={this.writable.bind(this)}
+                            error={this.error_saving.bind(this)}>
+                    <>
+                      <span className="wrinput__readable"></span>
+                      <input type="datetime-local"
+                             className="wrinput__writable" />
+                    </>
+                  </WR_mtime>
 
 		  <span>Size</span>
 		  <span>{this.state.size} bytes</span>
 
 		  <span>Tags</span>
-                  <EInput value={this.state.tags}
-                          iid={this.iid()}
-                          name="tags"
-                          uid={this.state.uid}
-                          user_status={this.state.user_status}
-                          hook_to="#image--viewer__tagger"
-                          error={this.error_saving.bind(this)}>
-                    <div>
-                      <ic.Tagger id="image--viewer__tagger" />
-                    </div>
-                  </EInput>
+                  <WR_tags model={this.state.tags}
+                            iid={this.iid()}
+                            name="tags"
+                            is_writable={this.writable.bind(this)}
+                            error={this.error_saving.bind(this)}>
+                    <>
+                      <span className="wrinput__readable"></span>
+                      <div className="wrinput__writable">
+                        <ic.Tagger id="image--viewer__tagger" />
+                      </div>
+                    </>
+                  </WR_tags>
 
 		  <span>Uploaded</span>
 		  <div>{u.date_fmt(this.state.uploaded)}</div>
@@ -108,15 +114,18 @@ export default class Upload extends React.Component {
 		  <div>{this.writable() ? 'yes' : 'no'}</div>
 
 		  <span>Description</span>
-                  <EInput value={this.state.desc}
-                          iid={this.iid()}
-                          name="desc"
-                          uid={this.state.uid}
-                          user_status={this.state.user_status}
-                          hook_to="#image--viwer__desc"
-                          error={this.error_saving.bind(this)}>
-                    <textarea style={{height: '4rem'}} id="image--viwer__desc"/>
-                  </EInput>
+                  <WR_desc model={this.state.desc}
+                            iid={this.iid()}
+                            name="desc"
+                            is_writable={this.writable.bind(this)}
+                            error={this.error_saving.bind(this)}>
+                    <>
+                      <textarea style={{height: '4rem'}} readOnly="true"
+                                className="wrinput__readable"/>
+                      <textarea style={{height: '4rem'}}
+                                className="wrinput__writable"/>
+                    </>
+                  </WR_desc>
 
                   <button className={this.writable() ? '' : 'hidden'}
                           onClick={this.handle_delete.bind(this)}
@@ -151,12 +160,6 @@ export default class Upload extends React.Component {
 	}
     }
 
-    mtime() {
-        if (!this.state.mtime) return
-        let d = new Date(0); d.setUTCMilliseconds(this.state.mtime*1000)
-        return d.toISOString().replace(/Z$/, '')
-    }
-
     handle_delete() {
         if (!confirm("Are you sure?")) return
         let form = new FormData()
@@ -172,115 +175,161 @@ export default class Upload extends React.Component {
     }
 }
 
-class EInput extends React.Component  {
+class WR_input extends React.Component {
     constructor(props) {
         super(props)
-        this.state = { writable: false }
+        this.state = { mode: 'readable' }
+//        this.state = { mode: 'writable' }
+        this.node = React.createRef()
     }
 
-    // sets this.state.value when it gets a props update
+    // sets this.state.model when it gets a props update
     static getDerivedStateFromProps(props, state) {
-        if (state.value === undefined && props.value !== undefined)
-            return {value: props.value}
+        if (state.model === undefined && props.model !== undefined)
+            return {model: props.model}
         return null
     }
 
     render() {
-        return this.state.writable ? this.rnd_writable() : this.rnd_readable()
+        return <div ref={this.node}>{this[`${this.state.mode}_render`]()}</div>
     }
 
-    componentDidUpdate() {
-        if (!this.state.writable) return
-        let input = document.querySelector(this.props.hook_to)
-        input.value = this.state.value
+    // dom is ready
+    componentDidUpdate() { this[`${this.state.mode}_dom_upd`]() }
+
+    readable_dom_upd() {
+        this.readable_node().innerText = this.readable_value_get()
     }
 
-    writable_children_get() {
-        let children = React.cloneElement(this.props.children)
-        children.props.style = children.props.style || {}
-        Object.assign(children.props.style, { flexGrow: 1 })
-        return children
-    }
-
-    rnd_writable() {
+    readable_render() {
         return (
-            <div className="editable--input" style={{display: 'flex'}}>
-              {this.writable_children_get()}
-              <button style={{ marginLeft: "5px" }}
-                      onClick={this.handle_click_save.bind(this)}>S</button>
-            </div>
-        )
-    }
-
-    writable_value_get() {      // overridable
-        return document.querySelector(this.props.hook_to).value
-    }
-
-    value_for_saving() {
-        return this.writable_value_get() // overridable
-    }
-
-    handle_click_save() {
-        let value = this.writable_value_get()
-        this.props.error('')
-
-        let form = new FormData()
-        form.set('iid', this.props.iid)
-        form.set(this.props.name, this.value_for_saving())
-        u.my_fetch('/api/image/edit/misc', {
-            method: 'POST',
-            body: new URLSearchParams(form).toString()
-        }).then( () => {
-            this.setState({value, writable: false})
-        }).catch( e => {
-            this.props.error(e)
-        })
-    }
-
-    rnd_readable() {
-        return (
-            <div className="editable--input"
+            <div className="wrinput"
                  style={{
                      display: 'flex',
                      overflow: "auto",
                      wordBreak: "break-word"
                  }}>
-              <span style={{flexGrow: 1}}>{this.state.value}</span>
-              <button className={u.write_access(this.props.uid, this.props.user_status) ? '' : 'hidden'}
+              {this.readable_children()}
+              <button className={this.props.is_writable() ? '' : 'hidden'}
                       style={{ marginLeft: "5px" }}
-                      onClick={this.handle_click_edit.bind(this)}>E</button>
+                      onClick={this.readable_handle_click.bind(this)}>E</button>
             </div>
         )
     }
 
-    handle_click_edit() { this.setState({writable: true}) }
+    readable_node() { return this.node.current.querySelector(`.wrinput__readable`) }
+    readable_children() { return this.children('wrinput__readable') }
+    readable_value_get() { return this.state.model }
+    readable_value_set() { this.setState({model: this.readable_node().innerText}) }
+
+    readable_handle_click() {
+        this.readable_value_set()
+        this.setState({mode: 'writable'})
+    }
+
+
+    writable_render() {
+        return (
+            <div className="wrinput" style={{ display: 'flex' }}>
+              {this.writable_children()}
+              <button style={{ marginLeft: "5px" }}
+                      onClick={this.writable_handle_click.bind(this)}>S</button>
+            </div>
+        )
+    }
+
+    writable_dom_upd() {
+        this.writable_node().value = this.writable_value_get()
+    }
+
+    writable_node() { return this.node.current.querySelector(`.wrinput__writable`) }
+    writable_children() { return this.children('wrinput__writable') }
+    writable_value_get() { return this.state.model }
+    writable_value_set() {
+        let new_val = this.writable_node().value
+        this.setState({model: new_val})
+        return new_val
+    }
+
+    writable_handle_click() {
+        let new_val = this.writable_value_set()
+        this.props.error('')
+
+        let form = new FormData()
+        form.set('iid', this.props.iid)
+        form.set(this.props.name, new_val)
+        u.my_fetch('/api/image/edit/misc', {
+            method: 'POST',
+            body: new URLSearchParams(form).toString()
+        }).then( () => {
+            this.setState({mode: 'readable'})
+        }).catch( e => {
+            this.props.error(e)
+        })
+    }
+
+
+    children(class_name) {
+        let kids = React.cloneElement(this.props.children)
+        return u.children_find(kids, e => e.props.className === class_name)
+    }
 }
 
-class ELicenseSelector extends EInput {
-    writable_children_get() {
-        let children = super.writable_children_get()
-        let ls = u.children_find(children, elm => {
-            return elm.type === ic.LicenseSelector
-        })
-        ls.props.text = this.state.value
+// model is seconds from epoch
+class WR_mtime extends WR_input {
+    readable_value_get() {      // human-readable
+        let d = new Date(0); d.setUTCMilliseconds(this.state.model*1000)
+        return d.toISOString()
+    }
+
+    readable_value_set() { /* do nothing */ }
+
+    writable_value_get() { // suitable for <input type="datetime-local">
+        let d = new Date(0); d.setUTCMilliseconds(this.state.model*1000)
+        return d.toISOString().replace(/Z$/, '')
+    }
+
+    writable_value_set() { // back to seconds
+        let new_val = Math.floor(new Date((this.writable_node().value || 0) + 'Z').getTime() / 1000)
+        this.setState({model: new_val})
+        return new_val
+    }
+}
+
+class WR_desc extends WR_input { // readable node is a textarea
+    readable_dom_upd() { this.readable_node().value = this.readable_value_get()}
+    readable_value_set() { this.setState({model: this.readable_node().value}) }
+}
+
+class WR_tags extends WR_input {
+    writable_node() {           // awesomeplete
+        return this.node.current.querySelector('.wrinput__writable input')
+    }
+}
+
+class WR_license extends WR_input {
+    componentDidMount() { this.fetch_licenses() }
+
+    fetch_licenses() {
+        u.fetch_json('/api/licenses').then( licenses => this.setState({ licenses }))
+    }
+
+    writable_children() {
+        let children = super.writable_children()
+        let ls = u.children_find(children, e => e.type === ic.LicenseSelector)
+        ls.props.lid = String(this.state.model)
         return children
     }
 
-    writable_value_get() {
-        let node = document.querySelector(this.props.hook_to)
-        return node.options[node.selectedIndex].text
+    readable_value_get() {      // human-readable
+        if ( !(this.state.licenses && this.state.model)) return
+        return this.state.licenses
+            .find( v => v.lid === Number(this.state.model)).name
     }
 
-    value_for_saving() {
-        let node = document.querySelector(this.props.hook_to)
-        let idx = Array.from(node.options).
-            findIndex( v => v.text === this.writable_value_get())
-        return node.options[idx].value
-    }
-}
+    readable_value_set() { /* do nothing */ }
 
-class EDateTime extends EInput {
-    value_for_saving() {
-        return Math.floor(new Date(this.writable_value_get() + 'Z').getTime() / 1000)
+    writable_node() {
+        return this.node.current.querySelector('.wrinput__writable select')
     }
 }
