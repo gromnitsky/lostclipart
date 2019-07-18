@@ -277,12 +277,12 @@ class WR_input extends React.Component {
 // model is seconds from epoch
 class WR_mtime extends WR_input {
     readable_value_get() {      // human-readable
-        let d = new Date(0); d.setUTCMilliseconds(this.state.model*1000)
+        let d = new Date(0); d.setUTCMilliseconds((this.state.model || 0)*1000)
         return d.toISOString()
     }
 
     writable_value_get() { // suitable for <input type="datetime-local">
-        let d = new Date(0); d.setUTCMilliseconds(this.state.model*1000)
+        let d = new Date(0); d.setUTCMilliseconds((this.state.model || 0)*1000)
         return d.toISOString().replace(/Z$/, '')
     }
 

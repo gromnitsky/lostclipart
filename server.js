@@ -17,18 +17,22 @@ let multiparty = require('multiparty')
 let mmm = require('mmmagic')
 
 let devel = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
-let conf = {
-    img: '_out/img',
-    upload: {
-        dir: '_out/tmp',
+
+function Conf(out = '_out') {
+    this.img = path.join(out, 'img')
+    this.upload = {
+        dir: path.join(out, 'tmp'),
         max_files_size: 5*1024*1024,
     },
-    tags: { perimage: 5 }
+    this.tags = { perimage: 5 }
+    this.client = { dir: path.join(out, 'client') }
+    this.db = path.join(out, 'db.sqlite3')
+
+    fs.mkdirSync(this.upload.dir, {recursive: true})
 }
+
+let conf = new Conf()
 let db = db_open()
-fs.mkdirSync(conf.upload.dir, {recursive: true})
-
-
 let app = connect()
 
 app.use('/', (req, res, next) => {
@@ -248,7 +252,7 @@ app.use('/api/image/edit/rm', (req, res, next) => {
     res.end()
 })
 
-app.use(serve_static('_out/client'))
+app.use(serve_static(conf.client.dir))
 
 app.use((req, res, next) => {	// in 404 stead
     let error = () => next(new AERR(404, `${req.url} Not Found`))
@@ -256,7 +260,7 @@ app.use((req, res, next) => {	// in 404 stead
     let pathname = new URL(`http://example.com/${req.url}`).pathname
     if (pathname.indexOf('.') !== -1) return error()
 
-    fs.createReadStream('_out/client/index.html').pipe(res)
+    fs.createReadStream(path.join(conf.client.dir, 'index.html')).pipe(res)
 })
 
 app.use( (err, req, res, _next) => {
@@ -296,7 +300,7 @@ function db_open() {
         return db
     }
 
-    return open('_out/db.sqlite3', 'schema.sql')
+    return open(conf.db, __dirname + '/schema.sql')
 }
 
 // "foo, bar" is ok, ", " is not

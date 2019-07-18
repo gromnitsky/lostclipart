@@ -6,7 +6,9 @@ vendor.src := react/umd/react.production.min.js \
 	js-cookie/src/js.cookie.js \
 	@reach/router/umd/reach-router.min.js \
 	awesomplete/awesomplete.min.js \
-	awesomplete/awesomplete.css
+	awesomplete/awesomplete.min.js.map \
+	awesomplete/awesomplete.css \
+	awesomplete/awesomplete.css.map
 vendor.dest := $(addprefix $(out)/vendor/, $(vendor.src))
 
 $(out)/vendor/%: node_modules/%; $(copy)
