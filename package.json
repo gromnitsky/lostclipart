@@ -1,12 +1,13 @@
 {
+    "private": true,
     "dependencies": {
-        "@babel/cli": "^7.5.0",
-        "@babel/core": "^7.5.4",
+        "@babel/cli": "^7.5.5",
+        "@babel/core": "^7.5.5",
         "@babel/preset-react": "^7.0.0",
         "@reach/router": "^1.2.1",
         "awesomplete": "^1.1.4",
         "bcrypt": "^3.0.6",
-        "better-sqlite3": "^5.4.0",
+        "better-sqlite3": "^5.4.1",
         "co-body": "^6.0.0",
         "connect": "^3.7.0",
         "cookie": "^0.4.0",
