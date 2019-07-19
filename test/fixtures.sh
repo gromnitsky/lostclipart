@@ -5,6 +5,9 @@ server='http://127.0.0.1:3000'
 set -ex
 curl -fS $server/api/user/new -d name=bob -d password=1234567890
 curl -fS $server/api/user/new -d name=alice -d password=1234567890
+
+[ "$1" = users ] && exit 0
+
 eval `curl -fS $server/api/user/login -d name=bob -d password=1234567890 | \
     ruby -rjson -ne 'JSON.parse($_).each {|k,v| puts "#{k}=#{v}" }'`
 

@@ -124,8 +124,9 @@ app.use('/api/image/upload', (req, res, next) => {
         maxFilesSize: conf.upload.max_files_size,
         uploadDir: conf.upload.dir,
     })
-    let cleanup = files => Object.keys(files).forEach( k => { // rm tmp uploads
-	files[k].forEach(v => fs.unlink(v.path, ()=>{}))
+    // rm tmp uploads
+    let cleanup = files => files && Object.keys(files).forEach( k => {
+        files[k].forEach(v => fs.unlink(v.path, ()=>{}))
     })
 
     let attachments = async (fields, files) => {
@@ -193,7 +194,7 @@ app.use('/api/tags/search', (req, res) => {
     if (q.length < 2) { res.end('[]'); return }
 
     q = q.replace(/:/g, '::').replace(/[%_]/g, ':$&')
-    let tags = db.prepare(`SELECT * FROM tags WHERE name LIKE ? ESCAPE ':'`).all(`%${q}%`)
+    let tags = db.prepare(`SELECT * FROM tags WHERE name LIKE ? ESCAPE ':' LIMIT 10`).all(`%${q}%`)
     return res.end(JSON.stringify(tags))
 })
 
