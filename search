@@ -1,0 +1,69 @@
+#!/usr/bin/env node
+
+let minimist = require('minimist')
+let u = require('./u')
+
+function main() {
+    let conf = new u.Conf()
+    let db = u.db_open(conf)
+
+    console.log(search(db, query_parse(process.argv.slice(2))))
+}
+
+function search(db, query) {
+    let [pred1, pred2] = [new Predicate(), new Predicate()]
+    if (query.user_name) pred1.add('user_name = ?', query.user_name)
+    if (query.license) pred1.add('license = ?', query.license)
+    query.tags.forEach( v => pred2.add('tag = ?', v))
+
+    let sql = `SELECT group_concat(tags_view.name) AS tags, i.*
+FROM tags_view
+INNER JOIN (
+  SELECT count(iid) AS n, iid, uid, title, user_name, user_status, uploaded
+  FROM images_view
+  WHERE user_status IS NOT 'disabled'
+        AND ${pred1.toString('AND')}
+        AND ${pred2.toString('OR')}
+GROUP BY iid ${pred2.params.length ? 'HAVING n = '+pred2.params.length : ''}
+) AS i ON tags_view.iid = i.iid
+GROUP BY tags_view.iid
+ORDER BY i.uploaded ${query.sort}
+LIMIT 5`
+    return db.prepare(sql).all([...pred1.params, ...pred2.params])
+}
+
+class Predicate {
+    constructor() {
+        this.sql = []
+        this.params = []
+    }
+    add(template, values) {
+        this.sql.push(template)
+        this.params = this.params.concat(values)
+    }
+    toString(by) {
+        return '(' + (this.sql.length ? this.sql : [1]).join(` ${by} `) + ')'
+    }
+}
+
+function query_parse(args) {
+    let opt = {
+        boolean: ['r'],
+        string: ['u', 't', 'l'],
+    }
+    let argv = minimist(args, opt)
+    let unknown = Object.keys(argv).filter( k => !(opt.boolean.includes(k)
+                                                   || opt.string.includes(k)
+                                                   || k === '_'))
+    if (unknown.length) throw new Error(`unknown options: ${unknown}`)
+
+    return {
+        user_name: Array.isArray(argv.u) ? argv.u[0] : argv.u,
+        tags: argv.t ? (Array.isArray(argv.t) ? argv.t : [argv.t]) : [],
+        sort: argv.r ? 'DESC' : 'ASC',
+        license: Array.isArray(argv.l) ? argv.l[0] : argv.l,
+        _: argv._,
+    }
+}
+
+main()

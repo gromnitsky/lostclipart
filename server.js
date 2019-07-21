@@ -10,29 +10,15 @@ let rename = util.promisify(fs.rename)
 let connect = require('connect')
 let cookie = require('cookie')
 let bcrypt = require('bcrypt')
-let Database = require('better-sqlite3')
 let co_body = require('co-body')
 let serve_static = require('serve-static')
 let multiparty = require('multiparty')
 let mmm = require('mmmagic')
 
-let devel = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
+let u = require('./u')
 
-function Conf(out = '_out') {
-    this.img = path.join(out, 'img')
-    this.upload = {
-        dir: path.join(out, 'tmp'),
-        max_files_size: 5*1024*1024,
-    },
-    this.tags = { perimage: 5 }
-    this.client = { dir: path.join(out, 'client') }
-    this.db = path.join(out, 'db.sqlite3')
-
-    fs.mkdirSync(this.upload.dir, {recursive: true})
-}
-
-let conf = new Conf()
-let db = db_open()
+let conf = new u.Conf()
+let db = u.db_open(conf)
 let app = connect()
 
 app.use('/', (req, res, next) => {
@@ -199,7 +185,7 @@ app.use('/api/tags/search', (req, res) => {
 })
 
 app.use('/api/image/view', (req, res, next) => {
-    let q = db.prepare(`SELECT * FROM easyimages WHERE iid = ?`)
+    let q = db.prepare(`SELECT * FROM images_view WHERE iid = ?`)
 	.all(req.searchparams.get('iid'))
     if (!q.length) return next(new AERR(404, 'invalid iid'))
     if (q[0].user_status === 'disabled')
@@ -267,7 +253,7 @@ app.use((req, res, next) => {	// in 404 stead
 app.use( (err, req, res, _next) => {
     res.statusCode = err.status || 500
     res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-    res.end(devel ? err.stack : err.toString())
+    res.end(conf.devel ? err.stack : err.toString())
     if (process.env.NODE_ENV !== 'test') {
         let r = err.stack || err.toString()
         if (res.statusCode === 404) r = err.toString()
@@ -277,32 +263,6 @@ app.use( (err, req, res, _next) => {
 
 app.listen(3000)
 
-
-function db_open() {
-    let custom_sqlite_functions = db => {
-        db.pragma('foreign_keys = ON')
-        db.function('rmatch', (re, str) => Number(new RegExp(re).test(str)))
-    }
-
-    let open = (file, sql) => {
-        let opt = { verbose: devel ? console.log : null }
-        let db; try {
-            db = new Database(file,
-                              Object.assign({}, {fileMustExist: true}, opt))
-            custom_sqlite_functions(db)
-        } catch (e) {           // 1st run
-            fs.mkdirSync(path.dirname(file), {recursive: true})
-            db = new Database(file, opt)
-            custom_sqlite_functions(db)
-            db.exec(fs.readFileSync(sql).toString())
-            db.prepare(`UPDATE users SET blob = ? WHERE uid = 0`)
-                .run(crypto.randomBytes(1024))
-        }
-        return db
-    }
-
-    return open(conf.db, __dirname + '/schema.sql')
-}
 
 // "foo, bar" is ok, ", " is not
 function validate_tags(s) { return /^.*[^\s,].*$/.test(s) }
@@ -396,7 +356,7 @@ function iid2image(uid, iid) {
 
 function tags_add(str) {        // return an array of tids
     let tags = (str || '').split(',').filter(Boolean).
-	map( v => v.replace(/\s+/, ' ').trim()).filter(Boolean).
+	map( v => v.replace(/\s+/, ' ').trim().toLowerCase()).filter(Boolean).
 	slice(0, conf.tags.perimage)
 
     let insert = db.prepare('INSERT INTO tags (name) VALUES (?)')
@@ -439,7 +399,7 @@ function write_access_check(req, iid) {
             || (!target_status
                 && (session.grp === 'admin' || target_uid === session.uid))
     }
-    let target = db.prepare(`SELECT uid,user_status FROM easyimages WHERE iid = ? LIMIT 1`).get(iid)
+    let target = db.prepare(`SELECT uid,user_status FROM images_view WHERE iid = ? LIMIT 1`).get(iid)
     if ( !(target && wa(target.uid, target.user_status)))
         throw new AERR(403, 'Forbidden')
 }

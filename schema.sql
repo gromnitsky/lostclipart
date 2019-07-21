@@ -53,7 +53,7 @@ CREATE TABLE images_tags(iid INT NOT NULL,
 
 CREATE INDEX images_tags_idx ON images_tags(iid, tid);
 
-CREATE VIEW easyimages AS
+CREATE VIEW images_view AS
        SELECT tags.name as tag,
               images_tags.tid,
               images.*,
@@ -66,3 +66,8 @@ CREATE VIEW easyimages AS
        LEFT JOIN images ON images.iid == images_tags.iid
        LEFT JOIN licenses ON licenses.lid = images.lid
        LEFT JOIN users ON users.uid = images.uid;
+
+create view tags_view as
+       select images_tags.*, tags.name
+       from tags
+       inner join images_tags ON images_tags.tid == tags.tid
