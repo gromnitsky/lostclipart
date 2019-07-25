@@ -59,7 +59,7 @@ function query_parse(args) {
                                                    || k === '_'))
     if (unknown.length) throw new Error(`unknown options: ${unknown}`)
 
-    return {
+    let r = {
         user_name: Array.isArray(argv.u) ? argv.u[0] : argv.u,
         tags: argv.t ? (Array.isArray(argv.t) ? argv.t : [argv.t]) : [],
         sort: argv.r ? 'DESC' : 'ASC',
@@ -68,6 +68,9 @@ function query_parse(args) {
         last_iid: Number(argv.last_iid || 0),
         _: argv._,
     }
+    if (argv.r && !argv.last_uploaded) r.last_uploaded = '9e999' // infinity
+    if (argv.r && !argv.last_iid) r.last_iid = '9e999'
+    return r
 }
 
 main()
