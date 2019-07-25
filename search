@@ -22,14 +22,15 @@ INNER JOIN (
   SELECT count(iid) AS n, iid, uid, title, user_name, user_status, uploaded
   FROM images_view
   WHERE user_status IS NOT 'disabled'
-        AND iid ${query.sort === 'ASC' ? '>' : '<'} ${query.iid}
+        AND (uploaded,iid) ${query.sort === 'ASC' ? '>' : '<'} (${query.last_uploaded},${query.last_iid})
         AND ${pred1.toString('AND')}
         AND ${pred2.toString('OR')}
 GROUP BY iid ${pred2.params.length ? 'HAVING n = '+pred2.params.length : ''}
 ) AS i ON tags_view.iid = i.iid
 GROUP BY tags_view.iid
-ORDER BY i.uploaded ${query.sort}
-LIMIT 5`
+ORDER BY i.uploaded ${query.sort}, i.iid ${query.sort}
+LIMIT 5
+`
     return db.prepare(sql).all([...pred1.params, ...pred2.params])
 }
 
@@ -50,7 +51,7 @@ class Predicate {
 function query_parse(args) {
     let opt = {
         boolean: ['r'],
-        string: ['u', 't', 'l', 'iid'],
+        string: ['u', 't', 'l', 'last_uploaded', 'last_iid'],
     }
     let argv = minimist(args, opt)
     let unknown = Object.keys(argv).filter( k => !(opt.boolean.includes(k)
@@ -63,7 +64,8 @@ function query_parse(args) {
         tags: argv.t ? (Array.isArray(argv.t) ? argv.t : [argv.t]) : [],
         sort: argv.r ? 'DESC' : 'ASC',
         license: Array.isArray(argv.l) ? argv.l[0] : argv.l,
-        iid: Number(argv.iid || 0),
+        last_uploaded: Number(argv.last_uploaded || 0),
+        last_iid: Number(argv.last_iid || 0),
         _: argv._,
     }
 }
