@@ -16,12 +16,14 @@ function search(db, query) {
     if (query.license) pred1.add('license = ?', query.license)
     query.tags.forEach( v => pred2.add('tag = ?', v))
 
+    let fts_query = sql_quote(db, `{title desc tag}: ${query._}`)
     let sql = `SELECT group_concat(tags_view.name) AS tags, i.*
 FROM tags_view
 INNER JOIN (
-  SELECT count(iid) AS n, iid, uid, title, user_name, user_status, uploaded
-  FROM images_view
-  WHERE user_status IS NOT 'disabled'
+  SELECT count(iid) AS n, iid,uid,title,user_name,user_status,uploaded,tag,desc
+  FROM images_fts
+  WHERE ${query._ ? 'images_fts MATCH '+fts_query : 1}
+        AND user_status IS NOT 'disabled'
         AND (uploaded,iid) ${query.sort === 'ASC' ? '>' : '<'} (${query.last_uploaded},${query.last_iid})
         AND ${pred1.toString('AND')}
         AND ${pred2.toString('OR')}
@@ -33,6 +35,8 @@ LIMIT 5
 `
     return db.prepare(sql).all([...pred1.params, ...pred2.params])
 }
+
+function sql_quote(db, s) { return db.prepare('select quote(?) as q').get(s).q }
 
 class Predicate {
     constructor() {
@@ -66,7 +70,7 @@ function query_parse(args) {
         license: Array.isArray(argv.l) ? argv.l[0] : argv.l,
         last_uploaded: Number(argv.last_uploaded || 0),
         last_iid: Number(argv.last_iid || 0),
-        _: argv._,
+        _: argv._.map(v => v.trim()).filter(Boolean).join` `,
     }
     if (argv.r && !argv.last_uploaded) r.last_uploaded = '9e999' // infinity
     if (argv.r && !argv.last_iid) r.last_iid = '9e999'

@@ -18,9 +18,9 @@ upload() {
     curl -fS $server/api/image/upload -b "$token" \
 	 -F svg=@"$__dirname/$1.svg" \
 	 -F thumbnail=@"$__dirname/$1.png" \
-	 -F lid=2 -F tags="$2" -F title="$3"
+	 -F lid=2 -F tags="$2" -F title="$3" -F desc="$4"
 }
 
-upload 2ATCHART 'man, woman, man' one
-upload 18WHLTRK 'cat, track' two
-upload AIRPASS 'man, plane' three
+upload 2ATCHART 'man, woman, man' one "foo"
+upload 18WHLTRK 'cat, track' two "bar"
+upload AIRPASS 'man, plane' three "foo bar"

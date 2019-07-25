@@ -70,4 +70,7 @@ CREATE VIEW images_view AS
 create view tags_view as
        select images_tags.*, tags.name
        from tags
-       inner join images_tags ON images_tags.tid == tags.tid
+       inner join images_tags ON images_tags.tid == tags.tid;
+
+create virtual table images_fts
+       using fts5(iid, uid, title, user_name, user_status, uploaded, desc, tag);

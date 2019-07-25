@@ -153,6 +153,7 @@ app.use('/api/image/upload', (req, res, next) => {
 	    }).lastInsertRowid
 
 	    tag_image(iid, fields.tags[0])
+            fts_insert(iid)
 
 	    return {att, iid}
 	})
@@ -206,19 +207,29 @@ app.use('/api/image/edit', (req, res, next) => {
 })
 
 app.use('/api/image/edit/misc', (req, res, next) => {
+    let update_col = (col) => {
+        if (db.prepare(`UPDATE images SET ${col} = ? WHERE iid = ?`).
+            run(req.body[col], req.body.iid).changes !== 1)
+            throw new AERR(400, `${req.body.iid}: ${col}: upd failed`)
+    }
+
     try {
         if ('tags' in req.body) {
             if (!validate_tags(req.body.tags))
                 throw new AERR(400, 'invalid tags')
-            db.transaction( () => tag_image(req.body.iid, req.body.tags))()
+            db.transaction( () => {
+                tag_image(req.body.iid, req.body.tags)
+                fts_update_tags(req.body.iid) // depends on tag_image() work!
+            })()
         }
 
         // our GUI allows only a single column update
         ['lid', 'filename', 'desc', 'mtime', 'title'].
             filter( col => col in req.body).forEach( col => {
-                if (db.prepare(`UPDATE images SET ${col} = ? WHERE iid = ?`).
-                    run(req.body[col], req.body.iid).changes !== 1)
-                    throw new AERR(400, `${req.body.iid}: ${col}: upd failed`)
+                db.transaction( () => {
+                    update_col(col)
+                    fts_update(req.body.iid, col, req.body[col])
+                })()
             })
         res.end()
     } catch(e) {
@@ -232,6 +243,7 @@ app.use('/api/image/edit/rm', (req, res, next) => {
             db.prepare('DELETE FROM images_tags WHERE iid = ?').run(req.body.iid)
             tags_orphans_delete()
             db.prepare('DELETE FROM images WHERE iid = ?').run(req.body.iid)
+            fts_delete(req.body.iid)
         })()
     } catch(e) {
         next(new AERR(400, e))
@@ -402,4 +414,32 @@ function write_access_check(req, iid) {
     let target = db.prepare(`SELECT uid,user_status FROM images_view WHERE iid = ? LIMIT 1`).get(iid)
     if ( !(target && wa(target.uid, target.user_status)))
         throw new AERR(403, 'Forbidden')
+}
+
+function fts_insert(iid) {
+    return db.prepare(`INSERT INTO images_fts
+SELECT iid,uid,title,user_name,user_status,uploaded,desc,tag
+FROM images_view WHERE iid = ?`).run(iid)
+}
+
+function fts_delete(iid) {
+    return db.prepare(`DELETE FROM images_fts WHERE iid = ?`).run(Number(iid))
+}
+
+function fts_update(iid, col_name, col_val) {
+    if ( !(col_name === 'title' || col_name === 'desc')) return
+    return db.prepare(`UPDATE images_fts SET ${col_name} = ? WHERE iid = ?`)
+        .run(col_val, Number(iid))
+}
+
+function fts_update_tags(iid) {
+    iid = Number(iid)
+    fts_delete(iid)
+    db.prepare(`
+SELECT iid,uid,title,user_name,user_status,uploaded,desc,tag
+FROM images_view WHERE iid = ?`).all(iid).forEach( v => {
+    db.prepare(`INSERT INTO images_fts
+VALUES(@iid,@uid,@title,@user_name,@user_status,@uploaded,@desc,@tag)`)
+        .run(v)
+    })
 }
