@@ -8,7 +8,8 @@ vendor.src := react/umd/react.production.min.js \
 	awesomplete/awesomplete.min.js \
 	awesomplete/awesomplete.min.js.map \
 	awesomplete/awesomplete.css \
-	awesomplete/awesomplete.css.map
+	awesomplete/awesomplete.css.map \
+	bytesize-icons/dist/bytesize-inline.svg
 vendor.dest := $(addprefix $(out)/vendor/, $(vendor.src))
 
 $(out)/vendor/%: node_modules/%; $(copy)

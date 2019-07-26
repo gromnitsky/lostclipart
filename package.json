@@ -8,6 +8,7 @@
         "awesomplete": "^1.1.4",
         "bcrypt": "^3.0.6",
         "better-sqlite3": "^5.4.1",
+        "bytesize-icons": "^1.4.0",
         "co-body": "^6.0.0",
         "connect": "^3.7.0",
         "cookie": "^0.4.0",

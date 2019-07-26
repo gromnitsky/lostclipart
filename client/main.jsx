@@ -22,15 +22,9 @@ class Main extends React.Component {
         return (
             <>
               <header>
-                <Link to="/">
-                  <svg id="i-home" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
-                    <path d="M12 20 L12 30 4 30 4 12 16 2 28 12 28 30 20 30 20 20 Z" />
-                  </svg>
-                </Link>
+                <Link to="/"><Icon name="home" /></Link>
                 <Link to="upload" title="Upload an SVG">
-                  <svg id="i-upload" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
-                    <path d="M9 22 C0 23 1 12 9 13 6 2 23 2 22 10 32 7 32 23 23 22 M11 18 L16 14 21 18 M16 14 L16 29" />
-                  </svg>
+                  <Icon name="upload" />
                 </Link>
                 <input id="header__search" style={{flexGrow: 1}}
                        placeholder="Search..."/>
@@ -67,16 +61,8 @@ let HeaderProfile = function(props) {
         let profile = `/user/${Cookies.get('uid')}`
         return (
             <>
-              <a href={profile} title={props.name}>
-                <svg id="i-user" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
-                  <path d="M22 11 C22 16 19 20 16 20 13 20 10 16 10 11 10 6 12 3 16 3 20 3 22 6 22 11 Z M4 30 L28 30 C28 21 22 20 16 20 10 20 4 21 4 30 Z" />
-                </svg>
-              </a>
-              <Link to="logout" title="Logout">
-                <svg id="i-signout" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
-                  <path d="M28 16 L8 16 M20 8 L28 16 20 24 M11 28 L3 28 3 4 11 4" />
-                </svg>
-              </Link>
+              <a href={profile} title={props.name}><Icon name="user" /></a>
+              <Link to="logout" title="Logout"><Icon name="signout" /></Link>
             </>
         )
     }
@@ -90,11 +76,7 @@ let HeaderProfile = function(props) {
               <line x1="23" y1="11" x2="17" y2="11"></line>
             </svg>
           </Link>
-          <Link to="login" title="Login">
-            <svg id="i-signin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
-              <path d="M3 16 L23 16 M15 8 L23 16 15 24 M21 4 L29 4 29 28 21 28" />
-            </svg>
-          </Link>
+          <Link to="login" title="Login"><Icon name="signin" /></Link>
         </>
     )
 }
@@ -108,6 +90,10 @@ let Logout = function() {
 let Home = function() {
     u.title('Home')
     return <h1>Home</h1>
+}
+
+function Icon(props) {
+    return <svg width="16" height="16"><use href={"/vendor/bytesize-icons/dist/bytesize-inline.svg#i-" + props.name}></use></svg>
 }
 
 let app = document.querySelector('body')
