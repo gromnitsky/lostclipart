@@ -17,11 +17,13 @@ body {
 
 header {
   display: flex;
+  align-items: center;
   margin: 10px 0;
 }
 
 header > * {
   margin: 0 10px 0 0;
+  display: inline-flex;
 }
 
 header > *:last-child {
