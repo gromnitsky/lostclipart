@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
-let minimist = require('minimist')
+let search = require('./lib/search')
 let u = require('./u')
 
 function main() {
     let conf = new u.Conf()
     let db = u.db_open(conf)
 
-    console.log(search(db, query_parse(process.argv.slice(2))))
+    console.log(lookup(db, search.query_parse(process.argv.slice(2))))
 }
 
-function search(db, query) {
+function lookup(db, query) {
     let [pred1, pred2] = [new Predicate(), new Predicate()]
     if (query.user_name) pred1.add('user_name = ?', query.user_name)
     if (query.license) pred1.add('license = ?', query.license)
@@ -52,29 +52,5 @@ class Predicate {
     }
 }
 
-function query_parse(args) {
-    let opt = {
-        boolean: ['r'],
-        string: ['u', 't', 'l', 'last_uploaded', 'last_iid'],
-    }
-    let argv = minimist(args, opt)
-    let unknown = Object.keys(argv).filter( k => !(opt.boolean.includes(k)
-                                                   || opt.string.includes(k)
-                                                   || k === '_'))
-    if (unknown.length) throw new Error(`unknown options: ${unknown}`)
-
-    let r = {
-        user_name: Array.isArray(argv.u) ? argv.u[0] : argv.u,
-        tags: argv.t ? (Array.isArray(argv.t) ? argv.t : [argv.t]) : [],
-        sort: argv.r ? 'DESC' : 'ASC',
-        license: Array.isArray(argv.l) ? argv.l[0] : argv.l,
-        last_uploaded: Number(argv.last_uploaded || 0),
-        last_iid: Number(argv.last_iid || 0),
-        _: argv._.map(v => v.trim()).filter(Boolean).join` `,
-    }
-    if (argv.r && !argv.last_uploaded) r.last_uploaded = '9e999' // infinity
-    if (argv.r && !argv.last_iid) r.last_iid = '9e999'
-    return r
-}
 
 main()

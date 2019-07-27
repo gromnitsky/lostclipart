@@ -7,13 +7,27 @@ import Login from './login.js'
 import Upload from './upload.js'
 import ImageView from './image_view.js'
 import * as u from './u.js'
+import Search from './search.js'
 
 class Main extends React.Component {
     constructor(props) {
-	super(props)
-	this.state = {
-	    user_name: Cookies.get('name')
-	}
+        super(props)
+        this.input = React.createRef()
+        this.state = {
+            user_name: Cookies.get('name'),
+            search_query: new URLSearchParams(window.location.search).get('q')
+        }
+
+        this.handle_search = u.debounce(this.handle_search.bind(this), 500)
+    }
+
+    handle_search() {
+        let val = this.input.current.value
+        window.history.replaceState({}, null,
+                                    window.location.origin +
+                                    window.location.pathname +
+                                    '?q=' + encodeURIComponent(val))
+        this.setState({search_query: val})
     }
 
     user_set(name) { this.setState({user_name: name}) }
@@ -27,7 +41,10 @@ class Main extends React.Component {
                   <Icon name="upload" />
                 </Link>
                 <input id="header__search" style={{flexGrow: 1}}
-                       placeholder="Search..."/>
+                       ref={this.input}
+                       placeholder="Search..."
+                       defaultValue={this.state.search_query}
+                       onChange={this.handle_search} />
                 <HeaderProfile name={this.state.user_name} />
               </header>
 
@@ -41,6 +58,7 @@ class Main extends React.Component {
 		  <Profile path="user/:uid"
 			   user_set={this.user_set.bind(this)}/>
 		  <ImageView path="image/:iid" />
+                  <Search path="search" search_query={this.state.search_query}/>
 		</Router>
 	      </main>
 

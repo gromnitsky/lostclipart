@@ -28,7 +28,10 @@ static.dest := $(patsubst $(src)/%, $(out)/%, $(static.src))
 
 $(out)/%: $(src)/%; $(copy)
 
-compile := $(vendor.dest) $(jsx.dest) $(static.dest)
+$(out)/lib/search.js: lib/search.js
+	browserify -s search -d $< | exorcist $@.map > $@
+
+compile := $(vendor.dest) $(jsx.dest) $(static.dest) $(out)/lib/search.js
 all: $(compile) $(out)/clipart
 
 $(out)/clipart:
