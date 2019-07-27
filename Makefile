@@ -42,7 +42,7 @@ include server.mk
 devel: all server
 
 cloc:
-	cloc --script-lang=JavaScript,node *.sql *.js client/* Makefile search
+	cloc --script-lang=JavaScript,node *.sql *.js client/* Makefile lib/* search
 
 
 
