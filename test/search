@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+function main() {
+    fetch('http://127.0.0.1:3000/api/search?q=' +
+          encodeURIComponent(process.argv.slice(2).join` `))
+        .then(console.log)
+        .catch(console.error)
+}
+
+function fetch(url, opt) {
+    let fetcherr = r => {
+        if (!r.ok) throw new Error(r.statusText)
+        return r;
+    }
+    return require('node-fetch')(url, opt).then(fetcherr).then(r => r.json())
+}
+
+main()

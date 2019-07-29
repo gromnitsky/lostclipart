@@ -16,6 +16,7 @@ let multiparty = require('multiparty')
 let mmm = require('mmmagic')
 
 let u = require('./u')
+let search = require('./lib/search')
 
 let conf = new u.Conf()
 let db = u.db_open(conf)
@@ -251,6 +252,38 @@ app.use('/api/image/edit/rm', (req, res, next) => {
     res.end()
 })
 
+app.use('/api/search', (req, res, next) => {
+    let query
+    try {
+        query = search.query_parse(req.searchparams.get('q'))
+    } catch (e) {
+        return next(new AERR(400, e))
+    }
+    let [pred1, pred2] = [new SqlPredicate(), new SqlPredicate()]
+    if (query.user_name) pred1.add('user_name = ?', query.user_name)
+    if (query.license) pred1.add('license = ?', query.license)
+    query.tags.forEach( v => pred2.add('tag = ?', v))
+
+    let fts_query = sql_quote(`{title desc tag}: ${query._}`)
+    let sql = `SELECT group_concat(tags_view.name) AS tags, i.*
+FROM tags_view
+INNER JOIN (
+  SELECT count(iid) AS n, iid,uid,title,user_name,user_status,uploaded,tag,desc
+  FROM images_fts
+  WHERE ${query._ ? 'images_fts MATCH '+fts_query : 1}
+        AND user_status IS NOT 'disabled'
+        AND (uploaded,iid) ${query.sort === 'ASC' ? '>' : '<'} (${query.last_uploaded},${query.last_iid})
+        AND ${pred1.toString('AND')}
+        AND ${pred2.toString('OR')}
+GROUP BY iid ${pred2.params.length ? 'HAVING n = '+pred2.params.length : ''}
+) AS i ON tags_view.iid = i.iid
+GROUP BY tags_view.iid
+ORDER BY i.uploaded ${query.sort}, i.iid ${query.sort}
+LIMIT 5
+`
+    res.end(JSON.stringify(db.prepare(sql).all([...pred1.params, ...pred2.params])))
+})
+
 app.use(serve_static(conf.client.dir))
 
 app.use((req, res, next) => {	// in 404 stead
@@ -443,3 +476,19 @@ VALUES(@iid,@uid,@title,@user_name,@user_status,@uploaded,@desc,@tag)`)
         .run(v)
     })
 }
+
+class SqlPredicate {
+    constructor() {
+        this.sql = []
+        this.params = []
+    }
+    add(template, values) {
+        this.sql.push(template)
+        this.params = this.params.concat(values)
+    }
+    toString(by) {
+        return '(' + (this.sql.length ? this.sql : [1]).join(` ${by} `) + ')'
+    }
+}
+
+function sql_quote(s) { return "'" + s.replace(/'/g, "''") + "'" }
