@@ -1,4 +1,4 @@
-/* global React, ReachRouter */
+/* global React, ReachRouter, search */
 
 let {Link, navigate} = ReachRouter
 import * as u from './u.js'
@@ -12,7 +12,7 @@ export default class Upload extends React.Component {
     }
 
     componentDidMount() {
-	u.fetch_json(`/api/image/view?iid=${this.iid()}`).then( json => {
+	u.fetch_json(`/api/image/view?iid=${this.props.iid}`).then( json => {
 	    let r = Object.assign({}, json[0])
 	    r.tags = json.map( v => v.tag).join`, `
 	    this.setState(r)
@@ -38,7 +38,7 @@ export default class Upload extends React.Component {
 
                   <span>Title</span>
                   <WR_input model={this.state.title}
-                           iid={this.iid()}
+                           iid={this.props.iid}
                            name="title"
                            is_writable={this.writable.bind(this)}
                            error={this.error_saving.bind(this)}>
@@ -53,7 +53,7 @@ export default class Upload extends React.Component {
 
                   <span>License:</span>
                   <WR_license model={this.state.lid}
-                              iid={this.iid()}
+                              iid={this.props.iid}
                               name="lid"
                               is_writable={this.writable.bind(this)}
                               error={this.error_saving.bind(this)}>
@@ -67,7 +67,7 @@ export default class Upload extends React.Component {
 
                   <span>Original filename</span>
                   <WR_input model={this.state.filename}
-                           iid={this.iid()}
+                           iid={this.props.iid}
                            name="filename"
                            is_writable={this.writable.bind(this)}
                            error={this.error_saving.bind(this)}>
@@ -79,7 +79,7 @@ export default class Upload extends React.Component {
 
                   <span>mtime</span>
                   <WR_mtime model={this.state.mtime}
-                            iid={this.iid()}
+                            iid={this.props.iid}
                             name="mtime"
                             is_writable={this.writable.bind(this)}
                             error={this.error_saving.bind(this)}>
@@ -95,7 +95,7 @@ export default class Upload extends React.Component {
 
 		  <span>Tags</span>
                   <WR_tags model={this.state.tags}
-                            iid={this.iid()}
+                            iid={this.props.iid}
                             name="tags"
                             is_writable={this.writable.bind(this)}
                             error={this.error_saving.bind(this)}>
@@ -115,7 +115,7 @@ export default class Upload extends React.Component {
 
 		  <span>Description</span>
                   <WR_input model={this.state.desc}
-                            iid={this.iid()}
+                            iid={this.props.iid}
                             name="desc"
                             is_writable={this.writable.bind(this)}
                             error={this.error_saving.bind(this)}>
@@ -144,25 +144,14 @@ export default class Upload extends React.Component {
         this.setState({error_saving: err instanceof Error ? err.message : err})
     }
 
-    iid() {
-        let p = window.location.pathname.split('/')
-        return p[p.length - 1] || -1
-    }
-
     img() {
-	let dir = '/clipart'
-	return {
-	    svg: [dir, 'images', this.state.uid,
-		  `${this.state.iid}.svg`].join('/'),
-	    thumbnail: [dir, 'thumbnails', this.state.uid,
-			`${this.state.iid}.png`].join('/')
-	}
+        return search.iid2image(this.state.uid, this.state.iid, '/clipart')
     }
 
     handle_delete() {
         if (!confirm("Are you sure?")) return
         let form = new FormData()
-        form.set('iid', this.iid())
+        form.set('iid', this.props.iid)
         u.my_fetch('/api/image/edit/rm', {
             method: 'POST',
             body: new URLSearchParams(form).toString()

@@ -160,7 +160,7 @@ app.use('/api/image/upload', (req, res, next) => {
 	})
 
 	attachments(fields, files).then(transaction).then( async v => {
-	    let img = iid2image(session.uid, v.iid)
+	    let img = search.iid2image(session.uid, v.iid, conf.img)
 	    await mv(v.att.svg.file.path, img.svg)
 	    await mv(v.att.thumbnail.path,  img.thumbnail)
 
@@ -390,13 +390,6 @@ async function mv(src, dest) {
 
 async function md5_file(name) {
     return crypto.createHash('md5').update(await readFile(name)).digest('hex')
-}
-
-function iid2image(uid, iid) {
-    return {
-	svg: [conf.img, 'images', uid, `${iid}.svg`].join('/'),
-	thumbnail: [conf.img, 'thumbnails', uid, `${iid}.png`].join('/')
-    }
 }
 
 function tags_add(str) {        // return an array of tids

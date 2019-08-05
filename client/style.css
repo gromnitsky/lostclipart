@@ -1,5 +1,5 @@
 :root {
-  --max-width: 800px;
+  --max-width: 990px;
 }
 
 html {
@@ -182,4 +182,18 @@ div.awesomplete > input {
 pre.wrinput__readable {
   margin: 0;
   font-family: serif;
+}
+
+.images {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.image--preview {
+  max-width: calc(320px);
+  padding: 5px 5px 15px 5px;
+
+  display: flex;
+  flex-direction: column;
+
 }

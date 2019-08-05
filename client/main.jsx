@@ -13,34 +13,33 @@ class Main extends React.Component {
     constructor(props) {
         super(props)
         this.input = React.createRef()
-        this.state = {
-            user_name: Cookies.get('name'),
-            search_query: new URLSearchParams(window.location.search).get('q')
-        }
-
+        this.state = { user_name: Cookies.get('name') }
         this.handle_search = u.debounce(this.handle_search.bind(this), 500)
     }
 
     handle_search() {
-        let val = this.input.current.value
-        window.history.replaceState({}, null,
-                                    window.location.origin +
-                                    window.location.pathname +
-                                    '?q=' + encodeURIComponent(val))
-        this.setState({search_query: val})
+        navigate(`/search/${this.input.current.value}`, { replace: true })
     }
 
     user_set(name) { this.setState({user_name: name}) }
+
+    query_set(val) {
+        if (this.input.current) {
+            this.input.current.value = val
+            this.input.current.focus()
+        } else
+            this.setState({search_query: val}) // 1st load
+    }
 
     render() {
         return (
             <>
               <header>
-                <Link to="/"><Icon name="home" /></Link>
+                <Link to="/search/-t%20fish"><Icon name="home" /></Link>
                 <Link to="upload" title="Upload an SVG">
                   <Icon name="upload" />
                 </Link>
-                <input id="header__search" style={{flexGrow: 1}}
+                <input id="header__search" style={{flexGrow: 1}} type="search"
                        ref={this.input}
                        placeholder="Search..."
                        defaultValue={this.state.search_query}
@@ -48,19 +47,19 @@ class Main extends React.Component {
                 <HeaderProfile name={this.state.user_name} />
               </header>
 
-	      <main>
-		<Router>
-		  <Home path="/" />
-		  <Upload path="upload" />
-		  <UserAdd path="useradd" user_set={this.user_set.bind(this)} />
-		  <Login path="login" user_set={this.user_set.bind(this)} />
-		  <Logout path="logout" />
-		  <Profile path="user/:uid"
-			   user_set={this.user_set.bind(this)}/>
-		  <ImageView path="image/:iid" />
-                  <Search path="search" search_query={this.state.search_query}/>
-		</Router>
-	      </main>
+              <main>
+                <Router primary={false}>
+                  <Upload path="upload" />
+                  <UserAdd path="useradd" user_set={this.user_set.bind(this)} />
+                  <Login path="login" user_set={this.user_set.bind(this)} />
+                  <Logout path="logout" />
+                  <Profile path="user/:uid"
+                           user_set={this.user_set.bind(this)}/>
+                  <ImageView path="image/:iid" />
+                  <Search path="search/:query" query_set={this.query_set.bind(this)} />
+                  <Search path="search" query="" query_set={this.query_set.bind(this)} />
+                </Router>
+              </main>
 
 	      <footer>
 		<ul>
@@ -103,11 +102,6 @@ let Logout = function() {
     u.session_clean()
     window.location.replace('/') // hard reload
     return null
-}
-
-let Home = function() {
-    u.title('Home')
-    return <h1>Home</h1>
 }
 
 function Icon(props) {
