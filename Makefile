@@ -29,6 +29,7 @@ static.dest := $(patsubst $(src)/%, $(out)/%, $(static.src))
 $(out)/%: $(src)/%; $(copy)
 
 $(out)/lib/search.js: lib/search.js
+	$(mkdir)
 	browserify -s search -d $< | exorcist $@.map > $@
 
 compile := $(vendor.dest) $(jsx.dest) $(static.dest) $(out)/lib/search.js
@@ -42,7 +43,7 @@ include server.mk
 devel: all server
 
 cloc:
-	cloc --script-lang=JavaScript,node *.sql *.js client/* Makefile lib/* search
+	cloc --script-lang=JavaScript,node *.sql *.js client/* Makefile lib/*
 
 
 
