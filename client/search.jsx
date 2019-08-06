@@ -81,10 +81,10 @@ export default class Search extends React.Component {
                   <Link to={`/image/${image.iid}`} style={{flexGrow: 1}} >
                     <img src={search.iid2image(image.uid, image.iid, '/clipart').thumbnail} />
                   </Link>
-                  <div>{image.tags}</div>
+                  <u.Tags csv={image.tags} />
                   <div>
                     {this.uploaded(image.uploaded)} by&nbsp;
-                    <Link to={`/user/${image.uid}`}>{image.user_name}</Link>
+                    <Link to={`/search/-u%20${search.sq(image.user_name)}`}>{image.user_name}</Link>
                   </div>
                 </div>
             )

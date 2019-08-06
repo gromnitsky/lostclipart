@@ -26,7 +26,6 @@ class Main extends React.Component {
     query_set(val) {
         if (this.input.current) {
             this.input.current.value = val
-            this.input.current.focus()
         } else
             this.setState({search_query: val}) // 1st load
     }

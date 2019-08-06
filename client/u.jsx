@@ -1,4 +1,6 @@
-/* global Cookies, React */
+/* global Cookies, React, ReachRouter, search */
+
+let {Link} = ReachRouter
 
 export function my_fetch(url, opt) {
     let fetcherr = r => {
@@ -107,4 +109,11 @@ export function debounce(func, wait, immediate) {
 
         return result;
     };
+}
+
+export function Tags(props) {
+    let tags = props.csv.split(',').map(v => v.trim()).map( (name, idx) => {
+        return <Link key={idx} to={`/search/-t%20${search.sq(name)}`}>{name}</Link>
+    })
+    return <span>{tags.reduce((prev, curr) => [prev, ', ', curr])}</span>
 }

@@ -1,6 +1,6 @@
-/* global React, Cookies, ReachRouter */
+/* global React, Cookies, ReachRouter, search */
 
-let {navigate} = ReachRouter
+let {Link, navigate} = ReachRouter
 import * as u from './u.js'
 
 export default class Profile extends React.Component {
@@ -49,9 +49,7 @@ export default class Profile extends React.Component {
 		    </span>
 
 		    <label>Uploads</label>
-		    <a className="form--pw__roval" href="#">
-                      {this.state.uploads}
-                    </a>
+                    <Link className="form--pw__roval" to={`/search/-r%20-u%20${search.sq(this.state.name)}`}>{this.state.uploads}</Link>
 
 		    <label>Account status</label>
 		    <span>{this.state.status ? this.state.status : 'nominal'}</span>

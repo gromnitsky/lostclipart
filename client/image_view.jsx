@@ -1,4 +1,4 @@
-/* global React, ReachRouter, search */
+/* global React, ReachRouter, search, ReactDOM */
 
 let {Link, navigate} = ReachRouter
 import * as u from './u.js'
@@ -285,6 +285,11 @@ class WR_mtime extends WR_input {
 class WR_tags extends WR_input {
     writable_node() {           // awesomeplete
         return this.node.current.querySelector('.wrinput__writable input')
+    }
+
+    readable_dom_upd() {
+        ReactDOM.render(<u.Tags csv={this.readable_value_get()} />,
+                        this.readable_node())
     }
 }
 
