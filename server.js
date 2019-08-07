@@ -273,7 +273,7 @@ SELECT count(i.iid) AS n, i.*,
 FROM images_fts AS i
 INNER JOIN tags_view ON tags_view.iid = i.iid
 INNER JOIN users ON users.uid = i.uid
-INNER JOIN licenses ON licenses.lid = i.uid
+INNER JOIN licenses ON licenses.lid = i.lid
 WHERE ${query._ ? 'images_fts MATCH '+fts_query : 1}
       AND ${tags_pred.toString('OR')}
       AND user_status IS NOT 'disabled'
