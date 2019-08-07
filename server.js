@@ -259,29 +259,37 @@ app.use('/api/search', (req, res, next) => {
     } catch (e) {
         return next(new AERR(400, e))
     }
-    let [pred1, pred2] = [new SqlPredicate(), new SqlPredicate()]
-    if (query.user_name) pred1.add('user_name = ?', query.user_name)
-    if (query.license) pred1.add('license = ?', query.license)
-    query.tags.forEach( v => pred2.add('tag = ?', v))
+    let [simple_pred, tags_pred] = [new SqlPredicate(), new SqlPredicate()]
+    query.tags.forEach( v => tags_pred.add('matched_tag = ?', v))
+    if (query.uid) simple_pred.add('i.uid = ?', query.uid)
+    if (query.license) simple_pred.add('license = ?', query.license)
 
     let fts_query = sql_quote(`{title desc tag}: ${query._}`)
-    let sql = `SELECT group_concat(tags_view.name) AS tags, i.*
+    let sql = `
+SELECT group_concat(tags_view.name) AS tags, img.*
 FROM tags_view
 INNER JOIN (
-  SELECT count(iid) AS n, iid,uid,title,user_name,user_status,uploaded,tag,desc
-  FROM images_fts
+  SELECT count(i.iid) AS n, i.iid,i.uid,i.title,i.desc,i.uploaded,
+         tags_view.name AS matched_tag,
+         users.name AS user_name, users.status AS user_status,
+         licenses.name as license
+  FROM images_fts AS i
+  INNER JOIN tags_view ON tags_view.iid = i.iid
+  INNER JOIN users ON users.uid = i.uid
+  INNER JOIN licenses ON licenses.lid = i.uid
   WHERE ${query._ ? 'images_fts MATCH '+fts_query : 1}
+        AND ${tags_pred.toString('OR')}
         AND user_status IS NOT 'disabled'
-        AND (uploaded,iid) ${query.sort === 'ASC' ? '>' : '<'} (${query.last_uploaded},${query.last_iid})
-        AND ${pred1.toString('AND')}
-        AND ${pred2.toString('OR')}
-GROUP BY iid ${pred2.params.length ? 'HAVING n = '+pred2.params.length : ''}
-) AS i ON tags_view.iid = i.iid
+        AND (i.uploaded,i.iid) ${query.sort === 'ASC' ? '>' : '<'} (${query.last_uploaded},${query.last_iid})
+        AND ${simple_pred.toString('AND')}
+  GROUP BY i.iid ${tags_pred.params.length ? 'HAVING n > '+tags_pred.params.length : ''}
+  LIMIT 5
+) AS img ON tags_view.iid = img.iid
 GROUP BY tags_view.iid
-ORDER BY i.uploaded ${query.sort}, i.iid ${query.sort}
-LIMIT 5
+ORDER BY img.uploaded ${query.sort}, img.iid ${query.sort}
 `
-    res.end(JSON.stringify(db.prepare(sql).all([...pred1.params, ...pred2.params])))
+    res.end(JSON.stringify(db.prepare(sql)
+                           .all([...tags_pred.params, ...simple_pred.params])))
 })
 
 app.use(serve_static(conf.client.dir))
@@ -444,7 +452,7 @@ function write_access_check(req, iid) {
 
 function fts_insert(iid) {
     return db.prepare(`INSERT INTO images_fts
-SELECT iid,uid,title,user_name,user_status,uploaded,desc,tag
+SELECT iid, uid, uploaded, title, desc, lid, tag
 FROM images_view WHERE iid = ?`).run(iid)
 }
 
@@ -453,7 +461,7 @@ function fts_delete(iid) {
 }
 
 function fts_update(iid, col_name, col_val) {
-    if ( !(col_name === 'title' || col_name === 'desc')) return
+    if (['title', 'desc', 'lid'].indexOf(col_name) === -1) return
     return db.prepare(`UPDATE images_fts SET ${col_name} = ? WHERE iid = ?`)
         .run(col_val, Number(iid))
 }
@@ -461,13 +469,7 @@ function fts_update(iid, col_name, col_val) {
 function fts_update_tags(iid) {
     iid = Number(iid)
     fts_delete(iid)
-    db.prepare(`
-SELECT iid,uid,title,user_name,user_status,uploaded,desc,tag
-FROM images_view WHERE iid = ?`).all(iid).forEach( v => {
-    db.prepare(`INSERT INTO images_fts
-VALUES(@iid,@uid,@title,@user_name,@user_status,@uploaded,@desc,@tag)`)
-        .run(v)
-    })
+    fts_insert(iid)
 }
 
 class SqlPredicate {

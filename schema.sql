@@ -73,4 +73,4 @@ create view tags_view as
        inner join images_tags ON images_tags.tid == tags.tid;
 
 create virtual table images_fts
-       using fts5(iid, uid, title, user_name, user_status, uploaded, desc, tag);
+       using fts5(iid, uid, uploaded, title, desc, lid, tag);
