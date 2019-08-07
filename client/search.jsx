@@ -83,7 +83,9 @@ export default class Search extends React.Component {
                   </Link>
                   <u.Tags csv={image.tags} />
                   <div>
-                    {this.uploaded(image.uploaded)} by&nbsp;
+                    {this.uploaded(image.uploaded)},{" "}
+                    <Link to={`/search/-l%20${search.sq(image.license)}`}>{image.license}</Link>
+                    {" "}by{" "}
                     <Link to={`/search/-u%20${search.sq(image.uid)}`}>{image.user_name}</Link>
                   </div>
                 </div>
