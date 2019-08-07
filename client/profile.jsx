@@ -49,7 +49,7 @@ export default class Profile extends React.Component {
 		    </span>
 
 		    <label>Uploads</label>
-                    <Link className="form--pw__roval" to={`/search/-r%20-u%20${search.sq(this.state.name)}`}>{this.state.uploads}</Link>
+                    <Link className="form--pw__roval" to={`/search/-r%20-u%20${search.sq(this.state.uid)}`}>{this.state.uploads}</Link>
 
 		    <label>Account status</label>
 		    <span>{this.state.status ? this.state.status : 'nominal'}</span>

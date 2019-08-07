@@ -264,29 +264,24 @@ app.use('/api/search', (req, res, next) => {
     if (query.uid) simple_pred.add('i.uid = ?', query.uid)
     if (query.license) simple_pred.add('license = ?', query.license)
 
-    let fts_query = sql_quote(`{title desc tag}: ${query._}`)
+    let fts_query = sql_quote(`{title desc tags}: ${query._}`)
     let sql = `
-SELECT group_concat(tags_view.name) AS tags, img.*
-FROM tags_view
-INNER JOIN (
-  SELECT count(i.iid) AS n, i.iid,i.uid,i.title,i.desc,i.uploaded,
-         tags_view.name AS matched_tag,
-         users.name AS user_name, users.status AS user_status,
-         licenses.name as license
-  FROM images_fts AS i
-  INNER JOIN tags_view ON tags_view.iid = i.iid
-  INNER JOIN users ON users.uid = i.uid
-  INNER JOIN licenses ON licenses.lid = i.uid
-  WHERE ${query._ ? 'images_fts MATCH '+fts_query : 1}
-        AND ${tags_pred.toString('OR')}
-        AND user_status IS NOT 'disabled'
-        AND (i.uploaded,i.iid) ${query.sort === 'ASC' ? '>' : '<'} (${query.last_uploaded},${query.last_iid})
-        AND ${simple_pred.toString('AND')}
-  GROUP BY i.iid ${tags_pred.params.length ? 'HAVING n > '+tags_pred.params.length : ''}
-  LIMIT 5
-) AS img ON tags_view.iid = img.iid
-GROUP BY tags_view.iid
-ORDER BY img.uploaded ${query.sort}, img.iid ${query.sort}
+SELECT count(i.iid) AS n, i.*,
+       tags_view.name AS matched_tag,
+       users.name AS user_name, users.status AS user_status,
+       licenses.name as license
+FROM images_fts AS i
+INNER JOIN tags_view ON tags_view.iid = i.iid
+INNER JOIN users ON users.uid = i.uid
+INNER JOIN licenses ON licenses.lid = i.uid
+WHERE ${query._ ? 'images_fts MATCH '+fts_query : 1}
+      AND ${tags_pred.toString('OR')}
+      AND user_status IS NOT 'disabled'
+      AND (i.uploaded,i.iid) ${query.sort === 'ASC' ? '>' : '<'} (${query.last_uploaded},${query.last_iid})
+      AND ${simple_pred.toString('AND')}
+GROUP BY i.iid ${tags_pred.params.length ? 'HAVING n = '+tags_pred.params.length : ''}
+ORDER BY i.uploaded ${query.sort}, i.iid ${query.sort}
+LIMIT 5
 `
     res.end(JSON.stringify(db.prepare(sql)
                            .all([...tags_pred.params, ...simple_pred.params])))
@@ -452,8 +447,12 @@ function write_access_check(req, iid) {
 
 function fts_insert(iid) {
     return db.prepare(`INSERT INTO images_fts
-SELECT iid, uid, uploaded, title, desc, lid, tag
-FROM images_view WHERE iid = ?`).run(iid)
+  SELECT images.iid,uid,uploaded,title,desc,lid,
+         group_concat(tags_view.name) AS tags
+  FROM tags_view
+  INNER JOIN images ON images.iid = tags_view.iid
+  WHERE images.iid = ?
+  GROUP BY images.iid`).run(iid)
 }
 
 function fts_delete(iid) {
