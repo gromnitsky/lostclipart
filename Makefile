@@ -1,18 +1,11 @@
 out := _out/client
 all:
 
-vendor.src := react/umd/react.production.min.js \
-	react-dom/umd/react-dom.production.min.js \
-	js-cookie/src/js.cookie.js \
-	@reach/router/umd/reach-router.min.js \
-	awesomplete/awesomplete.min.js \
-	awesomplete/awesomplete.min.js.map \
-	awesomplete/awesomplete.css \
-	awesomplete/awesomplete.css.map \
-	bytesize-icons/dist/bytesize-inline.svg
-vendor.dest := $(addprefix $(out)/vendor/, $(vendor.src))
+vendor.src := /node_modules/bytesize-icons/dist/bytesize-inline.svg \
+	$(shell adieu -pe '$$("link,script").map((_,e) => $$(e).attr("href") || $$(e).attr("src")).get().filter(v => /^\/node_modules\//.test(v)).join`\n`' client/index.html)
+vendor.dest := $(patsubst /%, $(out)/%, $(vendor.src))
 
-$(out)/vendor/%: node_modules/%; $(copy)
+$(out)/node_modules/%: node_modules/%; $(copy)
 
 src := client
 
@@ -51,4 +44,5 @@ mkdir = @mkdir -p $(dir $@)
 define copy =
 $(mkdir)
 cp $< $@
+@[ ! -r $<.map ] || cp $<.map $@.map
 endef

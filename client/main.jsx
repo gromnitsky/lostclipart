@@ -104,7 +104,7 @@ let Logout = function() {
 }
 
 function Icon(props) {
-    return <svg width="16" height="16"><use href={"/vendor/bytesize-icons/dist/bytesize-inline.svg#i-" + props.name}></use></svg>
+    return <svg width="16" height="16"><use href={"/node_modules/bytesize-icons/dist/bytesize-inline.svg#i-" + props.name}></use></svg>
 }
 
 let app = document.querySelector('body')
