@@ -1,4 +1,4 @@
-/* global React, Cookies, ReachRouter */
+/* global React, Cookies, ReachRouter, AwesompleteTagger */
 
 let {navigate} = ReachRouter
 import * as u from './u.js'
@@ -42,8 +42,9 @@ export default class Upload extends React.Component {
 		  <ic.LicenseSelector />
 
                   <label htmlFor="form--image__tags">Tags:</label>
-                  <ic.Tagger id="form--image__tags" name="tags"
-                             placeholder="foo bar, baz" />
+                  <AwesompleteTagger id="form--image__tags" name="tags"
+                                     placeholder="foo bar, baz"
+                                     completions={ic.tags_completions} />
 
 		  <label htmlFor="form--upload__desc">Description:</label>
 		  <textarea id="form--image__desc"

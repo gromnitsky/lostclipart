@@ -1,4 +1,4 @@
-/* global React, ReachRouter, search, ReactDOM */
+/* global React, ReachRouter, search, ReactDOM, AwesompleteTagger */
 
 let {Link, navigate} = ReachRouter
 import * as u from './u.js'
@@ -97,12 +97,13 @@ export default class Upload extends React.Component {
                   <WR_tags model={this.state.tags}
                             iid={this.props.iid}
                             name="tags"
-                            is_writable={this.writable.bind(this)}
+                             is_writable={this.writable.bind(this)}
                             error={this.error_saving.bind(this)}>
                     <>
                       <span className="wrinput__readable"></span>
                       <div className="wrinput__writable">
-                        <ic.Tagger id="image--viewer__tagger" />
+                        <AwesompleteTagger id="image--viewer__tagger"
+                                           completions={ic.tags_completions} />
                       </div>
                     </>
                   </WR_tags>

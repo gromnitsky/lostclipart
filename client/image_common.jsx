@@ -1,4 +1,4 @@
-/* global React, Awesomplete */
+/* global React */
 
 import * as u from './u.js'
 
@@ -33,40 +33,7 @@ export class LicenseSelector extends React.Component {
     }
 }
 
-export class Tagger extends React.Component {
-    constructor(props) {
-	super(props)
-	this.ctrl = React.createRef()
-    }
-
-    render() {
-	return <input {...this.props} ref={this.ctrl} />
-    }
-
-    componentDidMount() {
-	let ctrl = this.ctrl.current
-
-	let last_tag = s => s.match(/[^,]*$/)[0]
-	let awsmplt = new Awesomplete(ctrl, {
-	    filter: function(text, input) {
-		return Awesomplete.FILTER_CONTAINS(text, last_tag(input))
-	    },
-	    item: function(text, input) {
-		return Awesomplete.ITEM(text, last_tag(input))
-	    },
-	    replace: function(text) {
-		let before = this.input.value.match(/^.+,\s*|/)[0]
-		this.input.value = before + text + ", "
-	    }
-	})
-
-	ctrl.addEventListener('input', evt => { // TODO: debounce
-	    let q = last_tag(evt.target.value).trim(); if (q.length < 2) return
-	    u.fetch_json(`/api/tags/search?q=${encodeURIComponent(q)}`)
-		.then( tags => {
-		    awsmplt.list = tags.map( v => v.name)
-		    awsmplt.evaluate()
-		})
-	})
-    }
+export function tags_completions(user_input) {
+    return u.fetch_json(`/api/tags/search?q=${encodeURIComponent(user_input)}`).
+        then( r => r.map( v => v.name))
 }

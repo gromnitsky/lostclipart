@@ -17,6 +17,7 @@
         "mmmagic": "^0.5.3",
         "multiparty": "^4.2.1",
         "react": "^16.9.0",
+        "react-awesomplete-tagger": "^0.0.1",
         "react-dom": "^16.9.0",
         "serve-static": "^1.14.1",
         "shellwords": "^0.1.1"

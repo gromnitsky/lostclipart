@@ -30,7 +30,7 @@ module.exports = {
 
 	// "react/no-danger": 0,
 	"react/prop-types": 0,
-	// "react/jsx-no-undef": [2, { "allowGlobals": true }]
+        "react/jsx-no-undef": [2, { "allowGlobals": true }]
     },
     settings: {
 	react: {
