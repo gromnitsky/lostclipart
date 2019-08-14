@@ -19,7 +19,9 @@ class Main extends React.Component {
     }
 
     handle_search() {
-        navigate(`/search/${this.input.current.value}`, { replace: true })
+        // preserve trailing spaces
+        let s = encodeURIComponent(this.input.current.value)
+        navigate(`/search/${s}`, { replace: true })
     }
 
     user_set(name) { this.setState({user_name: name}) }

@@ -34,7 +34,7 @@ export default class AwesompleteInput extends React.Component {
                 text = search.sq(text)
                 let t = query_parse(this.input.value)
                 let other = a => a + (a.length ?  ' ' : '')
-                this.input.value = other(t.left().trimRight()) + text + ' ' + other(t.right())
+                this.input.value = other(t.left().trimRight()) + text + ' ' + t.right()
                 // set cursor position
                 // let cursor = t.left().length + text.length +
                 //     (t.right().length ? 1 : 2)
@@ -70,7 +70,7 @@ export default class AwesompleteInput extends React.Component {
                     ic.tags_completions(user_input).then(run)
                 break
             }
-        }, this.props.debounce || 200)
+        }, 200)
         ctrl.addEventListener('input',  input_listener)
     }
 }
