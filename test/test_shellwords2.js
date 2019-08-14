@@ -55,6 +55,13 @@ suite('split', function() {
     test('throws on unmatched double quotes', function() {
         assert.throws( () => split('foo "bar baz'))
     })
+
+    test('escaped spaces', function() {
+        assert.deepEqual(split('a\\ b 1\\ 2'), [
+            { begin: 0, end: 5, value: 'a b' },
+            { begin: 5, end: 9, value: '1 2' }
+        ])
+    })
 })
 
 function test_split(str, expected) {
