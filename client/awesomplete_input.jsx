@@ -17,27 +17,29 @@ export default class AwesompleteInput extends React.Component {
     componentDidMount() {
         let ctrl = this.ctrl.current
 
-        let query_parse = input => {
-            try {
-                return new Tokens(input, ctrl.selectionStart)
+        let parse = str => {
+           try {
+                return new Tokens(str == null ? ctrl.value : str,
+                                  ctrl.selectionStart)
             } catch (e) {
-                return query_parse([])
+                return parse('')
             }
         }
 
         let opt = Object.assign(this.props.opt || {}, {
-            filter: function(text, input) {
-                return Awesomplete.FILTER_CONTAINS(text, query_parse(input).current())
+            filter: function(text, _input) {
+                return Awesomplete.FILTER_CONTAINS(text, parse().current())
             },
-            item: function(text, input) {
-                return Awesomplete.ITEM(text, query_parse(input).current())
+            item: function(text, _input) {
+                return Awesomplete.ITEM(text, parse().current())
             },
-            replace: function(text) {
-                // inject a new item to the current input
+            replace: function(text) { // inject a new item to the current input
+                let t = parse()
+                if (!t.current().length) return
+
                 text = search.sq(text)
-                let t = query_parse(this.input.value)
                 let other = a => a + (a.length ?  ' ' : '')
-                this.input.value = other(t.left().trimRight()) + text + ' ' + t.right()
+                ctrl.value = other(t.left().trimRight()) + text + ' ' + t.right()
             }
         })
         let awsmplt = new Awesomplete(ctrl, opt)
@@ -47,8 +49,8 @@ export default class AwesompleteInput extends React.Component {
             awsmplt.list = []
         })
 
-        let input_listener = u.debounce( evt => {
-            let t = query_parse(evt.target.value)
+        let input_listener = u.debounce( () => {
+            let t = parse()
             let user_input = t.current()
             let run = list => {
                 awsmplt.list = list
