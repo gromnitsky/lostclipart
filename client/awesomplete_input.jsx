@@ -18,9 +18,12 @@ export default class AwesompleteInput extends React.Component {
         let ctrl = this.ctrl.current
 
         let query_parse = input => {
-            return new Tokens(input, ctrl.selectionStart)
+            try {
+                return new Tokens(input, ctrl.selectionStart)
+            } catch (e) {
+                return query_parse([])
+            }
         }
-        let trigger_on_change = val => this.props.onChange(val)
 
         let opt = Object.assign(this.props.opt || {}, {
             filter: function(text, input) {
@@ -35,14 +38,6 @@ export default class AwesompleteInput extends React.Component {
                 let t = query_parse(this.input.value)
                 let other = a => a + (a.length ?  ' ' : '')
                 this.input.value = other(t.left().trimRight()) + text + ' ' + t.right()
-                // set cursor position
-                // let cursor = t.left().length + text.length +
-                //     (t.right().length ? 1 : 2)
-                // this.input.selectionStart = cursor
-                // this.input.selectionEnd = cursor
-
-                // emulate onchange event
-                trigger_on_change(this.input.value)
             }
         })
         let awsmplt = new Awesomplete(ctrl, opt)

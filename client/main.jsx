@@ -15,10 +15,11 @@ class Main extends React.Component {
         super(props)
         this.input = React.createRef()
         this.state = { user_name: Cookies.get('name') }
-        this.handle_search = u.debounce(this.handle_search.bind(this), 500)
     }
 
-    handle_search() {
+    handle_search(event) {
+        if (event.key !== 'Enter') return
+
         // preserve trailing spaces
         let s = encodeURIComponent(this.input.current.value)
         navigate(`/search/${s}`, { replace: true })
@@ -46,7 +47,7 @@ class Main extends React.Component {
                                     inner_ref={this.input}
                                     placeholder="Search..."
                                     defaultValue={this.state.search_query}
-                                    onChange={this.handle_search} />
+                                    onKeyDown={this.handle_search.bind(this)}/>
                 </span>
                 <HeaderProfile name={this.state.user_name} />
               </header>
