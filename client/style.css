@@ -23,7 +23,6 @@ header {
 
 header > * {
   margin: 0 10px 0 0;
-  display: inline-flex;
 }
 
 header > *:last-child {
@@ -143,6 +142,10 @@ footer ul li {
 
 #image__license-sel {
   max-width: fit-content;
+}
+
+div.awesomplete {
+  width: 100%;
 }
 
 div.awesomplete > input {

@@ -8,6 +8,7 @@ import Upload from './upload.js'
 import ImageView from './image_view.js'
 import * as u from './u.js'
 import Search from './search.js'
+import AwesompleteInput from './awesomplete_input.js'
 
 class Main extends React.Component {
     constructor(props) {
@@ -38,11 +39,13 @@ class Main extends React.Component {
                 <Link to="upload" title="Upload an SVG">
                   <Icon name="upload" />
                 </Link>
-                <input id="header__search" style={{flexGrow: 1}} type="search"
-                       ref={this.input}
-                       placeholder="Search..."
-                       defaultValue={this.state.search_query}
-                       onChange={this.handle_search} />
+                <span style={{flexGrow: 1}}>
+                  <AwesompleteInput type="search"
+                                    inner_ref={this.input}
+                                    placeholder="Search..."
+                                    defaultValue={this.state.search_query}
+                                    onChange={this.handle_search} />
+                </span>
                 <HeaderProfile name={this.state.user_name} />
               </header>
 
