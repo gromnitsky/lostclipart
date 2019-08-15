@@ -22,6 +22,8 @@ let conf = new u.Conf()
 let db = u.db_open(conf)
 let app = connect()
 
+if (conf.devel) console.log(process.env)
+
 app.use('/', (req, res, next) => {
     if (req.method === 'GET') req.searchparams = new URLSearchParams(req.url.slice(req.url.search(/[?&]/)+1))
     next()

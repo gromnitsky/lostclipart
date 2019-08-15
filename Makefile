@@ -32,8 +32,13 @@ $(out)/clipart:
 	mkdir -p $(out)/../img
 	cd $(out) && ln -s ../img $(notdir $@)
 
-include server.mk
-devel: all server
+devel: all
+	systemctl --user link `readlink -f lostclipart.service`
+	systemctl --user restart lostclipart
+
+o := cat
+log:
+	journalctl --user -f -u lostclipart -o $(o)
 
 cloc:
 	cloc --script-lang=JavaScript,node *.sql *.js client/* Makefile lib/*

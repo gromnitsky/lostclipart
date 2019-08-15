@@ -3,6 +3,10 @@ let fs = require('fs')
 let path = require('path')
 let Database = require('better-sqlite3')
 
+exports.log = {
+    sqlite: console.log.bind(console, "sqlite:")
+}
+
 exports.db_open = function(conf) {
     let custom_sqlite_functions = db => {
         db.pragma('foreign_keys = ON')
@@ -10,7 +14,7 @@ exports.db_open = function(conf) {
     }
 
     let open = (file, sql) => {
-        let opt = { verbose: conf.devel ? console.log : null }
+        let opt = { verbose: conf.devel ? exports.log.sqlite : null }
         let db; try {
             db = new Database(file,
                               Object.assign({}, {fileMustExist: true}, opt))
