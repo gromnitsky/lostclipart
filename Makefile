@@ -32,13 +32,25 @@ $(out)/clipart:
 	mkdir -p $(out)/../img
 	cd $(out) && ln -s ../img $(notdir $@)
 
+
+
 devel: all
-	systemctl --user link `readlink -f lostclipart.service`
-	systemctl --user restart lostclipart
+	-systemctl --user stop lostclipart
+	systemd-run --user --collect --unit=lostclipart -d node server.js
+
+node.bin := $(HOME)/lib/software/alex/go/bin
+prod: all
+	sudo systemd-run --collect --unit=lostclipart -p ProtectSystem=strict \
+	 -p ProtectHome=tmpfs -p BindPaths=`pwd`:/home/$(USER) \
+	 -p BindPaths=$(node.bin):/home/$(USER)/bin \
+	 -p User=$(USER) -p WorkingDirectory=/home/$(USER) \
+	 -p Environment=NODE_ENV=production \
+	 -p SyslogIdentifier=node \
+	 sh -c 'exec bin/node server.js'
 
 o := cat
 log:
-	journalctl --user -f -u lostclipart -o $(o)
+	journalctl --user -b -f -u lostclipart -o $(o)
 
 cloc:
 	cloc --script-lang=JavaScript,node *.sql *.js client/* Makefile lib/*
