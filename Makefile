@@ -38,15 +38,22 @@ devel: all
 	-systemctl --user stop lostclipart
 	systemd-run --user --collect --unit=lostclipart -d node server.js
 
-node.bin := $(HOME)/lib/software/alex/go/bin
-prod: all
-	sudo systemd-run --collect --unit=lostclipart -p ProtectSystem=strict \
-	 -p ProtectHome=tmpfs -p BindPaths=`pwd`:/home/$(USER) \
-	 -p BindPaths=$(node.bin):/home/$(USER)/bin \
-	 -p User=$(USER) -p WorkingDirectory=/home/$(USER) \
-	 -p Environment=NODE_ENV=production \
-	 -p SyslogIdentifier=node \
-	 sh -c 'exec bin/node server.js'
+node.dir := /opt/s/node-v12.8.0-linux-x64
+chroot.dir := $(realpath ../chroot)
+prod:
+	-sudo systemctl stop lostclipart
+	rm -rf $(chroot.dir)
+	mkdir -p $(chroot.dir)/{bin,lib64}
+	cp `which busybox` $(chroot.dir)/bin/sh
+	ldd $(node.dir)/bin/node | awk '/=> \/lib64\// {print $$3}' | xargs install -t $(chroot.dir)/lib64
+	cp /lib64/ld-linux-* $(chroot.dir)/lib64
+	sudo systemd-run --collect --unit=lostclipart \
+	 -p RootDirectory=$(chroot.dir) -p BindReadOnlyPaths=$(node.dir):/usr \
+	 -p MountAPIVFS=true -p PrivateDevices=true \
+	 -p User=$(USER) -p SyslogIdentifier=node \
+	 -p Environment=PATH=/bin:/usr/bin -p Environment=NODE_ENV=production \
+	 -p BindReadOnlyPaths=`pwd`:/app -p BindPaths=`pwd`/_out:/app/_out \
+	 -p WorkingDirectory=/app /bin/sh -c 'node server.js'
 
 o := cat
 log:
