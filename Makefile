@@ -41,19 +41,27 @@ devel: all
 node.dir := /opt/s/node-v12.8.0-linux-x64
 chroot.dir := $(realpath ../chroot)
 prod:
-	-sudo systemctl stop lostclipart
-	rm -rf $(chroot.dir)
-	mkdir -p $(chroot.dir)/{bin,lib64}
-	cp `which busybox` $(chroot.dir)/bin/sh
-	ldd $(node.dir)/bin/node | awk '/=> \/lib64\// {print $$3}' | xargs install -t $(chroot.dir)/lib64
-	cp /lib64/ld-linux-* $(chroot.dir)/lib64
-	sudo systemd-run --collect --unit=lostclipart \
-	 -p RootDirectory=$(chroot.dir) -p BindReadOnlyPaths=$(node.dir):/usr \
-	 -p MountAPIVFS=true -p PrivateDevices=true \
-	 -p User=$(USER) -p SyslogIdentifier=node \
-	 -p Environment=PATH=/bin:/usr/bin -p Environment=NODE_ENV=production \
-	 -p BindReadOnlyPaths=`pwd`:/app -p BindPaths=`pwd`/_out:/app/_out \
-	 -p WorkingDirectory=/app /bin/sh -c 'node server.js'
+	$(call chroot,/bin/sh -c 'node server.js')
+
+test-chroot:
+	$(call chroot,/bin/sh,--wait --tty)
+
+define chroot =
+-sudo systemctl stop lostclipart
+rm -rf $(chroot.dir)
+mkdir -p $(chroot.dir)/{bin,lib64}
+cp `which busybox` $(chroot.dir)/bin/sh
+$(if $2,cp `which busybox` $(chroot.dir)/bin)
+ldd $(node.dir)/bin/node | awk '/=> \/lib64\// {print $$3}' | xargs install -t $(chroot.dir)/lib64
+cp /lib64/ld-linux-* $(chroot.dir)/lib64
+sudo systemd-run $2 --collect --unit=lostclipart \
+ -p RootDirectory=$(chroot.dir) -p BindReadOnlyPaths=$(node.dir):/usr \
+ -p MountAPIVFS=true -p PrivateDevices=true \
+ -p User=$(USER) -p SyslogIdentifier=node \
+ -p Environment=PATH=/bin:/usr/bin -p Environment=NODE_ENV=production \
+ -p BindReadOnlyPaths=`pwd`:/app -p BindPaths=`pwd`/_out:/app/_out \
+ -p WorkingDirectory=/app $1
+endef
 
 o := cat
 log:
