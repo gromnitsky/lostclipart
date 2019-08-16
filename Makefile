@@ -39,7 +39,7 @@ devel: all
 	systemd-run --user --collect --unit=lostclipart -d node server.js
 
 node.dir := /opt/s/node-v12.8.0-linux-x64
-chroot.dir := $(realpath ../chroot)
+chroot.dir := $(abspath ../chroot)
 prod:
 	$(call chroot,/bin/sh -c 'node server.js')
 
@@ -50,6 +50,7 @@ define chroot =
 -sudo systemctl stop lostclipart
 rm -rf $(chroot.dir)
 mkdir -p $(chroot.dir)/{bin,lib64}
+echo /bin/busybox --install -s /bin > $(chroot.dir)/busybox-install.sh
 cp `which busybox` $(chroot.dir)/bin/sh
 $(if $2,cp `which busybox` $(chroot.dir)/bin)
 ldd $(node.dir)/bin/node | awk '/=> \/lib64\// {print $$3}' | xargs install -t $(chroot.dir)/lib64
