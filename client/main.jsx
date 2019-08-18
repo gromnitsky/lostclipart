@@ -38,7 +38,7 @@ class Main extends React.Component {
         return (
             <>
               <header>
-                <Link to="/search/-t%20fish"><Icon name="home" /></Link>
+                <Link to="/"><Icon name="home" /></Link>
                 <Link to="upload" title="Upload an SVG">
                   <Icon name="upload" />
                 </Link>
@@ -62,7 +62,8 @@ class Main extends React.Component {
                            user_set={this.user_set.bind(this)}/>
                   <ImageView path="image/:iid" />
                   <Search path="search/:query" query_set={this.query_set.bind(this)} />
-                  <Search path="search" query="" query_set={this.query_set.bind(this)} />
+                  <Search path="/" query="-t fish" query_set={this.query_set.bind(this)} />
+                  <NotFound default />
                 </Router>
               </main>
 
@@ -108,6 +109,8 @@ let Logout = function() {
     window.location.replace('/') // hard reload
     return null
 }
+
+let NotFound = () => <h1>Not Found</h1>
 
 function Icon(props) {
     return <svg width="16" height="16"><use href={"/node_modules/bytesize-icons/dist/bytesize-inline.svg#i-" + props.name}></use></svg>
