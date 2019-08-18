@@ -6,10 +6,11 @@ import * as ic from './image_common.js'
 
 export default class Upload extends React.Component {
     constructor(props) {
-	super(props)
-	this.form = React.createRef()
-	this.state = {}
+        super(props)
+        this.form = React.createRef()
+        this.state = {}
         u.title('Upload')
+        this.error = u.gui_error.bind(this)
     }
 
     render() {
@@ -111,13 +112,12 @@ export default class Upload extends React.Component {
 		body: form
 	    }).then( json => {
 		navigate(`image/${json.iid}`)
-	    }).catch( e => this.error(e))
-		.finally( () => fieldset.disabled = false)
-	})
-    }
-
-    error(err) {
-	if (err instanceof Error) err = err.message
-	this.setState({error: err ? `Error: ${err}`: ''})
+            }).catch( e => {
+                // redirect to the already uploaded by someone else image
+                let m = e.headers.get('X-Error').match(/^SqliteError: ([0-9]+)$/)
+                if (m) navigate(`/image/${m[1]}`)
+                this.error(e)
+            }).finally( () => fieldset.disabled = false)
+        })
     }
 }

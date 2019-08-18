@@ -14,6 +14,7 @@ let co_body = require('co-body')
 let serve_static = require('serve-static')
 let multiparty = require('multiparty')
 let mmm = require('mmmagic')
+let SqliteError = require('better-sqlite3').SqliteError
 
 let u = require('./u')
 let search = require('./lib/search')
@@ -163,7 +164,8 @@ app.use('/api/image/upload', (req, res, next) => {
 	    return {att, iid}
 	})
 
-	attachments(fields, files).then(transaction).then( async v => {
+        let get_attachments = attachments(fields, files)
+	get_attachments.then(transaction).then( async v => {
 	    let img = search.iid2image(session.uid, v.iid, conf.img)
 	    await mv(v.att.svg.file.path, img.svg)
 	    await mv(v.att.thumbnail.path,  img.thumbnail)
@@ -171,6 +173,13 @@ app.use('/api/image/upload', (req, res, next) => {
             u.log.image('upload:', v.iid)
 	    res.end(JSON.stringify({iid: v.iid}))
 	}).catch( e => {
+            if (e instanceof SqliteError && /\bmd5\b/.test(e.message)) {
+                get_attachments.then(att => md5_to_iid(att.svg.md5)).then(iid=>{
+                    e.message = iid
+                }).finally( () => error(409, e))
+                return
+            }
+
 	    // FIXME: rm moved files
 	    error(400, e)
 	})
@@ -308,7 +317,8 @@ app.use((req, res, next) => {	// in 404 stead
 app.use( (err, req, res, _next) => {
     res.statusCode = err.status || 500
     res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-    res.end(conf.devel ? err.stack : err.toString())
+    res.setHeader('X-Error', err.message)
+    res.end(conf.devel ? err.stack : '')
     if (process.env.NODE_ENV !== 'test') {
         let r = err.stack || err.toString()
         if (res.statusCode === 404) r = err.toString()
@@ -493,3 +503,9 @@ class SqlPredicate {
 }
 
 function sql_quote(s) { return "'" + s.replace(/'/g, "''") + "'" }
+
+function md5_to_iid(md5) {
+    let image = db.prepare(`select iid from images where md5=?`).get(md5)
+    if (!image) throw new AERR(404, `invalid md5`)
+    return image.iid
+}
