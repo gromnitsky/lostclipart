@@ -108,8 +108,9 @@ div.awesomplete {
   width: 100%;
 }
 
-div.awesomplete > input {
-  width: -webkit-fill-available; /* FIXME */
+div.awesomplete > input {       /* FIXME */
+  width: -webkit-fill-available;
+  width: -moz-available;
 }
 
 
