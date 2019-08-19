@@ -23,20 +23,19 @@ export default class Upload extends React.Component {
     }
 
     render() {
-	return (
-	    <>
-	      <div className="form-error">{this.state.error_loading}</div>
-              <div className="form-error">{this.state.error_saving}</div>
+        return (
+            <>
+              <div className="form-error">{this.state.error_loading}</div>
 
-	      <div className={this.state.error_loading ? 'hidden' : ''}>
-		<div id="image--viewer">
-		  <a id="image--viewer__img"
-		     href={this.img().svg} target="_blank"
-		     rel="noopener noreferrer">
-		    <img src={this.state.iid && this.img().thumbnail} />
-		  </a>
+              <div className={this.state.error_loading ? 'hidden' : 'image--viewer'}>
+                <a href={this.img().svg} target="_blank"
+                   rel="noopener noreferrer"
+                   style={{marginRight: '5px'}} >
+                  <img src={this.state.iid && this.img().thumbnail} />
+                </a>
 
-                  <span>Title</span>
+                <div className="image--viewer__controls">
+                  <span>Title:</span>
                   <WR_input model={this.state.title}
                            iid={this.props.iid}
                            name="title"
@@ -48,7 +47,7 @@ export default class Upload extends React.Component {
                     </>
                   </WR_input>
 
-                  <span>Uploader</span>
+                  <span>Uploader:</span>
                   <Link to={"/user/" + this.state.uid}>{this.state.user_name}</Link>
 
                   <span>License:</span>
@@ -65,7 +64,7 @@ export default class Upload extends React.Component {
                     </>
                   </WR_license>
 
-                  <span>Original filename</span>
+                  <span>Original filename:</span>
                   <WR_input model={this.state.filename}
                            iid={this.props.iid}
                            name="filename"
@@ -77,7 +76,7 @@ export default class Upload extends React.Component {
                     </>
                   </WR_input>
 
-                  <span>mtime</span>
+                  <span>mtime:</span>
                   <WR_mtime model={this.state.mtime}
                             iid={this.props.iid}
                             name="mtime"
@@ -90,10 +89,10 @@ export default class Upload extends React.Component {
                     </>
                   </WR_mtime>
 
-		  <span>Size</span>
-		  <span>{this.state.size} bytes</span>
+                  <span>Size:</span>
+                  <span>{this.state.size} bytes</span>
 
-		  <span>Tags</span>
+                  <span>Tags:</span>
                   <WR_tags model={this.state.tags}
                             iid={this.props.iid}
                             name="tags"
@@ -102,19 +101,18 @@ export default class Upload extends React.Component {
                     <>
                       <span className="wrinput__readable"></span>
                       <div className="wrinput__writable">
-                        <AwesompleteTagger id="image--viewer__tagger"
-                                           completions={ic.tags_completions} />
+                        <AwesompleteTagger completions={ic.tags_completions} />
                       </div>
                     </>
                   </WR_tags>
 
-		  <span>Uploaded</span>
-		  <div>{u.date_fmt(this.state.uploaded)}</div>
+                  <span>Uploaded:</span>
+                  <div>{u.date_fmt(this.state.uploaded)}</div>
 
-		  <span>Write access</span>
-		  <div>{this.writable() ? 'yes' : 'no'}</div>
+                  <span>Write access:</span>
+                  <div>{this.writable() ? 'yes' : 'no'}</div>
 
-		  <span>Description</span>
+                  <span>Description:</span>
                   <WR_input model={this.state.desc}
                             iid={this.props.iid}
                             name="desc"
@@ -127,14 +125,18 @@ export default class Upload extends React.Component {
                     </>
                   </WR_input>
 
+                  <div className="form-error" style={{gridColumn: '1 / -1'}}>
+                    {this.state.error_saving}
+                  </div>
+
                   <button className={this.writable() ? '' : 'hidden'}
                           onClick={this.handle_delete.bind(this)}
-                          id="image--viewer__delete">Delete</button>
+                          id="image--viewer__controls__delete">Delete</button>
 
-		</div>
-	      </div>
-	    </>
-	)
+                </div>
+              </div>
+            </>
+        )
     }
 
     writable() {

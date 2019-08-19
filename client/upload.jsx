@@ -22,7 +22,7 @@ export default class Upload extends React.Component {
               <h1>Upload</h1>
 
               <fieldset>
-                <div>
+                <div className="image--viewer">
                   <div style={{display: 'flex', flexDirection: 'column', marginRight: '5px'}}>
                     <input type="file" name="svg" id="form--image__file"
                            onChange={this.handle_image.bind(this)}
@@ -31,7 +31,7 @@ export default class Upload extends React.Component {
                             id="form--image__preview" />
                   </div>
 
-                  <div className="form--image__controls">
+                  <div className="image--viewer__controls">
                     <label htmlFor="form--image__title">Title:</label>
                     <input name="title" id="form--image__title" />
 
