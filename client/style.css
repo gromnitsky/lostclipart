@@ -114,29 +114,16 @@ footer ul li {
 }
 
 .form--image fieldset > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.form--image__controls {
+  flex-grow: 1;
   display: grid;
   grid-gap: 5px;
-  grid-template-columns: 1fr auto 2fr;
-  grid-template-rows: auto auto auto 1fr auto;
-  grid-template-areas: "img label ctrl"
-                       ".   label ctrl"
-                       ".   label ctrl"
-                       ".   label ctrl"
-                       ".   .     ctrl"
-}
-
-.form--image__ctrl {
-  grid-column: img;
-  grid-row: span 4;
-}
-
-.form--image > div > label {
-  grid-column: label;
-}
-
-.form--image__btn {
-  grid-column: ctrl;
-  text-align: end;
+  grid-template-columns: auto 1fr;
 }
 
 

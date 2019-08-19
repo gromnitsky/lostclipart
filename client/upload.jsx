@@ -14,53 +14,53 @@ export default class Upload extends React.Component {
     }
 
     render() {
-	if (!Cookies.get('uid')) {
-	    navigate('/login', { replace: true }); return null
-	}
-	return (
-	    <form className="form--image"
-		  onSubmit={this.handle_submit.bind(this)}
-		  ref={this.form}>
-	      <h1>Upload</h1>
+        if (!Cookies.get('uid')) return navigate('/login', { replace: true })
 
-	      <fieldset>
-		<div>
-		  <div className="form--image__ctrl">
-		    <input type="file" name="svg"
-			   id="form--image__file"
-			   onChange={this.handle_image.bind(this)}
-			   accept=".svg, .SVG" />
+        return (
+            <form className="form--image" ref={this.form}
+                  onSubmit={this.handle_submit.bind(this)} >
+              <h1>Upload</h1>
 
-		    <canvas style={{marginTop: '5px'}}
-			    width="320" height="320"
-			    id="form--image__preview"></canvas>
-		  </div>
+              <fieldset>
+                <div>
+                  <div style={{display: 'flex', flexDirection: 'column', marginRight: '5px'}}>
+                    <input type="file" name="svg" id="form--image__file"
+                           onChange={this.handle_image.bind(this)}
+                           accept=".svg, .SVG" />
+                    <canvas style={{marginTop: '5px'}} width="320" height="320"
+                            id="form--image__preview" />
+                  </div>
 
-		  <label htmlFor="form--image__title">Title:</label>
-		  <input name="title" id="form--image__title" />
+                  <div className="form--image__controls">
+                    <label htmlFor="form--image__title">Title:</label>
+                    <input name="title" id="form--image__title" />
 
-		  <label htmlFor="image__license-sel">License:</label>
-		  <ic.LicenseSelector />
+                    <label htmlFor="image__license-sel">License:</label>
+                    <ic.LicenseSelector />
 
-                  <label htmlFor="form--image__tags">Tags:</label>
-                  <AwesompleteTagger id="form--image__tags" name="tags"
-                                     placeholder="foo bar, baz"
-                                     completions={ic.tags_completions} />
+                    <label htmlFor="form--image__tags">Tags:</label>
+                    <AwesompleteTagger id="form--image__tags" name="tags"
+                                       placeholder="foo bar, baz"
+                                       completions={ic.tags_completions} />
 
-		  <label htmlFor="form--upload__desc">Description:</label>
-		  <textarea id="form--image__desc"
-			    name="desc" style={{height: '4rem'}} />
+                    <label htmlFor="form--image__desc">Description:</label>
+                    <textarea id="form--image__desc"
+                              name="desc" style={{height: '4rem'}} />
 
-		  <div className="form--image__btn">
-		    <input type="submit" />
-		  </div>
+                    <div className="form--useradd__btn">
+                      <input type="submit" />
+                    </div>
 
-		</div>
-	      </fieldset>
+                    <div className="form-error" style={{gridColumn: '1 / -1'}}>
+                      {this.state.error}
+                    </div>
+                  </div>
 
-	      <div className="form-error">{this.state.error}</div>
-	    </form>
-	)
+                </div>
+              </fieldset>
+
+            </form>
+        )
     }
 
     handle_image() {
@@ -88,6 +88,7 @@ export default class Upload extends React.Component {
 	    // select which s to use
 	    ;[width, height] = sY1 > sX2 ? [sX2, sY2] : [sX1, sY1]
 	    ctx.drawImage(img, 0,0, width, height)
+            this.error('')
 	}
     }
 
