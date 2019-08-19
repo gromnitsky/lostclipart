@@ -101,7 +101,7 @@ footer ul li {
 }
 
 #image__license-sel {
-  max-width: fit-content;
+  max-width: max-content;
 }
 
 div.awesomplete {

@@ -14,7 +14,9 @@ export default class Upload extends React.Component {
     }
 
     render() {
-        if (!Cookies.get('uid')) return navigate('/login', { replace: true })
+        if (!Cookies.get('uid')) {
+            navigate('/login', { replace: true }); return null
+        }
 
         return (
             <form className="form--image" ref={this.form}
