@@ -5,20 +5,16 @@ import * as u from './u.js'
 
 export default class UserAdd extends React.Component {
     constructor(props) {
-	super(props)
-	this.form = React.createRef()
-	this.state = { error: '' }
+        super(props)
+        this.form = React.createRef()
+        this.state = {}
         u.title('Register')
-    }
-
-    error(err) {
-	if (err instanceof Error) err = err.message
-	this.setState({error: err ? `Error: ${err}`: ''})
+        this.error = u.gui_error.bind(this)
     }
 
     handle_submit(event) {
 	event.preventDefault()
-	this.error()
+        this.error('')
 	let fieldset = this.form.current.querySelector('fieldset')
 
 	let form = new FormData(this.form.current)
