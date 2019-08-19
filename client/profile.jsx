@@ -3,146 +3,150 @@
 let {Link, navigate} = ReachRouter
 import * as u from './u.js'
 
-export default class Profile extends React.Component {
-    constructor(props) {
-	super(props)
-	this.form_general = React.createRef()
-	this.form_pw = React.createRef()
+export default function Profile(props) {
+    u.title('Profile')
+    return (
+        <>
+          <UserEdit {...props} />
+          <UserEditPassword {...props} />
+        </>
+    )
+}
 
-	this.error_general = e => this.flash_error('error_general', e)
-	this.error_pw = e => this.flash_error('error_pw', e)
-
-	this.state = {
-	    error_general: '',
-	    error_pw: '',
-	}
-        u.title('Profile')
+class UserEdit extends React.Component {
+    constructor() {
+        super()
+        this.state = {}
+        this.form = React.createRef()
+        this.error = u.gui_error.bind(this)
     }
 
     componentDidMount() {
-	u.user_info(this.uid()).then( json => {
+        u.user_info(this.props.uid).then( json => {
             this.setState(json)
             u.title(json.name, 2)
-        })
+        }).catch( e => this.error(e))
     }
 
     render() {
-	return (
-	    <>
-	      <form className="form--useradd"
-		    onSubmit={this.handle_submit_general.bind(this)}
-		    ref={this.form_general}>
-		<h1>Profile</h1>
-		<div className="form-error">{this.state.error_general}</div>
-		<fieldset>
-		  <div>
-		    <label>Name</label>
-		    <input name="name" value={this.state.name}
-			   onChange={this.handle_name_change.bind(this)} />
+        return (
+            <form className="form--useradd" ref={this.form}
+                  onSubmit={this.handle_submit.bind(this)} >
+              <h1>Profile</h1>
+              <div className="form-error">{this.state.error}</div>
 
-		    <label>Group</label>
-		    <span className="form--pw__roval">{this.state.grp}</span>
+              <fieldset>
+                <div>
+                  <label htmlFor="form--useradd__name">Name:</label>
+                  <input name="name" value={this.state.name}
+                         id="form--useradd__name"
+                         onChange={this.input_handle.bind(this)} />
 
-		    <label>Registered</label>
-		    <span className="form--pw__roval">
-		      {u.date_fmt(this.state.registered)}
-		    </span>
+                  <label>Group:</label>
+                  <span>{this.state.grp}</span>
 
-		    <label>Uploads</label>
-                    <Link className="form--pw__roval" to={`/search/-r%20-u%20${search.sq(this.state.uid)}`}>{this.state.uploads}</Link>
+                  <label>Registered:</label>
+                  <span>{u.date_fmt(this.state.registered)}</span>
 
-		    <label>Account status</label>
-		    <span>{this.state.status ? this.state.status : 'nominal'}</span>
+                  <label>Uploads:</label>
+                  {this.state.uid ? <Link to={`/search/-r%20-u%20${search.sq(this.state.uid)}`}>{this.state.uploads}</Link> : <span />}
 
-		    <label>Gecos</label>
-		    <textarea value={this.state.gecos}
-			      onChange={this.handle_gecos_change.bind(this)}
-			      name="gecos" style={{height: '4rem'}} />
+                  <label>Status:</label>
+                  <span>{this.status()}</span>
 
-		    <div className="form--useradd__btn">
-		      <input type="submit" />
-		    </div>
-		  </div>
-		</fieldset>
-	      </form>
+                  <label htmlFor="form--useradd__gecos">Gecos:</label>
+                  <textarea value={this.state.gecos}
+                            id="form--useradd__gecos"
+                            onChange={this.input_handle.bind(this)}
+                            name="gecos" style={{height: '4rem'}} />
 
-	      <form className="form--useradd"
-		    onSubmit={this.handle_submit_pw.bind(this)}
-		    ref={this.form_pw}>
-		<h1>Change Password</h1>
-		<div className="form-error">{this.state.error_pw}</div>
-		<fieldset>
-		  <div>
-		    <label htmlFor="form--pw__1">New password:</label>
-		    <input name="password1" type="password" id="form--pw__1" />
-		    <label htmlFor="form--pw__2">Repeat new password:</label>
-		    <input name="password2" type="password" id="form--pw__2" />
+                  <div className="form--useradd__btn">
+                    <input type="submit" />
+                  </div>
 
-		    <div className="form--useradd__btn">
-		      <input type="submit" />
-		    </div>
-
-		  </div>
-		</fieldset>
-	      </form>
-	    </>
-	)
+                </div>
+              </fieldset>
+            </form>
+        )
     }
 
-    handle_submit_general(event) {
-	event.preventDefault()
-	this.error_general('')
-	let fieldset = this.form_general.current.querySelector('fieldset')
-
-	let form = new FormData(this.form_general.current)
-	form.append('uid', this.uid())
-
-	fieldset.disabled = true
-	u.fetch_text('/api/user/edit/misc', {
-	    method: 'POST', body: new URLSearchParams(form).toString()
-	}).then( () => {	// upd user name in GUI
-	    Cookies.set('name', form.get('name'))
-	    this.props.user_set(form.get('name'))
-	}).catch( e => this.error_general(e))
-	    .finally( () => fieldset.disabled = false)
+    input_handle(event) {
+        this.setState({[event.target.name]: event.target.value})
     }
 
-    handle_gecos_change(evt) { this.setState({gecos: evt.target.value}) }
-    handle_name_change(evt) { this.setState({name: evt.target.value}) }
-
-    handle_submit_pw(event) {
-	event.preventDefault()
-	this.error_pw('')
-	let fieldset = this.form_pw.current.querySelector('fieldset')
-
-	let form = new FormData(this.form_pw.current)
-	if (form.get('password1') !== form.get('password2')) {
-	    this.error_pw("passwords don't match"); return
-	}
-	form.set('uid', this.uid())
-	form.set('password', form.get('password1'))
-	form.delete('password1')
-	form.delete('password2')
-
-	fieldset.disabled = true
-	u.fetch_text('/api/user/edit/password', {
-	    method: 'POST', body: new URLSearchParams(form).toString()
-	}).then( () => {
-	    navigate('/login')
-	}).catch( e => this.error_pw(e))
-	    .finally( () => fieldset.disabled = false)
+    status() {
+        if (this.state.error) return null
+        return this.state.status ? this.state.status : 'nominal'
     }
 
-    get_user_info() {
+    handle_submit(event) {
+        event.preventDefault()
+        this.error('')
+        let fieldset = this.form.current.querySelector('fieldset')
+
+        let form = new FormData(this.form.current)
+        form.append('uid', this.props.uid)
+
+        fieldset.disabled = true
+        u.fetch_text('/api/user/edit/misc', {
+            method: 'POST', body: new URLSearchParams(form).toString()
+        }).then( () => {        // upd user name in GUI
+            Cookies.set('name', form.get('name'))
+            this.props.user_set(form.get('name'))
+        }).catch( e => this.error(e)).finally( () => fieldset.disabled = false)
+    }
+}
+
+class UserEditPassword extends React.Component {
+    constructor() {
+        super()
+        this.state = {}
+        this.form = React.createRef()
+        this.error = u.gui_error.bind(this)
     }
 
-    uid() {
-	let p = window.location.href.split('/')
-	return p[p.length - 1] || -1
+    render() {
+        return (
+            <form className="form--useradd" ref={this.form}
+                  onSubmit={this.handle_submit.bind(this)} >
+              <h1>Change Password</h1>
+              <div className="form-error">{this.state.error}</div>
+              <fieldset>
+                <div>
+                  <label htmlFor="form--pw__1">New password:</label>
+                  <input name="password1" type="password" id="form--pw__1" />
+                  <label htmlFor="form--pw__2">Repeat new password:</label>
+                  <input name="password2" type="password" id="form--pw__2" />
+
+                  <div className="form--useradd__btn">
+                    <input type="submit" />
+                  </div>
+
+                </div>
+              </fieldset>
+            </form>
+        )
     }
 
-    flash_error(form, err) {
-	if (err instanceof Error) err = err.message
-	this.setState({[form]: err ? `Error: ${err}`: ''})
+    handle_submit(event) {
+        event.preventDefault()
+        this.error('')
+        let fieldset = this.form.current.querySelector('fieldset')
+
+        let form = new FormData(this.form.current)
+        if (form.get('password1') !== form.get('password2')) {
+            this.error("passwords don't match"); return
+        }
+        form.set('uid', this.props.uid)
+        form.set('password', form.get('password1'))
+        form.delete('password1')
+        form.delete('password2')
+
+        fieldset.disabled = true
+        u.fetch_text('/api/user/edit/password', {
+            method: 'POST', body: new URLSearchParams(form).toString()
+        }).then( () => {
+            navigate('/login')
+        }).catch( e => this.error(e)).finally( () => fieldset.disabled = false)
     }
 }

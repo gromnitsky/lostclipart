@@ -41,7 +41,8 @@ export function session_start(token, props) {
 }
 
 export function date_fmt(s) {
-    return new Date(s*1000).toLocaleString('en-ZA', {timeZone: 'UTC'})
+    let d = new Date(s*1000)
+    return isNaN(d) ? null : d.toLocaleString('en-ZA', {timeZone: 'UTC'})
 }
 
 export function user_info(uid) {

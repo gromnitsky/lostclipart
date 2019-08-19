@@ -114,7 +114,7 @@ export default class Upload extends React.Component {
 		navigate(`image/${json.iid}`)
             }).catch( e => {
                 // redirect to the already uploaded by someone else image
-                let m = e.headers.get('X-Error').match(/^SqliteError: ([0-9]+)$/)
+                let m = e.headers.get('X-Error').match(/SqliteError: ([0-9]+)$/)
                 if (m) navigate(`/image/${m[1]}`)
                 this.error(e)
             }).finally( () => fieldset.disabled = false)

@@ -317,7 +317,7 @@ app.use((req, res, next) => {	// in 404 stead
 app.use( (err, req, res, _next) => {
     res.statusCode = err.status || 500
     res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-    res.setHeader('X-Error', err.message)
+    res.setHeader('X-Error', err.toString())
     res.end(conf.devel ? err.stack : '')
     if (process.env.NODE_ENV !== 'test') {
         let r = err.stack || err.toString()
