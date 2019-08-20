@@ -55,7 +55,7 @@ export default class Search extends React.Component {
               <div className="form-error">{this.state.error}</div>
               <div>{this.state.progress}</div>
               <div className="images">
-                {!images.length && !this.state.error ? 'No match' : images}
+                {!this.state.progress && !images.length && !this.state.error ? 'No match' : images}
               </div>
 
               {this.next_link()}
