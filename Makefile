@@ -70,7 +70,7 @@ log:
 	journalctl --user -b -f -u lostclipart -o $(o)
 
 cloc:
-	cloc --script-lang=JavaScript,node *.sql *.js client/* Makefile lib/*
+	cloc --script-lang=JavaScript,node --exclude-ext=md client lib *.sql *.js Makefile
 
 
 
