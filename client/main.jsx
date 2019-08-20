@@ -39,7 +39,7 @@ class Main extends React.Component {
             <>
               <header>
                 <Link to="/"><Icon name="home" /></Link>
-                <Link to="upload" title="Upload an SVG">
+                <Link to={Cookies.get('uid') ? "upload" : "login"} title="Upload an SVG">
                   <Icon name="upload" />
                 </Link>
                 <span style={{flexGrow: 1}}>
@@ -84,7 +84,7 @@ let HeaderProfile = function(props) {
         let profile = `/user/${Cookies.get('uid')}`
         return (
             <>
-              <a href={profile} title={props.name}><Icon name="user" /></a>
+              <Link to={profile} title={props.name}><Icon name="user" /></Link>
               <Link to="logout" title="Logout"><Icon name="signout" /></Link>
             </>
         )
