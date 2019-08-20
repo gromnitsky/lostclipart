@@ -39,17 +39,25 @@ exports.db_open = function(conf) {
 }
 
 exports.Conf = function(out = '_out') {
+    this.server = { port: 3000 }
     this.img = path.join(out, 'img')
     this.upload = {
         dir: path.join(out, 'tmp'),
         max_files_size: 5*1024*1024,
     },
     this.tags = { perimage: 5 }
+    this.search = { perpage: 6 }
     this.client = { dir: path.join(out, 'client') }
     this.db = path.join(out, 'db.sqlite3')
     this.devel = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
 
     fs.mkdirSync(this.upload.dir, {recursive: true})
+
+    try {
+        Object.assign(this,JSON.parse(fs.readFileSync(out+'/server.conf.json')))
+    } catch(e) {
+        // do nothing
+    }
 }
 
 exports.is_str = function(s) {

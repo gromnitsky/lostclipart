@@ -297,7 +297,7 @@ WHERE ${query._ ? 'images_fts MATCH '+fts_query : 1}
       AND ${simple_pred.toString('AND')}
 GROUP BY i.iid ${tags_pred.params.length ? 'HAVING n = '+tags_pred.params.length : ''}
 ORDER BY i.uploaded ${query.sort}, i.iid ${query.sort}
-LIMIT 5
+LIMIT ${conf.search.perpage}
 `
     res.end(JSON.stringify(db.prepare(sql)
                            .all([...tags_pred.params, ...simple_pred.params])))
@@ -326,7 +326,7 @@ app.use( (err, req, res, _next) => {
     }
 })
 
-app.listen(3000)
+app.listen(conf.server.port || process.env('PORT'))
 
 
 // "foo, bar" is ok, ", " is not
