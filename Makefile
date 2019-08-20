@@ -9,14 +9,15 @@ $(out)/node_modules/%: node_modules/%; $(copy)
 
 src := client
 
-jsx.src := $(wildcard $(src)/*.jsx)
+files := $(shell find $(src) -type f)
+jsx.src := $(filter %.jsx, $(files))
 jsx.dest := $(patsubst $(src)/%.jsx, $(out)/%.js, $(jsx.src))
 
 $(out)/%.js: $(src)/%.jsx
 	$(mkdir)
 	node_modules/.bin/babel -s true $< -o $@
 
-static.src := $(filter-out $(jsx.src), $(wildcard $(src)/*))
+static.src := $(filter-out $(jsx.src), $(files))
 static.dest := $(patsubst $(src)/%, $(out)/%, $(static.src))
 
 $(out)/%: $(src)/%; $(copy)

@@ -9,6 +9,7 @@ import ImageView from './image_view.js'
 import * as u from './u.js'
 import Search from './search.js'
 import AwesompleteInput from './awesomplete_input.js'
+import Doc from './doc.js'
 
 class Main extends React.Component {
     constructor(props) {
@@ -63,19 +64,23 @@ class Main extends React.Component {
                   <ImageView path="image/:iid" />
                   <Search path="search/:query" query_set={this.query_set.bind(this)} />
                   <Search path="/" query="-t fish" query_set={this.query_set.bind(this)} />
+                  <Doc path="doc/:file" />
                   <NotFound default />
                 </Router>
               </main>
 
-	      <footer>
-		<ul>
-		  <li>&copy; 2019 AG</li>
-		  <li><a href="/terms.txt">Terms</a></li>
-		  <li><a href="/privacy.txt">Privacy</a></li>
-		</ul>
-	      </footer>
-	    </>
-	)
+              <footer>
+                <ul>
+                  <li><Link to="doc/help">Help</Link></li>
+                  <li><Link to="doc/terms">Terms</Link></li>
+                  <li><Link to="doc/privacy">Privacy</Link></li>
+                </ul>
+                <div>
+                  Contact: <code>q at lostclipart dot com</code>
+                </div>
+              </footer>
+            </>
+        )
     }
 }
 
