@@ -10,6 +10,7 @@ import * as u from './u.js'
 import Search from './search.js'
 import AwesompleteInput from './awesomplete_input.js'
 import Doc from './doc.js'
+import gdpr from './gdpr.js'
 
 class Main extends React.Component {
     constructor(props) {
@@ -34,6 +35,8 @@ class Main extends React.Component {
         } else
             this.setState({search_query: val}) // 1st load
     }
+
+    componentDidMount() { setTimeout( () => gdpr(), 5000) }
 
     render() {
         return (
@@ -74,6 +77,7 @@ class Main extends React.Component {
                   <li><Link to="doc/help">Help</Link></li>
                   <li><Link to="doc/terms">Terms</Link></li>
                   <li><Link to="doc/privacy">Privacy</Link></li>
+                  <li><Link to="doc/cookies">Cookies</Link></li>
                 </ul>
                 <div>
                   Contact: <code>q at lostclipart dot com</code>

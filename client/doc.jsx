@@ -20,10 +20,12 @@ export default class Upload extends React.Component {
 
         this.error('')
         u.title(this.props.file, 2)
+        let doc = this.div.current
+
         u.fetch_text(`/doc/${this.props.file}.md`).then( text => {
-            this.div.current.innerHTML = marked(text)
+            doc.innerHTML = marked(text)
             // convert all <a> to <Link>
-            Array.from(this.div.current.querySelectorAll('a')).forEach(tag => {
+            Array.from(doc.querySelectorAll('a')).forEach(tag => {
                 tag.onclick = function(event) {
                     if (shouldNavigate(event)) { // reach/router/src/index.js
                         event.preventDefault()
@@ -31,9 +33,11 @@ export default class Upload extends React.Component {
                     }
                 }
             })
+            doc.scrollIntoView()
+
         }).catch( e => {
             this.error(e)
-            this.div.current.innerHTML = ''
+            doc.innerHTML = ''
         })
     }
 
@@ -41,7 +45,7 @@ export default class Upload extends React.Component {
         return (
             <>
               <div className="form-error">{this.state.error}</div>
-              <div style={{margin: '0 auto', maxWidth: '600px'}} ref={this.div} />
+              <div id="doc" ref={this.div} />
             </>
         )
     }
