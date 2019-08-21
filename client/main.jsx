@@ -10,7 +10,7 @@ import * as u from './u.js'
 import Search from './search.js'
 import AwesompleteInput from './awesomplete_input.js'
 import Doc from './doc.js'
-import gdpr from './gdpr.js'
+import GDPR from './gdpr.js'
 
 class Main extends React.Component {
     constructor(props) {
@@ -36,11 +36,10 @@ class Main extends React.Component {
             this.setState({search_query: val}) // 1st load
     }
 
-    componentDidMount() { setTimeout( () => gdpr(), 5000) }
-
     render() {
         return (
             <>
+              <GDPR />
               <header>
                 <Link to="/"><Icon name="home" /></Link>
                 <Link to={Cookies.get('uid') ? "upload" : "login"} title="Upload an SVG">
