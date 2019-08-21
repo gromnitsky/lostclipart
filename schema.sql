@@ -5,7 +5,7 @@ CREATE TABLE users(uid INTEGER PRIMARY KEY,
                         CHECK(rmatch('^[a-zA-Z0-9_]{2,20}$', name)),
                    pw_hash NOT NULL,
                    blob NOT NULL,
-                   gecos,
+                   gecos NOT NULL DEFAULT '' CHECK(length(gecos) <= 512),
                    registered INT NOT NULL,
                    grp NOT NULL,
                    status);
@@ -27,19 +27,21 @@ INSERT INTO licenses(name) VALUES ('CC BY-SA');
 CREATE TABLE images(iid INTEGER PRIMARY KEY,
                     uid INT NOT NULL,
                     md5 UNIQUE NOT NULL,
-                    filename NOT NULL CHECK(length(trim(filename)) > 0),
+                    filename NOT NULL CHECK(length(trim(filename)) > 0
+                                            AND length(filename) <= 256),
                     mtime INT NOT NULL CHECK(rmatch('^[0-9.]+$', mtime)),
                     size INT NOT NULL,
                     uploaded INT NOT NULL,
-		    title NOT NULL CHECK(length(trim(title)) > 0),
-                    desc,
+		    title NOT NULL CHECK(length(trim(title)) > 0
+                                         AND length(title) <= 80),
+                    desc NOT NULL DEFAULT '' CHECK(length(desc) <= 512),
                     lid INT NOT NULL,
                     FOREIGN KEY(uid) REFERENCES users(uid)
 		    FOREIGN KEY(lid) REFERENCES licenses(lid));
 
 CREATE TABLE tags(tid INTEGER PRIMARY KEY,
-                  name UNIQUE NOT NULL COLLATE NOCASE,
-                  desc);
+                  name UNIQUE NOT NULL COLLATE NOCASE CHECK(length(name) <= 32),
+                  desc NOT NULL DEFAULT '' CHECK(length(desc) <= 512));
 INSERT INTO tags(name) VALUES ('man');
 INSERT INTO tags(name) VALUES ('woman');
 INSERT INTO tags(name) VALUES ('cat');

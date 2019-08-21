@@ -55,10 +55,6 @@ export default class UserAdd extends React.Component {
 		  <label htmlFor="form--useradd__pw2">Repeat password:</label>
 		  <input name="password2" type="password" id="form--useradd__pw2" />
 
-		  <div id="form--useradd__captcha">
-		    TODO: captcha
-		  </div>
-
 		  <div className="form--useradd__btn">
 		    <input type="submit" />
 		  </div>

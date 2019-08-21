@@ -167,6 +167,8 @@ pre.wrinput__readable {
   display: flex;
   flex-direction: column;
 
+  overflow: auto;
+  word-break: break-word;
 }
 
 .images__btn-next {
