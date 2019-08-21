@@ -74,11 +74,13 @@ class Main extends React.Component {
               <footer>
                 <ul>
                   <li><Link to="doc/help">Help</Link></li>
+                </ul>
+                <ul>
                   <li><Link to="doc/terms">Terms</Link></li>
                   <li><Link to="doc/privacy">Privacy</Link></li>
                   <li><Link to="doc/cookies">Cookies</Link></li>
                 </ul>
-                <div>
+                <div style={{marginLeft: 'auto'}}>
                   Contact: <code>q at lostclipart dot com</code>
                 </div>
               </footer>

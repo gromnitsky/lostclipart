@@ -42,10 +42,13 @@ export default class Upload extends React.Component {
     }
 
     render() {
+        let prank = {}
+        if (['terms', 'privacy', 'cookies'].indexOf(this.props.file) !== -1)
+            prank = { fontSize: '8px' }
         return (
             <>
               <div className="form-error">{this.state.error}</div>
-              <div id="doc" ref={this.div} />
+              <div id="doc" style={prank} ref={this.div} />
             </>
         )
     }

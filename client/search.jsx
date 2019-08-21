@@ -44,6 +44,7 @@ export default class Search extends React.Component {
             }).catch( e => {
                 this.setState({ error: e.message })
             }).finally( () => {
+                window.scroll({top: 0})
                 this.setState({progress: null})
             })
     }
@@ -70,7 +71,7 @@ export default class Search extends React.Component {
             last_uploaded: img.uploaded,
             last_iid: img.iid,
         })
-        return <Link to={`/search/${search.querify(new_query)}`}>Next</Link>
+        return <Link className="images__btn-next" to={`/search/${search.querify(new_query)}`}>Next</Link>
     }
 
     images() {
