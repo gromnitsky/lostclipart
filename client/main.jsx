@@ -57,17 +57,19 @@ class Main extends React.Component {
 
               <main>
                 <Router primary={false}>
-                  <Upload path="upload" />
-                  <UserAdd path="useradd" user_set={this.user_set.bind(this)} />
-                  <Login path="login" user_set={this.user_set.bind(this)} />
-                  <Logout path="logout" />
-                  <Profile path="user/:uid"
-                           user_set={this.user_set.bind(this)}/>
-                  <ImageView path="image/:iid" />
-                  <Search path="search/:query" query_set={this.query_set.bind(this)} />
-                  <Search path="/" query="-t fish" query_set={this.query_set.bind(this)} />
-                  <Doc path="doc/:file" />
-                  <NotFound default />
+                  <ScrollToTop path="/">
+                    <Upload path="upload" />
+                    <UserAdd path="useradd" user_set={this.user_set.bind(this)} />
+                    <Login path="login" user_set={this.user_set.bind(this)} />
+                    <Logout path="logout" />
+                    <Profile path="user/:uid"
+                             user_set={this.user_set.bind(this)}/>
+                    <ImageView path="image/:iid" />
+                    <Search path="search/:query" query_set={this.query_set.bind(this)} />
+                    <Search path="/" query="-t fish" query_set={this.query_set.bind(this)} />
+                    <Doc path="doc/:file" />
+                    <NotFound default />
+                  </ScrollToTop>
                 </Router>
               </main>
 
@@ -124,6 +126,12 @@ let NotFound = () => <h1>Not Found</h1>
 
 function Icon(props) {
     return <svg width="16" height="16"><use href={"/node_modules/bytesize-icons/dist/bytesize-inline.svg#i-" + props.name}></use></svg>
+}
+
+// https://github.com/reach/router/issues/242#issuecomment-491537468
+function ScrollToTop({children, location}) {
+    React.useEffect(() => window.scrollTo(0, 0), [location.pathname])
+    return children
 }
 
 let app = document.querySelector('body')

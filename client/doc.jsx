@@ -33,7 +33,6 @@ export default class Upload extends React.Component {
                     }
                 }
             })
-            doc.scrollIntoView()
 
         }).catch( e => {
             this.error(e)

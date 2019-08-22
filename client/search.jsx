@@ -44,7 +44,6 @@ export default class Search extends React.Component {
             }).catch( e => {
                 this.setState({ error: e.message })
             }).finally( () => {
-                window.scroll({top: 0})
                 this.setState({progress: null})
             })
     }
