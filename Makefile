@@ -1,3 +1,4 @@
+SHELL := bash -o pipefail
 out := _out
 web := _out/client
 all:
