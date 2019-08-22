@@ -33,3 +33,14 @@ Find all images that have a string in title/desc/tag that contains a
 substring "cat" from a user w/ the id 12345:
 
     cat* -u 12345
+
+## Converting WMF to SVG
+
+Use Inkscape. A recipe for GNU Make:
+
+~~~
+%.svg: %.WMF
+	inkscape "$<" --export-plain-svg="$@"
+~~~
+
+I tried ImageMagick first, but the results were pitiful.

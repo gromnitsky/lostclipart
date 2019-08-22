@@ -12,12 +12,14 @@ token := uid=$(uid); token=$(token); exp_date=$(exp_date)
 title := some rubbish
 tags := test,curl
 lid ?= 2
+orig_filename = $(if $(orig_ext),;filename=$(notdir $(basename $(svg))).$(orig_ext))
 
 .PHONY: upload
 upload:
 	curl -fS $(server)/api/image/upload -b "$(token)" \
-	 -F svg=@"$(svg)" \
+	 -F svg=@"$(svg)$(orig_filename)" \
 	 -F thumbnail=@"$(basename $(svg)).png" \
-	 -F lid=2 -F tags="$(tags)" -F title="$(title)" -F desc="$(desc)"
+	 -F lid=2 -F tags="$(tags)" -F title="$(title)" -F desc="$(desc)" \
+	 -F mtime="`stat -c %Y "$(svg)"`"
 
 login:; @echo "$(token)"

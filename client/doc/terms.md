@@ -26,7 +26,7 @@ You are specifically restricted from all of the following:
 * using this website in any way that is or may be damaging to this website;
 * using this website in any way that impacts user access to this website;
 * using this website contrary to applicable laws and regulations, or
-  in any way may cause harm to the Website, or to any person or
+  in any way may cause harm to the website, or to any person or
   business entity;
 * engaging in any data mining, bulk data harvesting, bulk data
   extracting or any other similar activity in relation to this
@@ -43,7 +43,7 @@ maintain confidentiality as well.
 
 This website is provided "as is," with all faults, and
 <code>lostclipart.com</code> express no representations or warranties,
-of any kind related to this Website or the materials contained on this
+of any kind related to this website or the materials contained on this
 website. Also, nothing contained on this website shall be interpreted
 as advising you.
 
