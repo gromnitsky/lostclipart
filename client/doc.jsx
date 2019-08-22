@@ -42,7 +42,7 @@ export default class Upload extends React.Component {
 
     render() {
         let prank = {}
-        if (['terms', 'privacy', 'cookies'].indexOf(this.props.file) !== -1)
+        if (['terms', 'privacy'].indexOf(this.props.file) !== -1)
             prank = { fontSize: '8px' }
         return (
             <>
