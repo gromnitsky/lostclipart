@@ -133,7 +133,7 @@ app.use('/api/image/upload', (req, res, next) => {
 	    },
 	    thumbnail: files.thumbnail[0],
 	}
-	if ( !(await file(att.svg.file.path) === 'image/svg' &&
+	if ( !( (await file(att.svg.file.path)).startsWith('image/svg') &&
 	       await file(att.thumbnail.path) === 'image/png') )
 	    throw new Error('images are in wrong formats')
 	return att
