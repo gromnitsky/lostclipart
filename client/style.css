@@ -23,7 +23,7 @@ body {
 
 header {
   display: flex;
-  align-items: center;
+  /* align-items: center; */
 }
 
 header > * {
@@ -32,6 +32,14 @@ header > * {
 
 header > *:last-child {
   margin: 0;
+}
+
+header input[type="search"] {
+  font-size: 24px;
+}
+
+header .awesomplete > ul {
+  font-size: 24px;
 }
 
 
