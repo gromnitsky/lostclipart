@@ -230,3 +230,18 @@ pre.wrinput__readable {
 .gdpr-warning button {
   float: right;
 }
+
+
+.tags-explorer {
+  margin-top: 1em;
+  column-width: 170px;
+  column-rule: 1px solid #a5a5a5;
+}
+
+.tags-explorer a {
+  text-decoration: none;
+}
+
+.tags-explorer--tag > span {
+  word-break: break-all;
+}

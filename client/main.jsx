@@ -12,6 +12,7 @@ import AwesompleteInput from './awesomplete_input.js'
 import Doc from './doc.js'
 import GDPR from './gdpr.js'
 import Status from './status.js'
+import TagsExplorer from './tags_explorer.js'
 
 class Main extends React.Component {
     constructor(props) {
@@ -46,6 +47,7 @@ class Main extends React.Component {
                 <Link to={Cookies.get('uid') ? "upload" : "login"} title="Upload an SVG">
                   <Icon name="upload" />
                 </Link>
+                <Link to="/tags/explorer" title="Tags Explorer"><Icon name="tag" /></Link>
                 <span style={{flexGrow: 1}}>
                   <AwesompleteInput type="search"
                                     inner_ref={this.input}
@@ -68,6 +70,7 @@ class Main extends React.Component {
                     <ImageView path="image/:iid" />
                     <Doc path="doc/:file" />
                     <Status path="status" />
+                    <TagsExplorer path="tags/explorer" />
                     <Search path="search/:query" query_set={this.query_set.bind(this)} />
                     <Search path="/" query="-t fish" query_set={this.query_set.bind(this)} />
                     <NotFound default />

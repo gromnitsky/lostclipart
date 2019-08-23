@@ -200,6 +200,15 @@ app.use('/api/tags/search', (req, res) => {
     return res.end(JSON.stringify(tags))
 })
 
+app.use('/api/tags/all', (req, res) => {
+    return res.end(JSON.stringify(db.prepare(`
+SELECT tags.tid, tags.name, tags.desc, count(iid) as count FROM tags
+INNER JOIN images_tags ON images_tags.tid == tags.tid
+GROUP BY tags.tid
+ORDER BY count DESC
+`).all()))
+})
+
 app.use('/api/image/view', (req, res, next) => {
     let q = db.prepare(`SELECT * FROM images_view WHERE iid = ?`)
 	.all(req.searchparams.get('iid'))
