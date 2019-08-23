@@ -303,6 +303,15 @@ LIMIT ${conf.search.perpage}
                            .all([...tags_pred.params, ...simple_pred.params])))
 })
 
+app.use('/api/status', (req, res) => {
+    return res.end(JSON.stringify(db.prepare(`SELECT
+(SELECT count(iid) FROM images) AS images,
+(SELECT count(tid) FROM tags) AS tags,
+(SELECT count(uid) FROM users) AS users,
+(SELECT uploaded FROM images ORDER BY uploaded DESC LIMIT 1) AS last_upload
+`).get()))
+})
+
 app.use(serve_static(conf.client.dir))
 
 app.use((req, res, next) => {	// in 404 stead

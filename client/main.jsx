@@ -11,6 +11,7 @@ import Search from './search.js'
 import AwesompleteInput from './awesomplete_input.js'
 import Doc from './doc.js'
 import GDPR from './gdpr.js'
+import Status from './status.js'
 
 class Main extends React.Component {
     constructor(props) {
@@ -65,9 +66,10 @@ class Main extends React.Component {
                     <Profile path="user/:uid"
                              user_set={this.user_set.bind(this)}/>
                     <ImageView path="image/:iid" />
+                    <Doc path="doc/:file" />
+                    <Status path="status" />
                     <Search path="search/:query" query_set={this.query_set.bind(this)} />
                     <Search path="/" query="-t fish" query_set={this.query_set.bind(this)} />
-                    <Doc path="doc/:file" />
                     <NotFound default />
                   </ScrollToTop>
                 </Router>
@@ -76,6 +78,7 @@ class Main extends React.Component {
               <footer>
                 <ul>
                   <li><Link to="doc/help">Help</Link></li>
+                  <li><Link to="status">Status</Link></li>
                 </ul>
                 <ul>
                   <li><Link to="doc/terms">Terms</Link></li>
