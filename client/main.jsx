@@ -14,6 +14,8 @@ import GDPR from './gdpr.js'
 import Status from './status.js'
 import TagsExplorer from './tags_explorer.js'
 
+let git = require('babel-plugin-git-log-1') // babel replaces the line w/ a hash
+
 class Main extends React.Component {
     constructor(props) {
         super(props)
@@ -89,7 +91,8 @@ class Main extends React.Component {
                   <li><Link to="doc/cookies">Cookies</Link></li>
                 </ul>
                 <div style={{marginLeft: 'auto'}}>
-                  Contact: <code>q at lostclipart dot com</code>
+                  Contact: <code>q at lostclipart dot com</code><br />
+                  <span title={git.log.subject}>{git.log.hash.slice(0,7)}</span>, {git.dirty ? '*' : '-'}:{git.ref}, {git.log.commiter.date}
                 </div>
               </footer>
             </>
