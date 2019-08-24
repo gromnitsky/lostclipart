@@ -30,7 +30,7 @@ export default class GDPR extends React.Component {
 
     handle_consent() {
         Cookies.set(this.key, 1, {
-            expires: new Date('2038-01-10'),
+            expires: new Date(Date.now() + 10*365*24*60*60*1000), // 10 years
             SameSite: 'Strict'
         })
         this.setState({hidden: true})

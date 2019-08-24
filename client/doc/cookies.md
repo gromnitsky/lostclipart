@@ -1,14 +1,17 @@
 # Cookies policy
 
-To make lostclipart.com work properly, we sometimes place small data
-files called cookies on your device.
+(Adopted from [European
+Commission's](https://ec.europa.eu/info/cookies_en) website.)
+
+To make <code>lostclipart.com</code> work properly, we sometimes place
+small data files called cookies on your device.
 
 ## What are cookies?
 
 A cookie is a small text file that a website stores on your computer
 or mobile device when you visit the site.
 
-* **First party cookies** are cookies set by the website you’re
+* **First party cookies** are cookies set by the website you're
   visiting. Only that website can read them. In addition, a website
   might potentially use external services, which also set their own
   cookies, known as **third-party cookies**.
@@ -16,11 +19,11 @@ or mobile device when you visit the site.
   not deleted automatically when you quit your browser, unlike a
   session cookie, which is deleted when you quit your browser.
 
-First time you visit the lostclipart.com, you will be prompted to
-accept or refuse cookies.
+First time you visit the <code>lostclipart.com</code>, you will be
+prompted to accept cookies.
 
 The purpose is to enable the site to remember your preferences (such
-as user name, etc.) for a certain period of time. That way, you don’t
+as user name, etc.) for a certain period of time. That way, you don't
 have to re-enter them when browsing around the site during the same
 visit.
 
@@ -29,9 +32,9 @@ browsing experience on our sites.
 
 ## How do we use cookies?
 
-lostclipart.com mostly use “first-party cookies”. These are cookies
-set and controlled by lostclipart.com, not by any external
-organisation.
+<code>lostclipart.com</code> mostly use "first-party cookies". These
+are cookies set and controlled by <code>lostclipart.com</code>, not by
+any external organisation.
 
 However, to establish anonymised statistics, you will have to accept
 cookies from external organisations.
@@ -44,11 +47,11 @@ The 2 types of first-party cookie we use are to:
 ### Visitor preferences
 
 These are set by us and only we can read them. They remember if you
-have agreed to this site’s cookie policy
+have agreed to this site's cookie policy
 
 | Name                | Purpose                        | Type & Duration  |
 | ------------------- | ------------------------------ | ---------------- |
-| `eu_cookie_consent` | Stores your cookie preferences | First-party persistent cookie, ∞ |
+| `eu_cookie_consent` | Stores your cookie preferences | First-party persistent cookie, 10 years |
 
 
 ## Operational cookies
@@ -61,7 +64,7 @@ web pages to function.
 
 ### Authentication cookies
 
-These are stored when you log in to lostclipart.com website, using our
+These are stored when you log in to <code>lostclipart.com</code> website, using our
 authentication service. When you do this, you accept the associated
 privacy policy.
 
@@ -99,7 +102,7 @@ the browsing history of your browser. This will remove all cookies
 from all websites you have visited.
 
 Be aware though that you may also lose some saved information
-(e.g. saved login details, site preferences).
+(e.g. saved login details).
 
 ### Managing site-specific cookies
 
