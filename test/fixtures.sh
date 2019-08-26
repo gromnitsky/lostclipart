@@ -19,7 +19,7 @@ new_token bob0
 __dirname="$(dirname "$(readlink -f "$0")")"
 
 upload() {
-    curl -fS $server/api/image/upload -b "$token" \
+    curl -fsS $server/api/image/upload -b "$token" \
 	 -F svg=@"$__dirname/$1.svg" \
 	 -F thumbnail=@"$__dirname/$1.png" \
 	 -F lid=2 -F tags="$2" -F title="$3" -F desc="$4"

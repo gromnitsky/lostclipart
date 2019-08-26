@@ -133,10 +133,12 @@ app.use('/api/image/upload', (req, res, next) => {
 	    },
 	    thumbnail: files.thumbnail[0],
 	}
-	if ( !( (await file(att.svg.file.path)).startsWith('image/svg') &&
-	       await file(att.thumbnail.path) === 'image/png') )
-	    throw new Error('images are in wrong formats')
-	return att
+        if ( !( (await file_mime_type(att.svg.file.path)).startsWith('image/svg') && await file_mime_type(att.thumbnail.path) === 'image/png') )
+            throw new Error('images are in wrong formats')
+        let png = await png_dimensions(att.thumbnail.path)
+        if ( !(png.width <= 320 && png.height <= 320))
+            throw new Error(`invalid png size: ${png.width}x${png.height}`)
+        return att
     }
 
     form.parse(req, (err, fields, files) => {
@@ -409,13 +411,29 @@ class AERR extends Error {
     }
 }
 
-function file(name) {
+function file_mime_type(name) {
     return new Promise( (res, rej) => {
 	let magic = new mmm.Magic(mmm.MAGIC_MIME_TYPE)
 	magic.detectFile(name, function(err, result) {
 	    if (err) rej(err)
 	    res(result)
 	})
+    })
+}
+
+function png_dimensions(name) {
+    return new Promise( (res, rej) => {
+        let magic = new mmm.Magic()
+        magic.detectFile(name, function(err, result) {
+            if (err) rej(err)
+
+            let m = result.match(/, (\d+) x (\d+),/)
+            let [height, width] = [Number(m[1]), Number(m[2])]
+            if (isNaN(height) || isNaN(width))
+                rej(new Error("failed to get png dimensions"))
+            else
+                res({width, height})
+        })
     })
 }
 
