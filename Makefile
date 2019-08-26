@@ -43,7 +43,7 @@ devel: all
 	-systemctl --user stop lostclipart
 	systemd-run --user --collect --unit=lostclipart -d node server.js
 
-node.dir := /opt/s/node-v12.8.0-linux-x64
+node.dir := /opt/s/node-v12.9.0-linux-x64
 chroot.dir := $(abspath ../chroot)
 prod:
 	$(call chroot,/bin/sh -c 'node server.js')
@@ -70,8 +70,9 @@ sudo systemd-run $2 --collect --unit=lostclipart \
 endef
 
 o := cat
+is_devel = $(shell systemctl is-active --quiet lostclipart || echo inactive)
 log:
-	journalctl --user -b -f -u lostclipart -o $(o)
+	journalctl -b -f -u lostclipart -o $(o) $(if $(is_devel),--user)
 
 cloc:
 	cloc --script-lang=JavaScript,node --exclude-ext=md client lib *.sql *.js Makefile

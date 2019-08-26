@@ -4,22 +4,14 @@ let path = require('path')
 let util = require('util')
 let Database = require('better-sqlite3')
 
-exports.log = {
-    debug: sd_log.bind(console, 7, ""),
-    error: sd_log.bind(console, 3, ""),
-    sqlite: sd_log.bind(console, 7, "sqlite"),
-    user: sd_log.bind(console, 5, "user"),
-    image: sd_log.bind(console, 5, "image"),
-}
-
-exports.db_open = function(conf) {
+exports.db_open = function(conf, log) {
     let custom_sqlite_functions = db => {
         db.pragma('foreign_keys = ON')
         db.function('rmatch', (re, str) => Number(new RegExp(re).test(str)))
     }
 
     let open = (file, sql) => {
-        let opt = { verbose: conf.devel ? exports.log.sqlite : null }
+        let opt = { verbose: log }
         let db; try {
             db = new Database(file,
                               Object.assign({}, {fileMustExist: true}, opt))
@@ -71,3 +63,17 @@ function sd_log(level, src, ...args) {
         return to_s(v).split("\n").join(`\n${prefix}`)
     }).join` `)
 }
+
+class Log {
+    constructor(max_level = 7) { this.max_level = max_level }
+    _log(level, src, ...args) {
+        if (level <= this.max_level) sd_log(level, src, ...args)
+    }
+
+    debug(...a) { this._log(7, "", ...a) }
+    sqlite(...a) { this._log(7, "sqlite", ...a) }
+    user(...a) { this._log(5, "user", ...a) }
+    image(...a) {this._log(5, "image", ...a) }
+    error(...a) { this._log(3, "", ...a) }
+}
+exports.Log = Log

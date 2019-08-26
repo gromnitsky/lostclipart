@@ -20,10 +20,11 @@ let u = require('./u')
 let search = require('./lib/search')
 
 let conf = new u.Conf()
-let db = u.db_open(conf)
+let log = new u.Log(conf.devel ? '7' : '5')
+let db = u.db_open(conf, log.sqlite.bind(log))
 let app = connect()
 
-if (conf.devel) u.log.debug(process.env)
+log.debug(process.env)
 
 app.use('/', (req, res, next) => {
     if (req.method === 'GET') req.searchparams = new URLSearchParams(req.url.slice(req.url.search(/[?&]/)+1))
@@ -50,7 +51,7 @@ app.use('/api/user/new', async (req, res, next) => {
 
     let gecos = (req.body.gecos || '').slice(0, 512)
     user_add(req.body.name, req.body.password, gecos, today()).then( uid => {
-        u.log.user('new:', req.body.name)
+        log.user('new:', req.body.name)
         res.end(JSON.stringify(token(uid)))
     }).catch(e => next(new AERR(409, e)))
 })
@@ -92,7 +93,7 @@ app.use('/api/user/edit/misc', (req, res, next) => {
     } catch(e) {
         return next(new AERR(400, e))
     }
-    u.log.user('edit:', req.body.name)
+    log.user('edit:', req.body.name)
     res.end()
 })
 
@@ -144,8 +145,8 @@ app.use('/api/image/upload', (req, res, next) => {
     form.parse(req, (err, fields, files) => {
 	let error = (code, msg) => { cleanup(files); next(new AERR(code, msg)) }
 	if (err) return error(500, err.message)
-	u.log.debug('upload fields:', fields)
-	u.log.debug('upload files:', util.inspect(files, {depth:null}))
+	log.debug('upload fields:', fields)
+	log.debug('upload files:', util.inspect(files, {depth:null}))
 
 	let transaction = db.transaction( att => {
 	    let iid = db.prepare('INSERT INTO images VALUES (NULL, @uid, @md5, @filename, @mtime, @size, @uploaded, @title, @desc, @lid)').run({
@@ -172,7 +173,7 @@ app.use('/api/image/upload', (req, res, next) => {
 	    await mv(v.att.svg.file.path, img.svg)
 	    await mv(v.att.thumbnail.path,  img.thumbnail)
 
-            u.log.image('upload:', v.iid)
+            log.image('upload:', v.iid)
 	    res.end(JSON.stringify({iid: v.iid}))
 	}).catch( e => {
             if (e instanceof SqliteError && /\bmd5\b/.test(e.message)) {
@@ -257,7 +258,7 @@ app.use('/api/image/edit/misc', (req, res, next) => {
                     fts_update(req.body.iid, col, req.body[col])
                 })()
             })
-        u.log.image('edit:', req.body.iid)
+        log.image('edit:', req.body.iid)
         res.end()
     } catch(e) {
         next(new AERR(400, e))
@@ -275,7 +276,7 @@ app.use('/api/image/edit/rm', (req, res, next) => {
     } catch(e) {
         next(new AERR(400, e))
     }
-    u.log.image('rm:', req.body.iid)
+    log.image('rm:', req.body.iid)
     res.end()
 })
 
@@ -342,7 +343,7 @@ app.use( (err, req, res, _next) => {
     if (process.env.NODE_ENV !== 'test') {
         let r = err.stack || err.toString()
         if (res.statusCode === 404) r = err.toString()
-        u.log.error(`${req.method} ${res.statusCode} ${req.url}:`, r)
+        log.error(`${req.method} ${res.statusCode} ${req.url}:`, r)
     }
 })
 
