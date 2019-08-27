@@ -34,6 +34,10 @@ class Main extends React.Component {
     user_set(name) { this.setState({user_name: name}) }
 
     query_set(val) {
+        // hide pagination info from users
+        val = (val || '').replace(/--last_uploaded\s+(\d+)?(\s+)?/g, '')
+            .replace(/--last_iid\s+(\d+)?(\s+)?/g, '')
+
         if (this.input.current) {
             this.input.current.value = val
         } else
