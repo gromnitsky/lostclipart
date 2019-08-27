@@ -311,8 +311,13 @@ GROUP BY i.iid ${tags_pred.params.length ? 'HAVING n = '+tags_pred.params.length
 ORDER BY i.uploaded ${query.sort}, i.iid ${query.sort}
 LIMIT ${conf.search.perpage}
 `
-    res.end(JSON.stringify(db.prepare(sql)
-                           .all([...tags_pred.params, ...simple_pred.params])))
+    let r
+    try {
+        r = db.prepare(sql).all([...tags_pred.params, ...simple_pred.params])
+    } catch(e) {
+        return next(new AERR(400, e)) // usually an fts5 error
+    }
+    res.end(JSON.stringify(r))
 })
 
 app.use('/api/status', (req, res) => {
