@@ -31,7 +31,7 @@ exports.db_open = function(conf, log) {
 }
 
 exports.Conf = function(out = '_out') {
-    this.server = { port: 3000 }
+    this.server = { host: '127.0.0.1', port: 3000 }
     this.img = path.join(out, 'img')
     this.upload = {
         dir: path.join(out, 'tmp'),
@@ -50,6 +50,8 @@ exports.Conf = function(out = '_out') {
     } catch(e) {
         // do nothing
     }
+    this.server.port = process.env.PORT || this.server.port
+    this.server.host = process.env.HOST || this.server.host
 }
 
 exports.is_str = function(s) {

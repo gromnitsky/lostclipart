@@ -356,7 +356,7 @@ app.use( (err, req, res, _next) => {
     }
 })
 
-app.listen(conf.server.port || process.env('PORT'))
+app.listen(conf.server, () => console.log(`Listening on ${conf.server.host}:${conf.server.port}`))
 
 
 // "foo, bar" is ok, ", " is not
