@@ -70,12 +70,12 @@ privacy policy.
 
 | Name       | Purpose                 | Type & Duration                       |
 | ---------- | ----------------------- | --------------------------------------|
-| `uid`      | Identifies your session | First-party persistent cookie, 3 month|
-| `name`     |                         |                                       |
-| `grp`      |                         |                                       |
-| `status`   |                         |                                       |
-| `token`    |                         |                                       |
-| `exp_date` |                         |                                       |
+| `uid`      | Identifies your session | First-party persistent cookie, 90 days|
+| `name`     | -/-                     | -/-                                   |
+| `grp`      | -/-                     | -/-                                   |
+| `status`   | -/-                     | -/-                                   |
+| `token`    | -/-                     | -/-                                   |
+| `exp_date` | -/-                     | -/-                                   |
 
 ### Third-party analytics cookies
 

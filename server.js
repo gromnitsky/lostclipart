@@ -401,6 +401,8 @@ function session_uid(req) {
     let exp_date = cookie_get(req, 'exp_date')
     let token = cookie_get(req, 'token')
 
+    if (new Date(Number(exp_date)) < new Date()) return {uid: -2}
+
     let user = db.prepare(`SELECT * FROM users WHERE uid = ?`).get(uid)
     if (!user || user.status) return { uid: -1 }
 
