@@ -10,6 +10,7 @@ export default class Status extends React.Component {
     }
 
     componentDidMount() {
+        u.fetch_json(`/api/1/headers`).then(console.log)
         u.fetch_json(`/api/status`).then( r => this.setState(r)).
             catch( e => this.error(e))
     }

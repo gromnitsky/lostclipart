@@ -329,6 +329,10 @@ app.use('/api/status', (req, res) => {
 `).get()))
 })
 
+app.use('/api/1/headers', (req, res) => {
+    return res.end(JSON.stringify(req.headers))
+})
+
 app.use(serve_static(conf.client.dir))
 
 app.use((req, res, next) => {	// in 404 stead
