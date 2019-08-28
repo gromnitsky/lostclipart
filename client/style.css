@@ -214,8 +214,6 @@ pre.wrinput__readable {
   max-width: 400px;
   border: 1px solid #a5a5a5;
   padding: 1em;
-  border-radius: 3px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.6);
 }
 
 .gdpr-warning h2 {
