@@ -43,9 +43,9 @@ devel: all
 	-systemctl --user stop lostclipart
 	systemd-run --user --collect --unit=lostclipart -d node server.js
 
-node.dir := /opt/s/node-v12.9.0-linux-x64
+node.dir := /opt/s/node-v12.9.1-linux-x64
 chroot.dir := $(abspath ../chroot)
-prod:
+prod: all
 	$(call chroot,/bin/sh -c 'node server.js')
 
 test-chroot:
