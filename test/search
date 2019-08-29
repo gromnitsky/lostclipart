@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 function main() {
-    fetch('http://127.0.0.1:3000/api/search?q=' +
+    fetch('http://127.0.0.1:3000/api/1/search?q=' +
           encodeURIComponent(process.argv.slice(2).join` `))
         .then(console.log)
         .catch(console.error)

@@ -88,7 +88,7 @@ class UserEdit extends React.Component {
         form.append('uid', this.props.uid)
 
         fieldset.disabled = true
-        u.fetch_text('/api/user/edit/misc', {
+        u.fetch_text('/api/1/user/edit/misc', {
             method: 'POST', body: new URLSearchParams(form).toString()
         }).then( () => {        // upd user name in GUI
             Cookies.set('name', form.get('name'))
@@ -143,7 +143,7 @@ class UserEditPassword extends React.Component {
         form.delete('password2')
 
         fieldset.disabled = true
-        u.fetch_text('/api/user/edit/password', {
+        u.fetch_text('/api/1/user/edit/password', {
             method: 'POST', body: new URLSearchParams(form).toString()
         }).then( () => {
             navigate('/login')

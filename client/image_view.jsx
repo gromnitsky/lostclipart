@@ -12,7 +12,7 @@ export default class Upload extends React.Component {
     }
 
     componentDidMount() {
-	u.fetch_json(`/api/image/view?iid=${this.props.iid}`).then( json => {
+	u.fetch_json(`/api/1/image/view?iid=${this.props.iid}`).then( json => {
 	    let r = Object.assign({}, json[0])
 	    r.tags = json.map( v => v.tag).join`, `
 	    this.setState(r)
@@ -155,7 +155,7 @@ export default class Upload extends React.Component {
         if (!confirm("Are you sure?")) return
         let form = new FormData()
         form.set('iid', this.props.iid)
-        u.my_fetch('/api/image/edit/rm', {
+        u.my_fetch('/api/1/image/edit/rm', {
             method: 'POST',
             body: new URLSearchParams(form).toString()
         }).then( () => {
@@ -249,7 +249,7 @@ class WR_input extends React.Component {
         let form = new FormData()
         form.set('iid', this.props.iid)
         form.set(this.props.name, new_val)
-        u.my_fetch('/api/image/edit/misc', {
+        u.my_fetch('/api/1/image/edit/misc', {
             method: 'POST',
             body: new URLSearchParams(form).toString()
         }).then( () => {
@@ -300,7 +300,7 @@ class WR_license extends WR_input {
     componentDidMount() { this.fetch_licenses() }
 
     fetch_licenses() {
-        u.fetch_json('/api/licenses').then( licenses => this.setState({ licenses }))
+        u.fetch_json('/api/1/licenses').then( licenses => this.setState({ licenses }))
     }
 
     writable_children() {

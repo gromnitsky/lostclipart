@@ -106,7 +106,7 @@ export default class Upload extends React.Component {
 		     this.svg().name.replace(/\.\w+$/, '.png'))
 
 	    fieldset.disabled = true // FIXME: draw a progress bar
-	    u.fetch_json('/api/image/upload', {
+	    u.fetch_json('/api/1/image/upload', {
 		method: 'POST',
 		body: form
 	    }).then( json => {

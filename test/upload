@@ -5,7 +5,7 @@ $(if $(svg),,$(error no svg= param))
 name ?= bob
 server := 127.0.0.1:3000
 
-login := $(shell curl -fs $(server)/api/user/login -d name=$(name) -d password=1234567890 | ruby -rjson -ne 'JSON.parse($$_).each {|k,v| puts "\#{k}:=\#{v}" }')
+login := $(shell curl -fs $(server)/api/1/user/login -d name=$(name) -d password=1234567890 | ruby -rjson -ne 'JSON.parse($$_).each {|k,v| puts "\#{k}:=\#{v}" }')
 $(foreach var,$(login),$(eval $(var)))
 token := uid=$(uid); token=$(token); exp_date=$(exp_date)
 
@@ -16,7 +16,7 @@ orig_filename = $(if $(orig_ext),;filename=$(notdir $(basename $(svg))).$(orig_e
 
 .PHONY: upload
 upload:
-	curl -fS $(server)/api/image/upload -b "$(token)" \
+	curl -fS $(server)/api/1/image/upload -b "$(token)" \
 	 -F svg=@"$(svg)$(orig_filename)" \
 	 -F thumbnail=@"$(basename $(svg)).png" \
 	 -F lid=2 -F tags="$(tags)" -F title="$(title)" -F desc="$(desc)" \

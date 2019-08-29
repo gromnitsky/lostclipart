@@ -59,7 +59,7 @@ export default class AwesompleteInput extends React.Component {
 
             switch (t.prev()) {
             case '-l':
-                u.fetch_json('/api/licenses').
+                u.fetch_json('/api/1/licenses').
                     then( r => r.map( v => v.name)).then(run)
                 break
             case '-t':

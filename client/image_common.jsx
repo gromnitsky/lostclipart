@@ -19,7 +19,7 @@ export class LicenseSelector extends React.Component {
 
     async fetch_licenses() {
 	this.setState({
-	    licenses: (await u.fetch_json('/api/licenses'))
+	    licenses: (await u.fetch_json('/api/1/licenses'))
 		.map( v => <option key={v.lid} value={v.lid}>{v.name}</option>)
 	})
     }
@@ -34,6 +34,6 @@ export class LicenseSelector extends React.Component {
 }
 
 export function tags_completions(user_input) {
-    return u.fetch_json(`/api/tags/search?q=${encodeURIComponent(user_input)}`).
+    return u.fetch_json(`/api/1/tags/search?q=${encodeURIComponent(user_input)}`).
         then( r => r.map( v => v.name))
 }

@@ -48,7 +48,7 @@ export function date_fmt(s) {
 export function user_info(uid) {
     let form = new FormData()
     form.append('uid', uid)
-    return fetch_json('/api/user/profile', {
+    return fetch_json('/api/1/user/profile', {
 	method: 'POST',
 	body: new URLSearchParams(form).toString()
     })

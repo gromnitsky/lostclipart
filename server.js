@@ -31,7 +31,7 @@ app.use('/', (req, res, next) => {
     next()
 })
 
-app.use('/api/user', (req, res, next) => {
+app.use('/api/1/user', (req, res, next) => {
     if (req.method !== 'POST') return next(new AERR(405, 'Method Not Allowed'))
     co_body.form(req, {limit: '1kb'}).then( body => {
         req.body = body
@@ -39,13 +39,13 @@ app.use('/api/user', (req, res, next) => {
     }).catch(next)
 })
 
-app.use('/api/user/profile', (req, res, next) => {
+app.use('/api/1/user/profile', (req, res, next) => {
     let user = db.prepare(`SELECT uid,name,grp,gecos,registered,status,(select count(iid) from images where uid=@uid) AS uploads FROM users WHERE uid = @uid`).get({uid: req.body.uid})
     if (!user) return next(new AERR(404, 'invalid uid'))
     res.end(JSON.stringify(user))
 })
 
-app.use('/api/user/new', async (req, res, next) => {
+app.use('/api/1/user/new', async (req, res, next) => {
     if (!validate_password(req.body.password))
         return next(new AERR(400, 'bad password'))
 
@@ -56,7 +56,7 @@ app.use('/api/user/new', async (req, res, next) => {
     }).catch(e => next(new AERR(409, e)))
 })
 
-app.use('/api/user/login', async (req, res, next) => {
+app.use('/api/1/user/login', async (req, res, next) => {
     let error = () => next(new AERR(400, 'bad cridentials'))
 
     let user = db.prepare(`SELECT uid,pw_hash,status FROM users WHERE name = ?`)
@@ -70,7 +70,7 @@ app.use('/api/user/login', async (req, res, next) => {
     error()
 })
 
-app.use('/api/user/edit', (req, res, next) => {
+app.use('/api/1/user/edit', (req, res, next) => {
     let session = session_uid(req)
     if (session.uid < 0) return next(new AERR(400, 'bad session token'))
 
@@ -85,7 +85,7 @@ app.use('/api/user/edit', (req, res, next) => {
     next()
 })
 
-app.use('/api/user/edit/misc', (req, res, next) => {
+app.use('/api/1/user/edit/misc', (req, res, next) => {
     let gecos = (req.body.gecos || '').slice(0, 512)
     try {
         db.prepare(`UPDATE users SET name = ?, gecos = ? WHERE uid = ?`)
@@ -97,7 +97,7 @@ app.use('/api/user/edit/misc', (req, res, next) => {
     res.end()
 })
 
-app.use('/api/user/edit/password', async (req, res, next) => {
+app.use('/api/1/user/edit/password', async (req, res, next) => {
     if (!validate_password(req.body.password))
 	return next(new AERR(400, 'bad password'))
 
@@ -108,7 +108,7 @@ app.use('/api/user/edit/password', async (req, res, next) => {
     res.end(JSON.stringify(token(req.body.uid)))
 })
 
-app.use('/api/image/upload', (req, res, next) => {
+app.use('/api/1/image/upload', (req, res, next) => {
     if (req.method !== 'POST') return next(new AERR(405, 'expected POST'))
     let session = session_uid(req)
     if (session.uid < 0) return next(new AERR(400, 'bad session token'))
@@ -189,12 +189,12 @@ app.use('/api/image/upload', (req, res, next) => {
     })
 })
 
-app.use('/api/licenses', (req, res) => {
+app.use('/api/1/licenses', (req, res) => {
     return res.end(JSON.stringify(db
 				  .prepare(`SELECT * FROM licenses`).all()))
 })
 
-app.use('/api/tags/search', (req, res) => {
+app.use('/api/1/tags/search', (req, res) => {
     let q = (req.searchparams.get('q') || '').trim()
     if (q.length < 2) { res.end('[]'); return }
 
@@ -203,7 +203,7 @@ app.use('/api/tags/search', (req, res) => {
     return res.end(JSON.stringify(tags))
 })
 
-app.use('/api/tags/all', (req, res) => {
+app.use('/api/1/tags/all', (req, res) => {
     return res.end(JSON.stringify(db.prepare(`
 SELECT tags.tid, tags.name, tags.desc, count(iid) as count FROM tags
 INNER JOIN images_tags ON images_tags.tid == tags.tid
@@ -212,7 +212,7 @@ ORDER BY count DESC
 `).all()))
 })
 
-app.use('/api/image/view', (req, res, next) => {
+app.use('/api/1/image/view', (req, res, next) => {
     let q = db.prepare(`SELECT * FROM images_view WHERE iid = ?`)
 	.all(req.searchparams.get('iid'))
     if (!q.length) return next(new AERR(404, 'invalid iid'))
@@ -222,7 +222,7 @@ app.use('/api/image/view', (req, res, next) => {
     return res.end(JSON.stringify(q))
 })
 
-app.use('/api/image/edit', (req, res, next) => {
+app.use('/api/1/image/edit', (req, res, next) => {
     if (req.method !== 'POST') return next(new AERR(405, 'Method Not Allowed'))
     co_body.form(req, {limit: '1kb'}).then( body => {
         req.body = body
@@ -233,7 +233,7 @@ app.use('/api/image/edit', (req, res, next) => {
     })
 })
 
-app.use('/api/image/edit/misc', (req, res, next) => {
+app.use('/api/1/image/edit/misc', (req, res, next) => {
     let update_col = (col) => {
         if (db.prepare(`UPDATE images SET ${col} = ? WHERE iid = ?`).
             run(req.body[col], req.body.iid).changes !== 1)
@@ -265,7 +265,7 @@ app.use('/api/image/edit/misc', (req, res, next) => {
     }
 })
 
-app.use('/api/image/edit/rm', (req, res, next) => {
+app.use('/api/1/image/edit/rm', (req, res, next) => {
     try {
         db.transaction( () => {
             db.prepare('DELETE FROM images_tags WHERE iid = ?').run(req.body.iid)
@@ -280,7 +280,7 @@ app.use('/api/image/edit/rm', (req, res, next) => {
     res.end()
 })
 
-app.use('/api/search', (req, res, next) => {
+app.use('/api/1/search', (req, res, next) => {
     let query
     try {
         query = search.query_parse(req.searchparams.get('q'))
@@ -320,7 +320,7 @@ LIMIT ${conf.search.perpage}
     res.end(JSON.stringify(r))
 })
 
-app.use('/api/status', (req, res) => {
+app.use('/api/1/status', (req, res) => {
     return res.end(JSON.stringify(db.prepare(`SELECT
 (SELECT count(iid) FROM images) AS images,
 (SELECT count(tid) FROM tags) AS tags,

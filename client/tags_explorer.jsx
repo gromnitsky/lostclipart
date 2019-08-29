@@ -12,7 +12,7 @@ export default class TagsExplorer extends React.Component {
     }
 
     componentDidMount() {
-        u.fetch_json(`/api/tags/all`).then( r => this.setState({tags: r}))
+        u.fetch_json(`/api/1/tags/all`).then( r => this.setState({tags: r}))
             .catch( e => this.error(e))
     }
 

@@ -19,7 +19,7 @@ export default class Login extends React.Component {
 	let form = new FormData(this.form.current)
 
 	fieldset.disabled = true
-	u.fetch_json('/api/user/login', {
+	u.fetch_json('/api/1/user/login', {
 	    method: 'POST',
 	    body: new URLSearchParams(form).toString()
 	}).then( token => {

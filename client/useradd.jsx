@@ -26,7 +26,7 @@ export default class UserAdd extends React.Component {
 	form.delete('password2')
 
 	fieldset.disabled = true
-	u.fetch_json('/api/user/new', {
+	u.fetch_json('/api/1/user/new', {
 	    method: 'POST',
 	    body: new URLSearchParams(form).toString()
 	}).then( token => {	// auto login

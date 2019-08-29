@@ -38,7 +38,7 @@ export default class Search extends React.Component {
             progress: 'Fetching...',
             query: query_parsed,
         })
-        u.fetch_json('/api/search?q='+encodeURIComponent(query))
+        u.fetch_json('/api/1/search?q='+encodeURIComponent(query))
             .then( images => {
                 this.setState({images})
             }).catch( e => {
