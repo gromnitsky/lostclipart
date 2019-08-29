@@ -1,25 +1,50 @@
 #!/usr/bin/make -f
 
-$(if $(svg),,$(error no svg= param))
+# Upload multiple images:
+# $ upload name=bob0 hist_ext=WMF test/2ATCHART test/18WHLTRK -k
+#
+# Create multiple users:
+# $ upload bob0.user alice0.user
 
-name ?= bob
+name ?= bob0
+pw := 1234567890
 server := 127.0.0.1:3000
 
-login := $(shell curl -fs $(server)/api/1/user/login -d name=$(name) -d password=1234567890 | ruby -rjson -ne 'JSON.parse($$_).each {|k,v| puts "\#{k}:=\#{v}" }')
-$(foreach var,$(login),$(eval $(var)))
+define get-token =
+$(foreach var,$(shell curl -fsS $(server)/api/1/user/login -d name=$(name) -d password=$(pw) | ruby -rjson -ne 'JSON.parse($$_).each {|k,v| puts "#{k}:=#{v}" }'),$(eval $(var)))
 token := uid=$(uid); token=$(token); exp_date=$(exp_date)
+endef
 
-title := some rubbish
+title = $(shell lorem-ipsum-generator -s 1)
+desc = $(title)
 tags := test,curl
 lid ?= 2
-orig_filename = $(if $(orig_ext),;filename=$(notdir $(basename $(svg))).$(orig_ext))
+orig_filename = $(if $(hist_ext),;filename=$(notdir $(basename $<)).$(hist_ext))
 
-.PHONY: upload
-upload:
+%.user:
+	curl -fsS $(server)/api/1/user/new -d name=$(basename $@) -d password=$(pw)
+
+%: %.svg cookies
 	curl -fS $(server)/api/1/image/upload -b "$(token)" \
-	 -F svg=@"$(svg)$(orig_filename)" \
-	 -F thumbnail=@"$(basename $(svg)).png" \
+	 -F svg="@$<$(orig_filename)" \
+	 -F thumbnail="@$(basename $<).png" \
 	 -F lid=2 -F tags="$(tags)" -F title="$(title)" -F desc="$(desc)" \
-	 -F mtime="`stat -c %Y "$(svg)"`"
+	 -F mtime="`stat -c %Y "$<"`"
 
-login:; @echo "$(token)"
+.PHONY: login
+login: cookies
+	@echo "$(token)"
+
+.PHONY: cookies
+cookies:; $(eval $(get-token))
+
+mk := $(lastword $(MAKEFILE_LIST))
+test := $(dir $(mk))
+mk := $(mk) --no-print-directory
+
+.PHONY: fixtures
+fixtures:
+	$(mk) bob0.user alice0.user
+	$(mk) hist_ext=WMF $(test)/2ATCHART tags='man, woman, man,' title=one desc=foo
+	$(mk) hist_ext=WMF $(test)/18WHLTRK tags='cat, track' title=two desc=bar
+	$(mk) name=alice0 hist_ext=WMF $(test)/AIRPASS tags='man, plane' title=three desc="foo bar"
