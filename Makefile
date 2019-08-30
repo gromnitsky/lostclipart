@@ -58,7 +58,7 @@ mkdir -p $(chroot.dir)/{bin,lib64}
 echo /bin/busybox --install -s /bin > $(chroot.dir)/busybox-install.sh
 cp `which busybox` $(chroot.dir)/bin/sh
 $(if $2,cp `which busybox` $(chroot.dir)/bin)
-ldd $(node.dir)/bin/node | awk '/=> \/lib64\// {print $$3}' | xargs install -t $(chroot.dir)/lib64
+for lib in `ldd $(node.dir)/bin/node | awk '/=> \/lib/ {print $$3}'`; do mkdir -p $(chroot.dir)/`dirname $$lib`; cp $$lib $(chroot.dir)/`dirname $$lib`; done
 cp /lib64/ld-linux-* $(chroot.dir)/lib64
 sudo systemd-run $2 --collect --unit=lostclipart \
  -p RootDirectory=$(chroot.dir) -p BindReadOnlyPaths=$(node.dir):/usr \
