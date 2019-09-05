@@ -43,8 +43,9 @@ devel: all
 	-systemctl --user stop lostclipart
 	systemd-run --user --collect --unit=lostclipart -d node server.js
 
-node.dir := /opt/s/node-v12.9.1-linux-x64
+node.dir := /opt/s/node-v12.10.0-linux-x64
 chroot.dir := $(abspath ../chroot)
+restart := 1
 prod: all
 	$(call chroot,/bin/sh -c 'node server.js')
 
@@ -66,7 +67,9 @@ sudo systemd-run $2 --collect --unit=lostclipart \
  -p User=$(USER) -p SyslogIdentifier=node \
  -p Environment=PATH=/bin:/usr/bin -p Environment=NODE_ENV=production \
  -p BindReadOnlyPaths=`pwd`:/app -p BindPaths=`pwd`/_out:/app/_out \
- -p WorkingDirectory=/app $1
+ -p WorkingDirectory=/app \
+ $(if $(restart),-p Restart=on-failure -p RestartSec=5) \
+ $1
 endef
 
 o := cat
