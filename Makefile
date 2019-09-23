@@ -53,6 +53,7 @@ test-chroot:
 	$(call chroot,/bin/sh,--wait --tty)
 
 define chroot =
+$(if $(wildcard $(node.dir)/bin/node),,$(error invalid node.dir))
 -sudo systemctl stop lostclipart
 rm -rf $(chroot.dir)
 mkdir -p $(chroot.dir)/{bin,lib64}
