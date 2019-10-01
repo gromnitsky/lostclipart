@@ -37,7 +37,7 @@ exports.Conf = function(out = '_out') {
         dir: path.join(out, 'tmp'),
         max_files_size: 5*1024*1024,
     },
-    this.tags = { perimage: 5 }
+    this.tags = { perimage: 8 }
     this.search = { perpage: 6 }
     this.client = { dir: path.join(out, 'client') }
     this.db = path.join(out, 'db.sqlite3')
