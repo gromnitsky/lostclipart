@@ -5,6 +5,12 @@
 #
 # Create multiple users:
 # $ upload bob0.user alice0.user
+#
+# Remove multiple images:
+# $ upload 123.rm 456.rm
+#
+# Remove images tagges with 'xmas':
+# $ sqlite3 _out/db.sqlite3 'select iid from tags_view where name="xmas"' | awk '{ print $0 ".rm"}' | xargs test/upload
 
 name ?= bob0
 pw := 1234567890
@@ -23,6 +29,9 @@ orig_filename = $(if $(hist_ext),;filename=$(notdir $(basename $<)).$(hist_ext))
 
 %.user:
 	curl -fsS $(server)/api/1/user/new -d name=$(basename $@) -d password=$(pw)
+
+%.rm: cookies
+	curl -fsS $(server)/api/1/image/edit/rm -b "$(token)" -d iid=$(basename $@)
 
 %: %.svg cookies
 	curl -fS $(server)/api/1/image/upload -b "$(token)" \
