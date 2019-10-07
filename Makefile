@@ -55,7 +55,7 @@ test-chroot:
 define chroot =
 $(if $(wildcard $(node.dir)/bin/node),,$(error invalid node.dir))
 -sudo systemctl stop lostclipart
-rm -rf $(chroot.dir)
+sudo rm -rf $(chroot.dir)
 mkdir -p $(chroot.dir)/{bin,lib64}
 echo /bin/busybox --install -s /bin > $(chroot.dir)/busybox-install.sh
 cp `which busybox` $(chroot.dir)/bin/sh
@@ -64,7 +64,7 @@ for lib in `ldd $(node.dir)/bin/node | awk '/=> \/lib/ {print $$3}'`; do mkdir -
 cp /lib64/ld-linux-* $(chroot.dir)/lib64
 sudo systemd-run $2 --collect --unit=lostclipart \
  -p RootDirectory=$(chroot.dir) -p BindReadOnlyPaths=$(node.dir):/usr \
- -p MountAPIVFS=true -p PrivateDevices=true \
+ -p MountAPIVFS=true -p PrivateDevices=true -p PrivateTmp=true \
  -p User=$(USER) -p SyslogIdentifier=node \
  -p Environment=PATH=/bin:/usr/bin -p Environment=NODE_ENV=production \
  -p BindReadOnlyPaths=`pwd`:/app -p BindPaths=`pwd`/_out:/app/_out \
