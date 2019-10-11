@@ -289,7 +289,7 @@ app.use('/api/1/search', (req, res, next) => {
     }
     let [simple_pred, tags_pred] = [new SqlPredicate(), new SqlPredicate()]
     query.tags.forEach( v => tags_pred.add('matched_tag = ?', v))
-    if (query.uid) simple_pred.add('i.uid = ?', query.uid)
+    if (query.uid >= 0) simple_pred.add('i.uid = ?', query.uid)
     if (query.license) simple_pred.add('license = ?', query.license)
 
     let fts_query = sql_quote(`{title desc tags}: ${query._}`)
