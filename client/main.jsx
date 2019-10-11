@@ -13,6 +13,7 @@ import Doc from './doc.js'
 import GDPR from './gdpr.js'
 import Status from './status.js'
 import TagsExplorer from './tags_explorer.js'
+import TagsUtils from './tags_utils.js'
 
 let git = require('babel-plugin-git-log-1') // babel replaces the line w/ a hash
 
@@ -77,6 +78,7 @@ class Main extends React.Component {
                     <Doc path="doc/:file" />
                     <Status path="status" />
                     <TagsExplorer path="tags/explorer" />
+                    <TagsUtils path="tags/utils" />
                     <Search path="search/:query" query_set={this.query_set.bind(this)} />
                     <Search path="/" query="-t fish" query_set={this.query_set.bind(this)} />
                     <NotFound default />
@@ -88,6 +90,7 @@ class Main extends React.Component {
                 <ul>
                   <li><Link to="doc/help">Help</Link></li>
                   <li><Link to="status">Status</Link></li>
+                  <li><Link to="tags/utils">Tags utils</Link></li>
                 </ul>
                 <ul>
                   <li><Link to="doc/terms">Terms</Link></li>

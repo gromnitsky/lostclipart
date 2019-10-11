@@ -333,6 +333,36 @@ app.use('/api/1/headers', (req, res) => {
     return res.end(JSON.stringify(req.headers))
 })
 
+app.use('/api/1/tags/edit', (req, res, next) => {
+    if (req.method !== 'POST') return next(new AERR(405, 'Method Not Allowed'))
+    co_body.form(req, {limit: '1kb'}).then( body => {
+        req.body = body
+        // FIXME: check write access!!!
+        next()
+    }).catch( e => {
+        next(new AERR(400, e))
+    })
+})
+
+app.use('/api/1/tags/edit/utils', (req, res, next) => {
+    let [src, dest] = [tags_parse(req.body.src), tags_parse(req.body.dest)]
+    if (!src.length) return next(new AERR(400, 'invalid src'))
+
+    if (src.length === 1 && dest.length === 1) {
+        tag_rename(src[0], dest[0])
+    } else if (!dest.length) { // delete
+        return next(new AERR(500, 'not implemented'))
+    } else if (src.length === 1 && dest.length > 1) { // split
+        return next(new AERR(500, 'not implemented'))
+    } else if (src.length > 1 && dest.length === 1) { // merge
+        return next(new AERR(500, 'not implemented'))
+    } else
+        return next(new AERR(400, 'bad request'))
+
+    log.tags('edit:', src)
+    res.end()
+})
+
 app.use(serve_static(conf.client.dir))
 
 app.use((req, res, next) => {	// in 404 stead
@@ -461,12 +491,8 @@ async function md5_file(name) {
 }
 
 function tags_add(str) {        // return an array of tids
-    let tags = (str || '').split(',').filter(Boolean).
-	map( v => v.replace(/\s+/, ' ').trim().toLowerCase()).filter(Boolean).
-	slice(0, conf.tags.perimage)
-
     let insert = db.prepare('INSERT INTO tags (name) VALUES (?)')
-    return tags.map( v => {
+    return tags_parse(str).map( v => {
 	try {
 	    return insert.run(v).lastInsertRowid
 	} catch (e) {
@@ -475,6 +501,12 @@ function tags_add(str) {        // return an array of tids
 		.get(v).tid
 	}
     })
+}
+
+function tags_parse(str) {
+    return (str || '').split(',').filter(Boolean).
+        map( v => v.replace(/\s+/, ' ').trim().toLowerCase()).filter(Boolean).
+        slice(0, conf.tags.perimage)
 }
 
 function tag_image(iid, str) {
@@ -534,6 +566,14 @@ function fts_update_tags(iid) {
     iid = Number(iid)
     fts_delete(iid)
     fts_insert(iid)
+}
+
+function tag_rename(src, dest) {
+    db.transaction( () => {
+        let iids = db.prepare(`SELECT iid FROM tags_view WHERE name = ?`).all(src)
+        db.prepare(`UPDATE tags SET name = ? WHERE name = ?`).run(dest, src)
+        iids.forEach(fts_update_tags) // fts table
+    })()
 }
 
 class SqlPredicate {

@@ -76,6 +76,7 @@ class Log {
     sqlite(...a) { this._log(7, "sqlite", ...a) }
     user(...a) { this._log(5, "user", ...a) }
     image(...a) {this._log(5, "image", ...a) }
+    tags(...a) {this._log(5, "tags", ...a) }
     error(...a) { this._log(3, "", ...a) }
 }
 exports.Log = Log

@@ -238,3 +238,16 @@ pre.wrinput__readable {
 .tags-explorer--tag > span {
   word-break: break-all;
 }
+
+
+.tags-utils table, .tags-utils th, .tags-utils td {
+  border: 1px solid var(--fg);
+}
+
+.tags-utils table {
+  border-collapse: collapse;
+}
+
+.tags-utils th, .tags-utils td {
+  padding: 5px;
+}
