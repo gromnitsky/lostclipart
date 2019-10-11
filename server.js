@@ -544,18 +544,18 @@ function write_access_check(req, iid) {
         throw new AERR(403, 'Forbidden')
 }
 
-function fts_insert(iid) {
+function fts_insert(iids) {
     return db.prepare(`INSERT INTO images_fts
   SELECT images.iid,uid,uploaded,title,desc,lid,
          group_concat(tags_view.name) AS tags
   FROM tags_view
   INNER JOIN images ON images.iid = tags_view.iid
-  WHERE images.iid = ?
-  GROUP BY images.iid`).run(iid)
+  WHERE images.iid in (${iids})
+  GROUP BY images.iid`).run()
 }
 
-function fts_delete(iid) {
-    return db.prepare(`DELETE FROM images_fts WHERE iid = ?`).run(Number(iid))
+function fts_delete(iids) {
+    return db.prepare(`DELETE FROM images_fts WHERE iid in (${iids})`).run()
 }
 
 function fts_update(iid, col_name, col_val) {
@@ -564,17 +564,16 @@ function fts_update(iid, col_name, col_val) {
         .run(col_val, Number(iid))
 }
 
-function fts_update_tags(iid) {
-    iid = Number(iid)
-    fts_delete(iid)
-    fts_insert(iid)
+function fts_update_tags(iids) {
+    fts_delete(iids)
+    fts_insert(iids)
 }
 
 function tag_rename(src, dest) {
     db.transaction( () => {
         let images = images_select_by_tags([src])
         db.prepare(`UPDATE tags SET name = ? WHERE name = ?`).run(dest, src)
-        images.iids.forEach(fts_update_tags) // update fts table
+        fts_update_tags(images.iids) // update fts table
     })()
 }
 
@@ -611,7 +610,7 @@ function tags_delete(src) {
         tags_untagged().forEach( iid => tag_image(iid, 'untagged'))
 
         // update fts table; iids should include the 'untagged' images as well
-        images.iids.forEach(fts_update_tags)
+        fts_update_tags(images.iids)
     })()
 }
 
@@ -630,7 +629,7 @@ function tags_merge(src, dest) {
         })
 
         tags_orphans_delete()
-        img.iids.forEach(fts_update_tags) // update fts table
+        fts_update_tags(img.iids) // update fts table
     })()
 }
 
