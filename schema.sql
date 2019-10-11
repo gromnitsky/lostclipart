@@ -42,6 +42,7 @@ CREATE TABLE images(iid INTEGER PRIMARY KEY,
 CREATE TABLE tags(tid INTEGER PRIMARY KEY,
                   name UNIQUE NOT NULL COLLATE NOCASE CHECK(length(name) <= 32),
                   desc NOT NULL DEFAULT '' CHECK(length(desc) <= 512));
+INSERT INTO tags(name) VALUES ('untagged');
 INSERT INTO tags(name) VALUES ('man');
 INSERT INTO tags(name) VALUES ('woman');
 INSERT INTO tags(name) VALUES ('cat');

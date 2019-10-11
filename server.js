@@ -351,7 +351,7 @@ app.use('/api/1/tags/edit/utils', (req, res, next) => {
     if (src.length === 1 && dest.length === 1) {
         tag_rename(src[0], dest[0])
     } else if (!dest.length) { // delete
-        return next(new AERR(500, 'not implemented'))
+        tags_delete(src)
     } else if (src.length === 1 && dest.length > 1) { // split
         return next(new AERR(500, 'not implemented'))
     } else if (src.length > 1 && dest.length === 1) { // merge
@@ -521,9 +521,11 @@ function tag_image(iid, str) {
 }
 
 function tags_orphans() {       // return an array of tids
-    return db.prepare(`SELECT tags.tid FROM tags LEFT OUTER JOIN images_tags
-                           ON tags.tid = images_tags.tid
-                        WHERE images_tags.iid IS null`).all().map( v => v.tid)
+    return db.prepare(`SELECT tags.tid
+FROM tags
+LEFT OUTER JOIN images_tags
+ON tags.tid = images_tags.tid
+WHERE images_tags.iid IS null AND name != 'untagged'`).all().map( v => v.tid)
 }
 
 function tags_orphans_delete() {
@@ -573,6 +575,39 @@ function tag_rename(src, dest) {
         let iids = db.prepare(`SELECT iid FROM tags_view WHERE name = ?`).all(src)
         db.prepare(`UPDATE tags SET name = ? WHERE name = ?`).run(dest, src)
         iids.forEach(fts_update_tags) // fts table
+    })()
+}
+
+function tags_untagged() {      // return an array of tids
+    return db.prepare(`SELECT images.iid
+FROM images
+LEFT JOIN images_tags on images_tags.iid = images.iid
+WHERE tid IS NULL`).all().map(v => v.iid)
+}
+
+function tags_delete(src) {
+    let tags_pred = new SqlPredicate()
+    src.filter( v => v !== 'untagged') // never delete the 'untagged' tag
+        .forEach( v => tags_pred.add('name = ?', v))
+
+    db.transaction( () => {
+        let tags = db.prepare(`
+SELECT iid,tid
+FROM tags_view WHERE ${tags_pred.toString('OR')}`).all(tags_pred.params)
+        let iids = tags.map( v => v.iid)
+        let tids = Array.from(new Set(tags.map( v => v.tid))) // uniq
+
+        // delete tags
+        ;['images_tags', 'tags'].forEach( v => {
+            db.prepare(`DELETE FROM ${v} WHERE tid in (${tids})`).run()
+        })
+
+        // if we just removed the last tag from some images, tag such
+        // images w/ the 'untagged' tag
+        tags_untagged().forEach( iid => tag_image(iid, 'untagged'))
+
+        // update fts table; iids should include the 'untagged' images as well
+        iids.forEach(fts_update_tags)
     })()
 }
 
