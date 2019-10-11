@@ -52,7 +52,8 @@ INSERT INTO tags(name) VALUES ('100%');
 CREATE TABLE images_tags(iid INT NOT NULL,
                          tid INT NOT NULL,
                          FOREIGN KEY(iid) REFERENCES images(iid)
-                         FOREIGN KEY(tid) REFERENCES tags(tid));
+                         FOREIGN KEY(tid) REFERENCES tags(tid)
+                         unique(iid, tid));
 
 CREATE INDEX images_tags_idx ON images_tags(iid, tid);
 

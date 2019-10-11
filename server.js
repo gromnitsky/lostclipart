@@ -354,8 +354,8 @@ app.use('/api/1/tags/edit/utils', (req, res, next) => {
         tags_delete(src)
     } else if (src.length === 1 && dest.length > 1) { // split
         return next(new AERR(500, 'not implemented'))
-    } else if (src.length > 1 && dest.length === 1) { // merge
-        return next(new AERR(500, 'not implemented'))
+    } else if (src.length > 1 && dest.length === 1) {
+        tags_merge(src, dest[0])
     } else
         return next(new AERR(400, 'bad request'))
 
@@ -585,21 +585,25 @@ LEFT JOIN images_tags on images_tags.iid = images.iid
 WHERE tid IS NULL`).all().map(v => v.iid)
 }
 
-function tags_delete(src) {
+function images_select_by_tags(arr) {
     let tags_pred = new SqlPredicate()
-    src.filter( v => v !== 'untagged') // never delete the 'untagged' tag
+    arr.filter( v => v !== 'untagged') // never select the 'untagged' tag
         .forEach( v => tags_pred.add('name = ?', v))
-
-    db.transaction( () => {
-        let tags = db.prepare(`
-SELECT iid,tid
+    let images = db.prepare(`SELECT iid,tid
 FROM tags_view WHERE ${tags_pred.toString('OR')}`).all(tags_pred.params)
-        let iids = tags.map( v => v.iid)
-        let tids = Array.from(new Set(tags.map( v => v.tid))) // uniq
+    return {
+        iids: images.map( v => v.iid),
+        tids: Array.from(new Set(images.map( v => v.tid))) // uniq
+    }
+}
+
+function tags_delete(src) {
+    db.transaction( () => {
+        let images = images_select_by_tags(src)
 
         // delete tags
         ;['images_tags', 'tags'].forEach( v => {
-            db.prepare(`DELETE FROM ${v} WHERE tid in (${tids})`).run()
+            db.prepare(`DELETE FROM ${v} WHERE tid in (${images.tids})`).run()
         })
 
         // if we just removed the last tag from some images, tag such
@@ -607,7 +611,26 @@ FROM tags_view WHERE ${tags_pred.toString('OR')}`).all(tags_pred.params)
         tags_untagged().forEach( iid => tag_image(iid, 'untagged'))
 
         // update fts table; iids should include the 'untagged' images as well
-        iids.forEach(fts_update_tags)
+        images.iids.forEach(fts_update_tags)
+    })()
+}
+
+function tags_merge(src, dest) {
+    db.transaction( () => {
+        let img = images_select_by_tags(src.filter(v => v !== dest))
+        db.prepare(`DELETE FROM images_tags WHERE tid in (${img.tids})`).run()
+
+        let dest_tid = tags_add(dest)[0]
+        img.iids.forEach( iid => {
+            try {
+                db.prepare(`INSERT INTO images_tags VALUES (?,?)`).run(iid, dest_tid)
+            } catch (e) {
+                if (!/\bUNIQUE\b/.test(e.message)) throw e
+            }
+        })
+
+        tags_orphans_delete()
+        img.iids.forEach(fts_update_tags)
     })()
 }
 
