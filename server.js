@@ -572,9 +572,9 @@ function fts_update_tags(iid) {
 
 function tag_rename(src, dest) {
     db.transaction( () => {
-        let iids = db.prepare(`SELECT iid FROM tags_view WHERE name = ?`).all(src)
+        let images = images_select_by_tags([src])
         db.prepare(`UPDATE tags SET name = ? WHERE name = ?`).run(dest, src)
-        iids.forEach(fts_update_tags) // fts table
+        images.iids.forEach(fts_update_tags) // update fts table
     })()
 }
 
@@ -630,7 +630,7 @@ function tags_merge(src, dest) {
         })
 
         tags_orphans_delete()
-        img.iids.forEach(fts_update_tags)
+        img.iids.forEach(fts_update_tags) // update fts table
     })()
 }
 
