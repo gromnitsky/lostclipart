@@ -21,6 +21,7 @@ export default class Upload extends React.Component {
         this.error('')
         u.title(this.props.file, 2)
         let doc = this.div.current
+        doc.innerHTML = 'Loading...'
 
         u.fetch_text(`/doc/${this.props.file}.md`).then( text => {
             doc.innerHTML = marked(text)
