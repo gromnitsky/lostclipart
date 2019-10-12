@@ -32,11 +32,7 @@ app.use('/', (req, res, next) => {
 })
 
 app.use('/api/1/user', (req, res, next) => {
-    if (req.method !== 'POST') return next(new AERR(405, 'Method Not Allowed'))
-    co_body.form(req, {limit: '1kb'}).then( body => {
-        req.body = body
-        next()
-    }).catch(next)
+    http_post_qs_parse(req, res, next)
 })
 
 app.use('/api/1/user/profile', (req, res, next) => {
@@ -223,14 +219,7 @@ app.use('/api/1/image/view', (req, res, next) => {
 })
 
 app.use('/api/1/image/edit', (req, res, next) => {
-    if (req.method !== 'POST') return next(new AERR(405, 'Method Not Allowed'))
-    co_body.form(req, {limit: '1kb'}).then( body => {
-        req.body = body
-        write_access_check(req, body.iid)
-        next()
-    }).catch( e => {
-        next(new AERR(400, e))
-    })
+    http_post_qs_parse(req, res, next, {access_check: write_access_check})
 })
 
 app.use('/api/1/image/edit/misc', (req, res, next) => {
@@ -334,14 +323,7 @@ app.use('/api/1/headers', (req, res) => {
 })
 
 app.use('/api/1/tags/edit', (req, res, next) => {
-    if (req.method !== 'POST') return next(new AERR(405, 'Method Not Allowed'))
-    co_body.form(req, {limit: '1kb'}).then( body => {
-        req.body = body
-        // FIXME: check write access!!!
-        next()
-    }).catch( e => {
-        next(new AERR(400, e))
-    })
+    http_post_qs_parse(req, res, next, {access_check: tags_edit_access_check})
 })
 
 app.use('/api/1/tags/edit/utils', (req, res, next) => {
@@ -532,14 +514,15 @@ function tags_orphans_delete() {
     db.prepare(`DELETE FROM tags WHERE tid in (${tags_orphans()})`).run()
 }
 
-function write_access_check(req, iid) {
+function write_access_check(req) {
+    console.log('req.body.iid = ', req.body.iid)
     let wa = (target_uid, target_status) => {
         let session = session_uid(req); if (session.uid < 0) return false
         return session.uid === 0
             || (!target_status
-                && (session.grp === 'admin' || target_uid === session.uid))
+                && (session.grp === 'adm' || target_uid === session.uid))
     }
-    let target = db.prepare(`SELECT uid,user_status FROM images_view WHERE iid = ? LIMIT 1`).get(iid)
+    let target = db.prepare(`SELECT uid,user_status FROM images_view WHERE iid = ? LIMIT 1`).get(req.body.iid)
     if ( !(target && wa(target.uid, target.user_status)))
         throw new AERR(403, 'Forbidden')
 }
@@ -654,4 +637,27 @@ function md5_to_iid(md5) {
     let image = db.prepare(`select iid from images where md5=?`).get(md5)
     if (!image) throw new AERR(404, `invalid md5`)
     return image.iid
+}
+
+function http_post_qs_parse(req, res, next, opt = {}) {
+    opt.limit = opt.limit || '1kb'
+
+    if (req.method !== 'POST') return next(new AERR(405, 'expected POST'))
+    co_body.form(req, {limit: opt.limit}).then( body => {
+        req.body = body
+        if (opt.access_check) opt.access_check(req)
+        next()
+    }).catch( e => {
+        next(new AERR(400, e))
+    })
+}
+
+function tags_edit_access_check(req) {
+    let err = new AERR(403, 'Forbidden')
+    let session = session_uid(req)
+    if (session.uid < 0) throw err
+
+    let status = db.prepare(`SELECT status FROM users WHERE uid = ?`)
+        .get(session.uid).status
+    if (status || session.grp !== 'adm') throw err
 }
