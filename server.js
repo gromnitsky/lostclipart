@@ -360,7 +360,11 @@ app.use( (err, req, res, _next) => {
     res.statusCode = err.status || 500
     res.setHeader('Content-Type', 'text/plain; charset=utf-8')
     res.setHeader('X-Error', err.toString())
-    res.end(conf.devel ? err.stack : '')
+    if (conf.devel) {
+        res.end(err.stack)
+    } else {
+        res.end(res.statusCode === 404 ? `${res.statusCode} ${err}` : '')
+    }
     if (process.env.NODE_ENV !== 'test') {
         let r = err.stack || err.toString()
         if (res.statusCode === 404) r = err.toString()
