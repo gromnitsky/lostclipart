@@ -509,7 +509,7 @@ function tags_parse(str) {
         slice(0, conf.tags.perimage)
 }
 
-function tag_image(iid, str) {
+function tag_image(iid, str, delete_orphans = true) {
     // delete old tags
     db.prepare(`DELETE FROM images_tags WHERE iid = ?`).run(iid)
     // add new
@@ -517,7 +517,7 @@ function tag_image(iid, str) {
                        SELECT ?,tid FROM tags WHERE tid in (${tags_add(str)})`).
         run(iid)
 
-    tags_orphans_delete()
+    if (delete_orphans) tags_orphans_delete()
 }
 
 function tags_orphans() {       // return an array of tids
@@ -607,7 +607,8 @@ function tags_delete(src) {
 
         // if we just removed the last tag from some images, tag such
         // images w/ the 'untagged' tag
-        tags_untagged().forEach( iid => tag_image(iid, 'untagged'))
+        tags_untagged().forEach( iid => tag_image(iid, 'untagged', false))
+        tags_orphans_delete()
 
         // update fts table; iids should include the 'untagged' images as well
         fts_update_tags(images.iids)
