@@ -1,145 +1,43 @@
 # Terms and Conditions
 
-2019-08-20
+2019-10-12
 
-Please read these terms and conditions ("terms", "terms and
-conditions") carefully before using <code>lostclipart.com</code>
-website (the "service").
+The providers ("we", "us", "our") of the service provided by this web
+site ("Service") are not responsible for any user-generated content
+and accounts. Content submitted express the views of their author
+only.
 
-## Conditions of Use
+This Service is only available to users who are at least 13 years
+old. If you are younger than this, please do not use this Service. If
+you use or register for this Service, you represent that you are this
+age or older.
 
-We will provide their services to you, which are subject to the
-conditions stated below in this document. Every time you visit this
-website, use its services or upload an image, you accept the following
-conditions.
+All content you submit, upload, or otherwise make available to the
+Service ("Content") may be reviewed by staff members. All Content you
+submit or upload may be sent to third-party verification services
+(including, but not limited to, spam prevention services). Do not
+submit any Content that you consider to be private or confidential.
 
-You must not use this website if you disagree with any of these terms
-and conditions.
+You agree to not use the Service to submit or link to any Content
+which is defamatory, abusive, hateful, threatening, spam or spam-like,
+likely to offend, contains adult or objectionable content, contains
+personal information of others, risks copyright infringement,
+encourages unlawful activity, or otherwise violates any laws. You are
+entirely responsible for the content of, and any harm resulting from,
+that Content or your conduct.
 
-Minors or people below 18 years old are not allowed to use this
-website.
+We may remove or modify any Content submitted at any time, with or
+without cause, with or without notice. Requests for Content to be
+removed or modified will be undertaken only at our discretion. We may
+terminate your access to all or any part of the Service at any time,
+with or without cause, with or without notice.
 
-## Restrictions
+You are granting us with a non-exclusive, permanent, irrevocable,
+unlimited license to use, publish, or re-publish your Content in
+connection with the Service. You retain copyright over the Content.
 
-You are specifically restricted from all of the following:
+These terms may be changed at any time without notice.
 
-* using this website in any way that is or may be damaging to this website;
-* using this website in any way that impacts user access to this website;
-* using this website contrary to applicable laws and regulations, or
-  in any way may cause harm to the website, or to any person or
-  business entity;
-* engaging in any data mining, bulk data harvesting, bulk data
-  extracting or any other similar activity in relation to this
-  website;
-* using this website to engage in any advertising or marketing.
-
-Certain areas of this website are restricted from being access by you
-and <code>lostclipart.com</code> may further restrict access by you to
-any areas of this website, at any time, in absolute discretion. Any
-passwords you may have for this website are confidential and you must
-maintain confidentiality as well.
-
-## No warranties
-
-This website is provided "as is," with all faults, and
-<code>lostclipart.com</code> express no representations or warranties,
-of any kind related to this website or the materials contained on this
-website. Also, nothing contained on this website shall be interpreted
-as advising you.
-
-## Your Privacy
-
-Please read [Privacy Policy](/doc/privacy).
-
-## Limitation of liability
-
-In no event shall <code>lostclipart.com</code>, nor any of its
-officers, directors and employees, shall be held liable for anything
-arising out of or in any way connected with your use of this website
-whether such liability is under contract.
-<code>lostclipart.com</code>, including its officers, directors and
-employees shall not be held liable for any indirect, consequential or
-special liability arising out of or in any way related to your use of
-this website.
-
-## Indemnification
-
-You hereby indemnify to the fullest extent
-<code>lostclipart.com</code> from and against any and/or all
-liabilities, costs, demands, causes of action, damages and expenses
-arising in any way related to your breach of any of the provisions of
-these terms.
-
-## Severability
-
-If any provision of these terms is found to be invalid under any
-applicable law, such provisions shall be deleted without affecting the
-remaining provisions herein.
-
-## Variation of Terms
-
-<code>lostclipart.com</code> is permitted to revise these terms at any
-time as it sees fit, and by using this website you are expected to
-review these terms on a regular basis.
-
-## Assignment
-
-<code>lostclipart.com</code> is allowed to assign, transfer, and
-subcontract its rights and/or obligations under these terms without
-any notification. However, you are not allowed to assign, transfer, or
-subcontract any of your rights and/or obligations under these Terms.
-
-## Entire Agreement
-
-These terms constitute the entire agreement between
-<code>lostclipart.com</code> and you in relation to your use of this
-website, and supersede all prior agreements and understandings.
-
-## Copyright
-
-Content published on this website (digital downloads, images,
-graphics, logos) is the property of its content creators and protected
-by international copyright laws.
-
-## Communications
-
-The entire communication with us is electronic. Every time you send us
-an email or visit our website, you are going to be communicating with
-us. You hereby consent to receive communications from us. We will
-continue to communicate with you by posting news and notices on our
-website and/or by sending you emails. You also agree that all notices,
-disclosures, agreements and other communications we provide to you
-electronically meet the legal requirements that such communications be
-in writing.
-
-## Applicable Law
-
-By visiting this website, you agree that the laws of Ukraine, without
-regard to principles of conflict laws, will govern these terms and
-conditions, or any dispute of any sort that might come between
-<code>lostclipart.com</code> and you, or its business partners and
-associates.
-
-## Uploads
-
-Visitors may post content as long as it is not obscene, illegal,
-defamatory, threatening, infringing of intellectual property rights,
-invasive of privacy or injurious in any other way to third
-parties. Content has to be free of porn, software viruses, political
-campaign, and commercial solicitation.
-
-We reserve all rights (but not the obligation) to remove and/or edit
-such content. When you post your content, you grant
-<code>lostclipart.com</code> non-exclusive, royalty-free and
-irrevocable right to use, reproduce, publish, modify such content
-throughout the world in any media.
-
-## User Account
-
-If you are an owner of an account on this website, you are solely
-responsible for maintaining the confidentiality of your private user
-details (username and password). You are responsible for all
-activities that occur under your account or password.
-
-We reserve all rights to terminate accounts, edit or remove content in
-our sole discretion.
+If you do not agree with these terms, please do not register or use
+the Service. Use of the Service constitutes acceptance of these
+terms. If you wish to close your account, please contact us.
