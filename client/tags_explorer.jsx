@@ -23,6 +23,7 @@ export default class TagsExplorer extends React.Component {
               <div className="form-error">{this.state.error}</div>
 
               <input placeholder="Filter by name"
+                     spellcheck="false"
                      disabled={!this.state.tags.length}
                      style={{width: '100%'}} type="search"
                      onChange={this.handle_search.bind(this)} />
@@ -38,7 +39,8 @@ export default class TagsExplorer extends React.Component {
 }
 
 function TagsList(props) {
-    return props.tags.filter( tag => tag.name.match(props.substring))
+    return props.tags
+        .filter( tag => tag.name.match((props.substring || '').toLowerCase()))
         .map( tag => (
             <div key={tag.id} className="tags-explorer--tag">
               <u.Tags csv={tag.name} /> × <span>{tag.count}</span>
