@@ -80,7 +80,7 @@ class Main extends React.Component {
                     <TagsExplorer path="tags/explorer" />
                     <TagsUtils path="tags/utils" />
                     <Search path="search/:query" query_set={this.query_set.bind(this)} />
-                    <Search path="/" query="-t fish" query_set={this.query_set.bind(this)} />
+                    <Search path="/" query="-t fish -t greenstreet" query_set={this.query_set.bind(this)} />
                     <NotFound default />
                   </ScrollToTop>
                 </Router>
