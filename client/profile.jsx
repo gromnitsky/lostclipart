@@ -49,7 +49,7 @@ class UserEdit extends React.Component {
                   <span>{u.date_fmt(this.state.registered)}</span>
 
                   <label>Uploads:</label>
-                  {this.state.uid ? <Link to={`/search/-r%20-u%20${search.sq(this.state.uid)}`}>{this.state.uploads}</Link> : <span />}
+                  {this.state.uid != null ? <Link to={`/search/-r%20-u%20${search.sq(this.state.uid)}`}>{this.state.uploads}</Link> : <span />}
 
                   <label>Status:</label>
                   <span>{this.status()}</span>
