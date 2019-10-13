@@ -255,6 +255,8 @@ app.use('/api/1/image/edit/misc', (req, res, next) => {
 })
 
 app.use('/api/1/image/edit/rm', (req, res, next) => {
+    let uid = db.prepare('SELECT uid from images WHERE iid = ?')
+        .get(req.body.iid)
     try {
         db.transaction( () => {
             db.prepare('DELETE FROM images_tags WHERE iid = ?').run(req.body.iid)
@@ -263,7 +265,11 @@ app.use('/api/1/image/edit/rm', (req, res, next) => {
             fts_delete(req.body.iid)
         })()
     } catch(e) {
-        next(new AERR(400, e))
+        return next(new AERR(400, e))
+    }
+    if (uid) { // delete files
+        let img = search.iid2image(uid.uid, req.body.iid, conf.img)
+        ;[img.svg, img.thumbnail].forEach(v => fs.unlink(v, ()=>{}))
     }
     log.image('rm:', req.body.iid)
     res.end()
