@@ -75,7 +75,7 @@ export default function TagsUtils() {
                                  completions={ic.tags_completions} />
 
               <div className="form--useradd__btn">
-                <input type="submit" />
+                <input type="reset" /> <input type="submit" />
               </div>
 
             </div>
