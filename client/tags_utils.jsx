@@ -67,11 +67,11 @@ export default function TagsUtils() {
           <fieldset style={{marginTop: '1em'}} disabled={progress}>
             <div>
               Source:
-              <AwesompleteTagger placeholder="old" name="src"
+              <AwesompleteTagger name="src" type="search"
                                  completions={ic.tags_completions} />
 
               Destination:
-              <AwesompleteTagger placeholder="new" name="dest"
+              <AwesompleteTagger name="dest" type="search"
                                  completions={ic.tags_completions} />
 
               <div className="form--useradd__btn">
