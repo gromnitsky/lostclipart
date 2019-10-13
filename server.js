@@ -432,7 +432,7 @@ function session_uid(req) {
 
 class AERR extends Error {
     constructor(status, msg) {
-	super(msg)
+        super(msg instanceof AERR ? msg.message : msg)
 	msg instanceof Error ? this.stack = msg.stack : Error.captureStackTrace(this, AERR)
 	this.name = 'ApiError'
 	this.status = msg instanceof AERR ? msg.status : status
