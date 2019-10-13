@@ -7,6 +7,7 @@ let Database = require('better-sqlite3')
 exports.db_open = function(conf, log) {
     let custom_sqlite_functions = db => {
         db.pragma('foreign_keys = ON')
+        db.pragma('journal_mode = WAL')
         db.function('rmatch', (re, str) => Number(new RegExp(re).test(str)))
     }
 

@@ -372,7 +372,11 @@ app.use( (err, req, res, _next) => {
     }
 })
 
-app.listen(conf.server, () => console.log(`Listening on ${conf.server.host}:${conf.server.port}`))
+app.listen(conf.server, () => console.log(`listen: ${conf.server.host}:${conf.server.port}`))
+process.on('exit', () => { db.close(); console.log('db: closed') })
+process.on('SIGHUP', () => process.exit(128 + 1))
+process.on('SIGINT', () => process.exit(128 + 2))
+process.on('SIGTERM', () => process.exit(128 + 15))
 
 
 // "foo, bar" is ok, ", " is not
