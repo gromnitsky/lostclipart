@@ -9,9 +9,9 @@ An svg images manager: [lostclipart.com](https://lostclipart.com).
 Let's code like it's 2005! Why 2005? It was the world w/o Rails &
 widespread ORMs. JFF.
 
-* Backend: node 12.x, sqlite (yes).
+* Backend: node 12.x, connect, sqlite (yes).
 * Frontend: React.
-* Build system: make; no bundler, except for 1 case when there's a
+* Build system: make; no bundlers, except for 1 case when there's a
   shared peace of code b/n the server & the client, hence browserify
   is used.
 * Deployment: a containerization w/ systemd (yes)
@@ -40,20 +40,22 @@ SUM:                            23            452             54           2380
 
 ## Deploying
 
-The user must be able to run under sudo: `systemctl`, `systemd-run`,
-`rm`.
+Reqs:
 
-0. Choose an umbrella dir for the app, e.g. `~/app`.
+* a systemd 241+ distro
+* a user must be able to run under sudo: `systemctl`, `systemd-run`, `rm`.
 
-1. Grab node's 12.x tarball & extract it to `$APP`.
+0. Choose an umbrella dir for the app, e.g. `~/my-app` (`$APP` below).
 
-2. Get the src & compile:
+1. Grab a node 12.x tarball & unpack it in `$APP`:
 
         $ cd $APP
+        $ tar xfJ node-v12*tar.xz
         $ ln -s node-v12.12.0-linux-x64 node
 
-        # add $APP/node to PATH
-        # ...
+    then add `$APP/node` to the PATH.
+
+2. Get the src & compile:
 
         $ npm i -g json adieu browserify exorcist
 
@@ -62,7 +64,7 @@ The user must be able to run under sudo: `systemctl`, `systemd-run`,
         $ npm i
         $ make
 
-3. Run the app in the development mode at http:/127.0.0.1:3000
+3. Run the app in the development mode at http://127.0.0.1:3000
 
         $ make devel
 
