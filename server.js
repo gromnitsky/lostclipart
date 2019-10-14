@@ -529,7 +529,6 @@ function tags_orphans_delete() {
 }
 
 function write_access_check(req) {
-    console.log('req.body.iid = ', req.body.iid)
     let wa = (target_uid, target_status) => {
         let session = session_uid(req); if (session.uid < 0) return false
         return session.uid === 0
