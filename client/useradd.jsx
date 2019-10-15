@@ -1,4 +1,4 @@
-/* global React, Cookies, ReachRouter */
+/* global React, ReachRouter */
 
 let {navigate} = ReachRouter
 import * as u from './u.js'
@@ -61,8 +61,8 @@ export default class UserAdd extends React.Component {
 	      </div></fieldset>
 
 	      <p>
-		By clicking 'Submit', you agree to our Terms of Service
-		and Privacy Statement.
+		By clicking &apos;Submit&apos;, you agree to our
+                Terms of Service & Privacy Statement.
 	      </p>
 	    </form>
 	)

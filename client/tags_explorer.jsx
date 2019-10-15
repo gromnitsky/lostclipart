@@ -1,6 +1,5 @@
-/* global React, ReachRouter */
+/* global React */
 
-let {Link} = ReachRouter
 import * as u from './u.js'
 
 export default class TagsExplorer extends React.Component {

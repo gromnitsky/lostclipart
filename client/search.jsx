@@ -1,6 +1,6 @@
 /* global React, ReachRouter, search */
 
-let {Link, navigate} = ReachRouter
+let {Link} = ReachRouter
 import * as u from './u.js'
 
 export default class Search extends React.Component {

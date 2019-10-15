@@ -1,4 +1,4 @@
-/* global React */
+/* global React, AwesompleteTagger */
 
 import * as u from './u.js'
 import * as ic from './image_common.js'
