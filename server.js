@@ -568,6 +568,7 @@ function fts_update_tags(iids) {
 function tag_rename(src, dest) {
     db.transaction( () => {
         let images = images_select_by_tags([src])
+        if (!images.tids.length) throw new AERR(400, 'invalid src tag')
         db.prepare(`UPDATE tags SET name = ? WHERE name = ?`).run(dest, src)
         fts_update_tags(images.iids) // update fts table
     })()
@@ -595,6 +596,7 @@ FROM tags_view WHERE ${tags_pred.toString('OR')}`).all(tags_pred.params)
 function tags_delete(src) {
     db.transaction( () => {
         let images = images_select_by_tags(src)
+        if (!images.tids.length) throw new AERR(400, 'invalid src tag')
 
         // delete tags
         ;['images_tags', 'tags'].forEach( v => {
@@ -614,6 +616,7 @@ function tags_delete(src) {
 function tags_merge(src, dest) {
     db.transaction( () => {
         let img = images_select_by_tags(src.filter(v => v !== dest))
+        if (!img.tids.length) throw new AERR(400, 'invalid src tag(s)')
         db.prepare(`DELETE FROM images_tags WHERE tid in (${img.tids})`).run()
 
         let dest_tid = tags_add(dest)[0]
