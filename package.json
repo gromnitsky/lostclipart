@@ -15,7 +15,7 @@
         "cookie": "^0.4.0",
         "js-cookie": "^2.2.1",
         "marked": "^0.7.0",
-        "minimist": "^1.2.0",
+        "minimist": "^1.2.3",
         "mmmagic": "^0.5.3",
         "multiparty": "^4.2.1",
         "react": "^16.10.2",
