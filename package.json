@@ -7,7 +7,7 @@
         "@reach/router": "^1.2.1",
         "awesomplete": "^1.1.4",
         "babel-plugin-git-log-1": "0.0.2",
-        "bcrypt": "^3.0.6",
+        "bcrypt": "^5.0.0",
         "better-sqlite3": "^5.4.2",
         "bytesize-icons": "^1.4.0",
         "co-body": "^6.0.0",
