@@ -1,5 +1,8 @@
-User-agent: *
-Disallow: /api/
-Disallow: /doc/terms
-Disallow: /doc/privacy
-Disallow: /doc/cookies
+user-agent: *
+disallow: /api/
+allow: /api/1/search?
+allow: /api/1/image/view?
+allow: /api/1/tags/all$
+disallow: /doc/terms
+disallow: /doc/privacy
+disallow: /doc/cookies
