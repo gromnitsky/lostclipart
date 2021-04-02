@@ -43,7 +43,7 @@ devel: all
 	-systemctl --user stop lostclipart
 	systemd-run --user --collect --unit=lostclipart -d node server.js
 
-node.dir := /opt/s/node-v12.10.0-linux-x64
+node.dir := ~/opt/s/node-v15.13.0-linux-x64
 chroot.dir := $(abspath ../chroot)
 restart := 1
 prod: all

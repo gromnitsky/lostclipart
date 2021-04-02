@@ -3,7 +3,7 @@
 (Adopted from [European
 Commission's](https://ec.europa.eu/info/cookies_en) website.)
 
-To make <code>lostclipart.com</code> work properly, we sometimes place
+To make <code>lostclipart</code> work properly, we sometimes place
 small data files called cookies on your device.
 
 ## What are cookies?
@@ -19,7 +19,7 @@ or mobile device when you visit the site.
   not deleted automatically when you quit your browser, unlike a
   session cookie, which is deleted when you quit your browser.
 
-First time you visit the <code>lostclipart.com</code>, you will be
+First time you visit the <code>lostclipart</code>, you will be
 prompted to accept cookies.
 
 The purpose is to enable the site to remember your preferences (such
@@ -32,8 +32,8 @@ browsing experience on our sites.
 
 ## How do we use cookies?
 
-<code>lostclipart.com</code> mostly use "first-party cookies". These
-are cookies set and controlled by <code>lostclipart.com</code>, not by
+<code>lostclipart</code> mostly use "first-party cookies". These
+are cookies set and controlled by <code>lostclipart</code>, not by
 any external organisation.
 
 However, to establish anonymised statistics, you will have to accept
@@ -64,7 +64,7 @@ web pages to function.
 
 ### Authentication cookies
 
-These are stored when you log in to <code>lostclipart.com</code> website, using our
+These are stored when you log in to <code>lostclipart</code> website, using our
 authentication service. When you do this, you accept the associated
 privacy policy.
 

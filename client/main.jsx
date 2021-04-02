@@ -98,7 +98,7 @@ class Main extends React.Component {
                   <li><Link to="doc/cookies">Cookies</Link></li>
                 </ul>
                 <div style={{marginLeft: 'auto'}}>
-                  Contact: <code>q at lostclipart dot com</code><br />
+                  <a href="https://github.com/gromnitsky/lostclipart">Github</a><br />
                   <span title={git.log.subject}>{git.log.hash.slice(0,7)}</span>, {git.dirty ? '*' : '-'}:{git.ref}, {git.log.commiter.date}
                 </div>
               </footer>

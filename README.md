@@ -1,15 +1,15 @@
 # LostClipArt
 
-An svg images manager: [lostclipart.com](https://lostclipart.com).
+An svg images manager.
 
-![](https://lostclipart.com/clipart/thumbnails/1/35436.png)
+![](https://lostclipart.sigwait.tk/clipart/thumbnails/1/35436.png)
 
 ## Prerecs
 
 Let's code like it's 2005! Why 2005? It was the world w/o Rails &
 widespread ORMs. JFF.
 
-* Backend: node 12.x, connect, sqlite (yes).
+* Backend: node, connect, sqlite (yes).
 * Frontend: React.
 * Build system: make; no bundlers, except for 1 case when there's a
   shared peace of code b/n the server & the client, hence browserify
@@ -47,11 +47,11 @@ Reqs:
 
 0. Choose an umbrella dir for the app, e.g. `~/my-app` (`$APP` below).
 
-1. Grab a node 12.x tarball & unpack it in `$APP`:
+1. Grab a node 15.x tarball & unpack it in `$APP`:
 
         $ cd $APP
-        $ tar xfJ node-v12*tar.xz
-        $ ln -s node-v12.12.0-linux-x64 node
+        $ tar xfJ node-v15*tar.xz
+        $ ln -s node-v15.13.0-linux-x64 node
 
     then add `$APP/node` to the PATH.
 
@@ -78,7 +78,7 @@ Reqs:
 
 6. Run the app in the production mode:
 
-        $ make prod restart=1 node.dir=~/app/node-v12.12.0-linux-x64
+        $ make prod restart=1 node.dir=~/app/node-v15.13.0-linux-x64
 
 7. Stop:
 
