@@ -8,7 +8,7 @@
         "awesomplete": "^1.1.4",
         "babel-plugin-git-log-1": "0.0.2",
         "bcrypt": "^5.0.1",
-        "better-sqlite3": "^7.1.4",
+        "better-sqlite3": "^9.4.1",
         "bytesize-icons": "^1.4.0",
         "co-body": "^6.0.0",
         "connect": "^3.7.0",
