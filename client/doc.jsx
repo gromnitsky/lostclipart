@@ -24,7 +24,7 @@ export default class Upload extends React.Component {
         doc.innerHTML = 'Loading...'
 
         u.fetch_text(`/doc/${this.props.file}.md`).then( text => {
-            doc.innerHTML = marked(text)
+            doc.innerHTML = marked.parse(text)
             // convert all <a> to <Link>
             Array.from(doc.querySelectorAll('a')).forEach(tag => {
                 tag.onclick = function(event) {

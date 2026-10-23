@@ -13,7 +13,7 @@ let bcrypt = require('bcrypt')
 let co_body = require('co-body')
 let serve_static = require('serve-static')
 let multiparty = require('multiparty')
-let mmm = require('mmmagic')
+let mmm = require('@picturae/mmmagic')
 let SqliteError = require('better-sqlite3').SqliteError
 
 let u = require('./u')
@@ -365,7 +365,7 @@ app.use((req, res, next) => {	// in 404 stead
 app.use( (err, req, res, _next) => {
     res.statusCode = err.status || 500
     res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-    res.setHeader('X-Error', err.toString())
+    res.setHeader('X-Error', err.toString().replaceAll(/\s+/g, ' '))
     if (conf.devel) {
         res.end(err.stack)
     } else {
@@ -391,7 +391,7 @@ function validate_tags(s) { return /^.*[^\s,].*$/.test(s) }
 function validate_password(s) { return s && s.length >= 10 }
 
 function cookie_get(req, name) {
-    return cookie.parse(req.headers.cookie || '')[name]
+    return cookie.parseCookie(req.headers.cookie || '')[name]
 }
 
 // return a fresh uid

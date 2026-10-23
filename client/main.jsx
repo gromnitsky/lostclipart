@@ -146,7 +146,7 @@ function Icon(props) {
 
 // https://github.com/reach/router/issues/242#issuecomment-491537468
 function ScrollToTop({children, location}) {
-    React.useEffect(() => window.scrollTo(0, 0), [location.pathname])
+    React.useEffect(() => { window.scrollTo(0, 0) }, [location.pathname])
     return children
 }
 

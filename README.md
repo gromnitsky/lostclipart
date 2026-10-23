@@ -2,7 +2,7 @@
 
 An svg images manager.
 
-![](https://lostclipart.sigwait.tk/clipart/thumbnails/1/35436.png)
+![](https://lostclipart.sigwait.org/clipart/thumbnails/1/35436.png)
 
 ## Prerecs
 

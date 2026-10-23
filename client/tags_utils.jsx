@@ -8,7 +8,7 @@ export default function TagsUtils() {
     let [progress, setProgress] = React.useState()
     let form = React.createRef()
 
-    React.useEffect( () => u.title('Tags utils'), [])
+    React.useEffect( () => { u.title('Tags utils') }, [])
 
     let gui_error2 = function(err) {
         if (err instanceof Error) {
